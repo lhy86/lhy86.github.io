@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="LHY主页">
+    <meta name="theme-color" content="#111">
+    <link rel="icon" href="file/icon-32x32.png" type="image/png">
+    <link rel="manifest" href="file/manifest.json">
+    <link rel="apple-touch-icon" href="file/apple-touch-icon.jpg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>LHY主页</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #7dd3fc;
+            --light-color: #f8fafc;
+            --dark-color: #0f172a;
+            --gray-color: #94a3b8;
+            --border-radius: 12px;
+            --box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE10+/Edge */
+            user-select: none; /* Standard */
+        }
+
+        /* 允许在特定元素中选择文本 */
+        input, textarea {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: var(--dark-color);
+            line-height: 1.2;
+            min-height: 100vh;
+            padding: 1.6rem;
+            position: relative;
+            background-color: var(--dark-color);
+        }
+        
+        body::before {
+            content: "";
+            position: fixed;
+            top: -50px;
+            left: -50px;
+            right: -50px;
+            bottom: -50px;
+            background-image: url('./file/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -1;
+            animation: backgroundLoad 1.5s ease-out forwards;
+        }
+
+        @keyframes backgroundLoad {
+            0% {
+                filter: blur(30px) brightness(0.1);
+                transform: scale(1.5);
+            }
+            100% {
+                filter: blur(1vw) brightness(0.7);
+                transform: scale(1);
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            padding: 2rem 0 0 0;
+            margin-bottom: 2rem;
+            gap: 2rem;
+        }
+
+        .avatar {
+            width: 192px;
+            height: 192px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: var(--box-shadow);
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        .name {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1rem;
+            color: var(--light-color);
+        }
+
+        .typing-text {
+            color: var(--primary-color);
+            font-size: 3.8rem;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1.5rem;
+            background-color: var(--primary-color);
+            margin-left: 2px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .person-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+
+        .person-tag {
+            background: #334155;
+            color: var(--secondary-color);
+            padding: 0.3rem 0.4rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* 联系方式链接框样式 */
+        .contact-links {
+            display: flex;
+            gap: 0.4rem;
+            margin-top: 0.6rem;
+        }
+
+        .contact-link {
+            display: flex;
+            align-items: center;
+            background: #334155;
+            color: var(--secondary-color);
+            padding: 0.3rem 0.4rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: -0.05em;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .contact-link:hover {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .title {
+            font-size: 1rem;
+            color: var(--gray-color);
+            font-weight: 400;
+            margin-bottom: 0.4rem;
+        }
+
+        .quote-container {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            border-radius: var(--border-radius);
+            color: white;
+            margin: 1.5rem 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .quote-fade {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .quote-visible {
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .card {
+            background: #22262e;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.6rem;
+            margin-bottom: 1.6rem;
+            transition: var(--transition);
+        }
+
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--secondary-color);
+            color: var(--light-color);
+            font-weight: 600;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-item h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .info-item p {
+            color: var(--light-color);
+        }
+
+        .quote-container {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            border-radius: var(--border-radius);
+            color: white;
+            margin: 1.5rem 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* 新增的 fade-out 类 */
+        .fade-out {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .quote-text {
+            font-size: 1.25rem;
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+
+        .quote-author {
+            font-weight: 500;
+        }
+
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            background-image: url('./file/timeline.jpg');
+            background-size: cover;
+            background-position: right center;
+            background-repeat: no-repeat;
+
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            backdrop-filter: blur(300px);
+        }
+
+        .timeline::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: var(--border-radius);
+            z-index: -1;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stat-value {
+                font-size: 2rem;
+            }
+            
+            .timeline {
+                padding-left: 1.5rem;
+                background-position: center;
+                padding: 1.5rem 1.5rem 1.5rem 1rem;
+                min-height: auto;
+            }
+            
+            .timeline::before {
+                left: -2px;
+            }
+            
+            .timeline-marker {
+                left: -1.4rem;
+                width: 16px;
+                height: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: repeat(1, 1fr);
+            }
+            
+            .timeline {
+                padding-left: 1.2rem;
+            }
+            
+            .timeline-marker {
+                left: -1.25rem;
+                width: 14px;
+                height: 14px;
+            }
+            
+            .timeline-content {
+                padding: 0;
+            }
+            
+            .timeline-title {
+                font-size: 1.1rem;
+            }
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            margin-left: 0.8rem;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .timeline-items {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .timeline-items {
+                grid-template-columns: 1fr 1fr;
+                column-gap: 3rem;
+            }
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 0.5rem;
+            background: transparent;
+            padding: 0;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            top: 0;
+            left: -1.6rem;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            border: 4px solid #1e293b;
+            z-index: 1;
+        }
+
+        .timeline-content {
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
+            transition: none;
+        }
+
+        .timeline-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--light-color);
+            margin-bottom: 0.2rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        .timeline-date {
+            color: var(--secondary-color);
+            font-weight: 500;
+
+            line-height: 0.5rem;
+            font-size: 0.9rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        .timeline-description {
+            color: var(--gray-color);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        /* 服务板块样式 */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 1rem;
+        }
+
+        /* 数据统计栏目样式 */
+        .stats-section {
+            margin-top: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stat-value {
+                font-size: 2rem;
+            }
+            
+            .timeline {
+                padding-left: 1.5rem;
+            }
+            
+            .timeline::before {
+                left: -2px;
+            }
+            
+            .timeline-marker {
+                left: -1.4rem;
+                width: 16px;
+                height: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: repeat(1, 1fr);
+            }
+            
+            .timeline {
+                padding-left: 1.2rem;
+            }
+            
+            .timeline-marker {
+                left: -1.25rem;
+                width: 14px;
+                height: 14px;
+            }
+            
+            .timeline-content {
+                padding: 1rem;
+            }
+            
+            .timeline-title {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* 工具集导航板块样式 */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.4rem;
+        }
+
+        .tool-card {
+            background: #334155;
+            border-radius: var(--border-radius);
+            padding: 0.4rem;
+            transition: var(--transition);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            text-decoration: none; /* 去除默认的超链接下划线 */
+        }
+
+        .tool-card:hover {
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+            background: #3b4a5c;
+            text-decoration: none; /* 确保悬停时也没有下划线 */
+        }
+
+        .tool-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--light-color);
+            position: relative;
+            padding-left: 0.8rem;
+        }
+
+        .tool-title::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0.6rem;
+            height: 0.6rem;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+        }
+        
+        /* 不同颜色的圆点类 */
+        .tool-title.b::before {
+            background-color: #3b82f6; /* 蓝色 */
+        }
+        
+        .tool-title.g::before {
+            background-color: #10b981; /* 绿色 */
+        }
+        
+        .tool-title.y::before {
+            background-color: #f59e0b; /* 黄色 */
+        }
+        
+        .tool-title.r::before {
+            background-color: #ef4444; /* 红色 */
+        }
+        
+        .tool-title.p::before {
+            background-color: #8b5cf6; /* 紫色 */
+        }
+
+        .tool-description {
+            font-size: 0.8rem;
+            color: var(--gray-color);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .stat-item {
+            padding: 0.8rem 0;
+            background: #22262e;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-value {
+            position: relative;
+            display: inline-block;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            line-height: 1;
+        }
+
+        .stat-number {
+            display: inline-block;
+        }
+
+        .stat-unit {
+            display: inline-block;
+            font-size: 2rem;
+            vertical-align: bottom;
+            margin-left: -0.4em;
+            position: relative;
+        }
+
+        .stat-label {
+            color: var(--gray-color);
+            font-size: 1rem;
+        }
+
+        .service-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #334155;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            color: var(--light-color);
+            transition: var(--transition);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .service-card:hover {
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .service-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(30, 41, 59, 0.9) 40%, rgba(30, 41, 59, 0.7) 60%, rgba(30, 41, 59, 0.1) 100%);
+            z-index: 0;
+        }
+
+        .service-card::after {
+            display: none;
+        }
+
+        .service-content {
+            flex: 1;
+            background: linear-gradient(to right, rgba(30, 41, 59, 0.95) 60%, transparent 100%);
+            padding: 0.8rem 0 0.8rem 0.8rem;
+            border-radius: 8px;
+        }
+
+        .service-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .service-description {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+            margin: 0;
+        }
+
+        .service-card:hover .service-description {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .service-icon {
+            z-index: 1;
+            padding-right: 0.8rem;
+        }
+
+        .service-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+            z-index: 0;
+        }
+
+        /* 技能板块样式 */
+        .skills-content {
+            text-align: center;
+        }
+
+        .skills-image {
+            width: 100%;
+        }
+
+        /* 默认使用PC图片 */
+        .skills-image {
+            content: url('./file/skillPc.svg');
+        }
+
+        /* 小屏幕设备使用WAP图片 */
+        @media (max-width: 768px) {
+            .skills-image {
+                content: url('./file/skillWap.svg');
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0 0.5rem 0;
+            color: var(--gray-color);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0.6rem;
+            }
+            
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            
+            .person-tags {
+                justify-content: center;
+            }
+            
+            .name {
+                font-size: 2rem;
+            }
+            
+            .avatar {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+            
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stat-value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="./file/icon-192x192.jpg" alt="头像" class="avatar">
+            <div class="header-content">
+                <h1 class="name">欢迎！我是<span class="typing-text"></span></h1>
+                <div class="person-tags">
+                    <span class="person-tag">无线电</span>
+                    <span class="person-tag">建模</span>
+                    <span class="person-tag">剪辑</span>
+                    <span class="person-tag">摄影</span>
+                    <span class="person-tag">绘画</span>
+                    <span class="person-tag">编程</span>
+                    <span class="person-tag">网络</span>
+                </div>
+                <p class="title" style="margin-bottom:0">衷心感谢您拨冗访问我的个人主页！本站访问量<img src="https://w.saobby.com/w/x137hw2r" style="vertical-align: middle">次！</p>
+                <p class="title">在这里，你可以在点滴之中了解我的项目、技能和成长历程，</p>
+                <p class="title">愿我们携手并肩，在思维碰撞与灵感交融中，共探科技魅力！</p>
+                <!-- 添加联系方式链接框 -->
+                <div class="contact-links">
+                    <a href="https://www.crealitycloud.cn/user-profile/2582633251/models" class="contact-link" target="_blank">
+                        <svg t="1755173566302" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5695" width="20" height="20"><path d="M832 128H192c-35.2 0-64 28.8-64 64v640c0 35.2 28.8 64 64 64h640c35.2 0 64-28.8 64-64V192c0-35.2-28.8-64-64-64z m0 704H192v-96h96v17.92c0 8.32 5.76 14.72 13.44 16l208 29.44s3.2 0.64 5.12 0l208-29.44c7.68-1.28 13.44-7.68 13.44-16v-17.92H832V832z m-480-119.68V592l128-36.48v175.36l-128-18.56z m267.52-135.04l31.36 8.96-81.28 140.8-25.6 3.84v-23.04l75.52-130.56z m-75.52 2.56v-24.32l12.16 3.84-12.16 20.48z m128 97.92v34.56l-21.76 3.2 21.76-37.76z m160-5.76h-96V556.16c0-7.04-4.48-13.44-11.52-15.36l-208-59.52s-5.76-0.64-8.96 0l-208 59.52c-7.04 1.92-11.52 8.32-11.52 15.36v115.84H192V320h224l38.4 51.2c5.76 8.32 15.36 12.8 25.6 12.8v32c0 17.92 14.08 32 32 32s32-14.08 32-32V384c10.24 0 19.84-4.48 25.6-12.8l38.4-51.2H832v352zM832 256H192V192h640v64z" p-id="5696" fill="#ffffff"></path></svg>
+                        <span class="link-text">创想云</span>
+                    </a>
+                    <a href="https://lhy.netlify.app/" class="contact-link" target="_blank">
+                        <svg t="1754854138206" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="22702" width="19" height="19"><path d="M957.06 511.84c0 246.74-200.15 446.76-447 446.76S63 758.58 63 511.84 263.13 65.09 510 65.09s447.06 200.02 447.06 446.75z m-81.28 0c0-201.56-164.07-365.52-365.76-365.52s-365.75 164-365.75 365.52S308.33 877.37 510 877.37s365.78-163.96 365.78-365.53z" fill="#ffffff" p-id="22703"></path><path d="M713.22 511.84c0 246.74-91 446.76-203.2 446.76s-203.19-200-203.19-446.76S397.8 65.09 510 65.09s203.22 200.02 203.22 446.75z m-81.28 0c0-237.41-86.52-365.52-121.92-365.52S388.1 274.43 388.1 511.84 474.62 877.37 510 877.37s121.94-128.11 121.94-365.53z" fill="#ffffff" p-id="22704"></path><path d="M144.27 308.78h731.51v81.23H144.27zM144.27 593.07h731.51v81.23H144.27z" fill="#ffffff" p-id="22705"></path></svg>
+                        <span class="link-text">备用站</span>
+                    </a>
+                    <a href="https://www.qrz.com/db/BG5FUG" class="contact-link" target="_blank">
+                        <svg t="1754854598585" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="24996" width="18" height="18"><path d="M641.024 632.32l-3.584 3.072 31.744 77.312 6.144-4.608c127.488-90.624 157.184-267.264 67.072-394.24S475.648 155.648 348.16 246.272s-157.184 267.264-67.072 394.24c18.432 26.112 40.96 48.64 67.072 67.072l6.144 4.608 31.744-77.312-3.584-3.072C296.96 560.64 285.696 433.664 356.864 348.16s198.144-96.768 283.648-25.6 96.768 198.144 25.6 283.648c-7.168 9.728-15.872 18.432-25.088 26.112z" fill="#ffffff" p-id="24997"></path><path d="M512 9.728C253.952 9.216 44.544 218.112 44.032 476.672c0 166.912 88.576 321.024 232.96 404.992l6.144 3.584 31.232-75.776-4.608-2.56C128 694.784 71.168 457.216 182.272 274.944S531.968 35.84 713.728 147.456s239.104 349.696 127.488 531.456c-31.744 52.224-75.776 95.744-127.488 127.488l-4.608 2.56 31.232 75.776 6.144-3.584C970.24 751.616 1046.016 465.92 916.48 242.688c-83.456-144.384-237.568-233.472-404.48-232.96z" fill="#ffffff" p-id="24998"></path><path d="M561.664 567.808c-3.072-9.216-9.728-16.896-18.432-21.504 37.888-17.408 54.784-61.952 37.376-99.84-17.408-37.888-61.952-54.784-99.84-37.376S425.984 471.04 443.392 508.928c7.68 16.896 20.992 30.208 37.376 37.376-8.704 4.608-15.36 12.288-18.432 21.504l-139.264 393.216c-3.584 9.728-3.072 20.992 1.536 30.72 4.608 9.728 13.312 17.408 23.552 20.48 4.096 1.536 8.704 2.048 13.312 2.048 17.408 0 32.768-10.752 38.4-27.136l14.848-41.984h194.048l14.848 41.984c5.632 16.384 21.504 27.136 38.4 27.136 4.608 0 9.216-1.024 13.312-2.048 10.24-3.584 18.944-10.752 23.552-20.48 4.608-9.728 5.12-20.48 1.536-30.72l-138.752-393.216z m-125.952 318.976l11.776-33.792h128.512l11.776 33.792h-87.04z m32.768-92.16l43.52-123.392 43.52 123.392h-87.04z" fill="#ffffff" p-id="24999"></path></svg>
+                        <span class="link-text">QRZ</span>
+                    </a>
+                    <a href="https://www.hamqth.com/BG5FUG" class="contact-link" target="_blank">
+                        <svg t="1754854598585" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="24996" width="18" height="18"><path d="M641.024 632.32l-3.584 3.072 31.744 77.312 6.144-4.608c127.488-90.624 157.184-267.264 67.072-394.24S475.648 155.648 348.16 246.272s-157.184 267.264-67.072 394.24c18.432 26.112 40.96 48.64 67.072 67.072l6.144 4.608 31.744-77.312-3.584-3.072C296.96 560.64 285.696 433.664 356.864 348.16s198.144-96.768 283.648-25.6 96.768 198.144 25.6 283.648c-7.168 9.728-15.872 18.432-25.088 26.112z" fill="#ffffff" p-id="24997"></path><path d="M512 9.728C253.952 9.216 44.544 218.112 44.032 476.672c0 166.912 88.576 321.024 232.96 404.992l6.144 3.584 31.232-75.776-4.608-2.56C128 694.784 71.168 457.216 182.272 274.944S531.968 35.84 713.728 147.456s239.104 349.696 127.488 531.456c-31.744 52.224-75.776 95.744-127.488 127.488l-4.608 2.56 31.232 75.776 6.144-3.584C970.24 751.616 1046.016 465.92 916.48 242.688c-83.456-144.384-237.568-233.472-404.48-232.96z" fill="#ffffff" p-id="24998"></path><path d="M561.664 567.808c-3.072-9.216-9.728-16.896-18.432-21.504 37.888-17.408 54.784-61.952 37.376-99.84-17.408-37.888-61.952-54.784-99.84-37.376S425.984 471.04 443.392 508.928c7.68 16.896 20.992 30.208 37.376 37.376-8.704 4.608-15.36 12.288-18.432 21.504l-139.264 393.216c-3.584 9.728-3.072 20.992 1.536 30.72 4.608 9.728 13.312 17.408 23.552 20.48 4.096 1.536 8.704 2.048 13.312 2.048 17.408 0 32.768-10.752 38.4-27.136l14.848-41.984h194.048l14.848 41.984c5.632 16.384 21.504 27.136 38.4 27.136 4.608 0 9.216-1.024 13.312-2.048 10.24-3.584 18.944-10.752 23.552-20.48 4.608-9.728 5.12-20.48 1.536-30.72l-138.752-393.216z m-125.952 318.976l11.776-33.792h128.512l11.776 33.792h-87.04z m32.768-92.16l43.52-123.392 43.52 123.392h-87.04z" fill="#ffffff" p-id="24999"></path></svg>
+                        <span class="link-text">HQ</span>
+                    </a>
+                    <a href="https://space.bilibili.com/1921299521" class="contact-link" target="_blank">
+                        <svg t="1754853865182" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="13581" width="20" height="20"><path d="M777.514667 131.669333a53.333333 53.333333 0 0 1 0 75.434667L728.746667 255.829333h49.92A160 160 0 0 1 938.666667 415.872v320a160 160 0 0 1-160 160H245.333333A160 160 0 0 1 85.333333 735.872v-320a160 160 0 0 1 160-160h49.749334L246.4 207.146667a53.333333 53.333333 0 1 1 75.392-75.434667l113.152 113.152c3.370667 3.370667 6.186667 7.04 8.448 10.965333h137.088c2.261333-3.925333 5.12-7.68 8.490667-11.008l113.109333-113.152a53.333333 53.333333 0 0 1 75.434667 0z m1.152 231.253334H245.333333a53.333333 53.333333 0 0 0-53.205333 49.365333l-0.128 4.010667v320c0 28.117333 21.76 51.157333 49.365333 53.162666l3.968 0.170667h533.333334a53.333333 53.333333 0 0 0 53.205333-49.365333l0.128-3.968v-320c0-29.44-23.893333-53.333333-53.333333-53.333334z m-426.666667 106.666666c29.44 0 53.333333 23.893333 53.333333 53.333334v53.333333a53.333333 53.333333 0 1 1-106.666666 0v-53.333333c0-29.44 23.893333-53.333333 53.333333-53.333334z m320 0c29.44 0 53.333333 23.893333 53.333333 53.333334v53.333333a53.333333 53.333333 0 1 1-106.666666 0v-53.333333c0-29.44 23.893333-53.333333 53.333333-53.333334z" p-id="13582" fill="#ffffff"></path></svg>
+                    </a>
+                    <a href="mailto:lhy866@126.com" class="contact-link">
+                        <svg t="1754853944930" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15691" width="18" height="18"><path d="M926.47619 355.644952V780.190476a73.142857 73.142857 0 0 1-73.142857 73.142857H170.666667a73.142857 73.142857 0 0 1-73.142857-73.142857V355.644952l304.103619 257.828572a170.666667 170.666667 0 0 0 220.745142 0L926.47619 355.644952zM853.333333 170.666667a74.044952 74.044952 0 0 1 26.087619 4.778666 72.704 72.704 0 0 1 30.622477 22.186667 73.508571 73.508571 0 0 1 10.678857 17.67619c3.169524 7.509333 5.12 15.652571 5.607619 24.210286L926.47619 243.809524v24.380952L559.469714 581.241905a73.142857 73.142857 0 0 1-91.306666 2.901333l-3.632762-2.925714L97.52381 268.190476v-24.380952a72.899048 72.899048 0 0 1 40.155428-65.292191A72.97219 72.97219 0 0 1 170.666667 170.666667h682.666666z" p-id="15692" fill="#ffffff"></path></svg>
+                    </a>
+                    <a href="https://github.com/lhy86" target="_blank" class="contact-link">
+                        <svg t="1754853917587" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="14614" width="18" height="18"><path d="M511.6 76.3C264.3 76.2 64 276.4 64 523.5 64 718.9 189.3 885 363.8 946c23.5 5.9 19.9-10.8 19.9-22.2v-77.5c-135.7 15.9-141.2-73.9-150.3-88.9C215 726 171.5 718 184.5 703c30.9-15.9 62.4 4 98.9 57.9 26.4 39.1 77.9 32.5 104 26 5.7-23.5 17.9-44.5 34.7-60.8-140.6-25.2-199.2-111-199.2-213 0-49.5 16.3-95 48.3-131.7-20.4-60.5 1.9-112.3 4.9-120 58.1-5.2 118.5 41.6 123.2 45.3 33-8.9 70.7-13.6 112.9-13.6 42.4 0 80.2 4.9 113.5 13.9 11.3-8.6 67.3-48.8 121.3-43.9 2.9 7.7 24.7 58.3 5.5 118 32.4 36.8 48.9 82.7 48.9 132.3 0 102.2-59 188.1-200 212.9 23.5 23.2 38.1 55.4 38.1 91v112.5c0.8 9 0 17.9 15 17.9 177.1-59.7 304.6-227 304.6-424.1 0-247.2-200.4-447.3-447.5-447.3z" p-id="14615" fill="#ffffff"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <section style="text-align: center; margin: 1rem 0; cursor: pointer;" id="quote-section">
+                <p id="quote-text" class="quote-fade quote-visible" style="font-size: 1.2rem; font-style: italic; color: var(--light-color); margin-bottom: 0.5rem;">
+                    ~ 这里是金句区，每日金句支持点击或自动刷新哦 ~
+                </p>
+                <p id="quote-author" class="quote-fade quote-visible" style="color: var(--gray-color);">
+                    网站正在开发中...
+                </p>
+            </section>
+                <!-- 数据统计栏目 -->
+            <div class="stats-grid" style="margin-bottom: 1.6rem;">
+                <div class="stat-item">
+                    <div class="stat-value">
+                        <span class="stat-number" data-target="3500000">0</span>
+                        <span class="stat-unit">+</span>
+                    </div>
+                    <div class="stat-label">全平台访问量</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">
+                        <span class="stat-number" data-target="7200">0</span>
+                        <span class="stat-unit">+</span>
+                    </div>
+                    <div class="stat-label">投入时长</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">
+                        <span class="stat-number" data-target="40">0</span>
+                        <span class="stat-unit">+</span>
+                    </div>
+                    <div class="stat-label">文章数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">
+                        <span class="stat-number" data-target="16">0</span>
+                        <span class="stat-unit">+</span>
+                    </div>
+                    <div class="stat-label">服务数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">
+                        <span class="stat-number" data-target="365" data-start-date="2023-03-01">0</span>
+                        <span class="stat-unit">+</span>
+                    </div>
+                    <div class="stat-label">运行天数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">
+                        <span class="stat-number" data-target="24">0</span>
+                        <span class="stat-unit">h</span>
+                    </div>
+                    <div class="stat-label">在线时长</div>
+                </div>
+            </div>
+        </section>
+        <section class="card">
+            <h2 class="section-title">信息</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <h3>年龄</h3>
+                    <p id="age">16岁</p>
+                </div>
+                <div class="info-item">
+                    <h3>所在地</h3>
+                    <p>浙江, 中国</p>
+                </div>
+                <div class="info-item">
+                    <h3>邮箱<button id="email-toggle" style="margin-left: 10px; background: #334155; color: var(--secondary-color); border: none; border-radius: 8px; padding: 2px 8px; cursor: pointer;">切换</button></h3>
+                    <p id="email-display">lhy866@126.com </p>
+                </div>
+                <div class="info-item">
+                    <h3>QQ</h3>
+                    <p>749656150</p>
+                </div>
+            </div>
+        </section>
+        <section class="card">
+            <h2 class="section-title">我的服务</h2>
+            <div class="services-grid">
+                <a href="https://c.lhy6.top:50088" target="_blank" class="service-card" style="background-image: url('./file/s1.jpg');">
+                    <div class="service-content">
+                        <h3 class="service-title">NAS网络存储</h3>
+                        <p class="service-description">36T高速云存储|共享</p>
+                    </div>
+                            <div class="service-icon">
+                                <svg t="1755193088595" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="12206" width="28" height="28"><path d="M543.146667 410.453333a42.666667 42.666667 0 0 0-60.16 0l-74.24 69.546667a42.666667 42.666667 0 0 0 0 60.586667 42.666667 42.666667 0 0 0 30.293333 12.373333 42.666667 42.666667 0 0 0 29.44-11.946667v87.466667a42.666667 42.666667 0 0 0 85.333333 0v-85.333333a42.666667 42.666667 0 0 0 30.293334 12.8 42.666667 42.666667 0 0 0 30.293333-12.8 42.666667 42.666667 0 0 0 0-60.16z" fill="#ffffff" p-id="12207"></path><path d="M721.066667 384a213.333333 213.333333 0 0 0-418.133334 0A213.333333 213.333333 0 1 0 298.666667 810.666667h426.666666a213.333333 213.333333 0 1 0-4.266666-426.666667z m4.266666 341.333333H298.666667a128 128 0 0 1 0-256 138.24 138.24 0 0 1 32.426666 4.693334 42.666667 42.666667 0 0 0 37.546667-7.68 42.666667 42.666667 0 0 0 15.36-34.986667 21.333333 21.333333 0 0 0 0-4.693333 128 128 0 0 1 256-2.56v7.253333a42.666667 42.666667 0 0 0 15.786667 34.986667 42.666667 42.666667 0 0 0 37.546666 7.68A138.24 138.24 0 0 1 725.333333 469.333333a128 128 0 0 1 0 256z" fill="#ffffff" p-id="12208"></path></svg>
+                            </div>
+                    </a>
+                    <a href="https://c.lhy6.top:50089" target="_blank" class="service-card" style="background-image: url('./file/s2.jpg');">
+                        <div class="service-content">
+                            <h3 class="service-title">服务状态监控</h3>
+                            <p class="service-description">实时服务器状态|上报</p>
+                        </div>
+                        <div class="service-icon">
+                            <svg t="1755192981274" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="9672" width="24" height="24"><path d="M227.6352 426.5984a43.7248 43.7248 0 1 0-44.6976 75.1104 43.7248 43.7248 0 0 0 44.6976-75.1104zM356.096 509.2864a38.4 38.4 0 0 0-39.2704 66.048l239.9744 142.9504a38.5024 38.5024 0 0 0 58.0608-32.9728 38.5024 38.5024 0 0 0-18.7392-33.0752L356.096 509.2864z" fill="#ffffff" p-id="9673"></path><path d="M1015.552 459.4688l-0.1024-0.2048a38.5536 38.5536 0 0 0-5.888-14.5408c-0.8192-1.1776-2.048-1.9968-2.9696-3.1232a37.4784 37.4784 0 0 0-8.3456-7.7312c-0.4096-0.256-0.6656-0.768-1.0752-1.024l-483.2256-284.3136a38.3488 38.3488 0 1 0-38.8608 66.2016l443.904 261.2224-126.4128 149.248L200.1408 272.2304l147.5584-174.2848A38.3488 38.3488 0 1 0 289.0752 48.3328l-176.8448 208.896a37.888 37.888 0 0 0-5.6832 10.8544c-1.3312 1.536-3.0208 2.7136-4.0448 4.5056L33.9456 387.584a128.6144 128.6144 0 0 0 44.6464 176.0768l188.928 112.5376-47.1552 97.024H85.3504l-0.3584-57.088a38.4 38.4 0 0 0-38.4-38.144H46.336a38.4 38.4 0 0 0-38.144 38.4v0.256l1.3824 234.496a38.4 38.4 0 0 0 38.4 38.144h0.256a38.4 38.4 0 0 0 38.144-38.4v-0.256l-0.6144-100.608H244.48a37.1712 37.1712 0 0 0 16.5888-4.1984 39.936 39.936 0 0 0 8.9088-5.9904c0.6144-0.5632 1.3312-0.9728 1.8944-1.5872a38.1952 38.1952 0 0 0 7.0656-9.8304l54.8352-112.7424 249.4464 148.5824a127.488 127.488 0 0 0 97.2288 14.08 127.232 127.232 0 0 0 78.848-58.6752l19.0464-32c27.8016 17.5616 55.04 24.1664 79.3088 24.1664 35.0208 0 63.9488-13.3632 79.872-25.7536a38.6048 38.6048 0 0 0 13.824-22.016l63.8976-289.9456a37.888 37.888 0 0 0 0.2048-11.776c-0.1024-0.9216 0.3072-1.8432 0.1024-2.8672z m-393.0112 338.7904L117.9136 497.664c-11.7248-7.0144-20.1728-18.2272-23.552-31.6928s-1.3824-27.3408 5.5808-39.1168l48.8448-82.0224 593.3568 353.4848-48.8448 82.0224a51.5584 51.5584 0 0 1-70.7584 17.92z m195.1232-76.4928l10.1376-17.0496c0.8192-1.4336 0.9216-2.9696 1.5872-4.4544 0.2048-0.256 0.5632-0.3584 0.768-0.6144l76.6976-90.5728-26.9312 122.1632c-12.288 4.9152-34.7136 8.5504-62.2592-9.472z" fill="#ffffff" p-id="9674"></path></svg>
+                        </div>
+                    </a>
+                    <a href="https://c.lhy6.top:50087" target="_blank" class="service-card" style="background-image: url('./file/s3.jpg');">
+                        <div class="service-content">
+                            <h3 class="service-title">智能家居管理</h3>
+                            <p class="service-description">基于HA聚合|智能化</p>
+                        </div>
+                        <div class="service-icon">
+                            <svg t="1755193306988" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="18180" width="24" height="24"><path d="M864 320l-704 0C107.072 320 64 276.928 64 224l0-64C64 107.072 107.072 64 160 64l704 0C916.928 64 960 107.072 960 160l0 64C960 276.928 916.928 320 864 320zM160 128C142.4 128 128 142.4 128 160l0 64C128 241.6 142.4 256 160 256l704 0C881.6 256 896 241.6 896 224l0-64C896 142.4 881.6 128 864 128L160 128zM224 160C206.336 160 192 174.336 192 192s14.336 32 32 32S256 209.664 256 192 241.664 160 224 160zM352 160C334.336 160 320 174.336 320 192s14.336 32 32 32S384 209.664 384 192 369.664 160 352 160zM832 192c0-17.664-14.336-32-32-32l-128 0C654.336 160 640 174.336 640 192l0 0c0 17.664 14.336 32 32 32l128 0C817.664 224 832 209.664 832 192L832 192zM864 640l-704 0C107.072 640 64 596.928 64 544l0-64C64 427.072 107.072 384 160 384l704 0C916.928 384 960 427.072 960 480l0 64C960 596.928 916.928 640 864 640zM160 448C142.4 448 128 462.4 128 480l0 64C128 561.6 142.4 576 160 576l704 0C881.6 576 896 561.6 896 544l0-64C896 462.4 881.6 448 864 448L160 448zM224 480C206.336 480 192 494.336 192 512s14.336 32 32 32S256 529.664 256 512 241.664 480 224 480zM352 480C334.336 480 320 494.336 320 512s14.336 32 32 32S384 529.664 384 512 369.664 480 352 480zM832 512c0-17.664-14.336-32-32-32l-128 0C654.336 480 640 494.336 640 512l0 0c0 17.664 14.336 32 32 32l128 0C817.664 544 832 529.664 832 512L832 512zM864 960l-704 0C107.072 960 64 916.928 64 864l0-64C64 747.072 107.072 704 160 704l704 0c52.928 0 96 43.072 96 96l0 64C960 916.928 916.928 960 864 960zM160 768C142.4 768 128 782.4 128 800l0 64C128 881.6 142.4 896 160 896l704 0c17.6 0 32-14.4 32-32l0-64c0-17.6-14.4-32-32-32L160 768zM224 800C206.336 800 192 814.336 192 832s14.336 32 32 32S256 849.664 256 832 241.664 800 224 800zM352 800C334.336 800 320 814.336 320 832s14.336 32 32 32S384 849.664 384 832 369.664 800 352 800zM832 832c0-17.664-14.336-32-32-32l-128 0c-17.664 0-32 14.336-32 32l0 0c0 17.664 14.336 32 32 32l128 0C817.664 864 832 849.664 832 832L832 832z" p-id="18181" fill="#ffffff"></path></svg>
+                        </div>
+                    </a>
+                    <a href="https://c.lhy6.top:50082" target="_blank" class="service-card" style="background-image: url('./file/s4.jpg');">
+                        <div class="service-content">
+                            <h3 class="service-title">谷歌地图服务</h3>
+                            <p class="service-description">0-14级月更混合瓦片</p>
+                        </div>
+                        <div class="service-icon">
+                            <svg t="1755192943529" class="icon" viewBox="0 0 1027 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8549" width="24" height="24"><path d="M696.371069 1023.986564a100.341653 100.341653 0 0 1-34.116162-6.020499h-2.006833L362.233366 895.549249a20.068331 20.068331 0 0 0-12.040999 0h-2.006833l-219.748219 59.201575a98.334819 98.334819 0 0 1-86.293821-13.044415 96.327986 96.327986 0 0 1-42.143494-77.263072V249.349007a40.136661 40.136661 0 0 1 80.273322 0v612.08408a17.058081 17.058081 0 0 0 7.023916 13.044415 19.064914 19.064914 0 0 0 17.058081 3.01025h2.006833l219.748219-58.198159a101.345069 101.345069 0 0 1 64.218657 1.003417h2.006833l297.011292 122.416816a20.068331 20.068331 0 0 0 12.040998 0l195.666223-55.187909 32.109329-7.023916a20.068331 20.068331 0 0 0 17.058081-20.06833V239.314841a17.058081 17.058081 0 0 0-7.023916-14.047831 19.064914 19.064914 0 0 0-17.058081-3.01025l-198.676472 55.187909a40.176798 40.176798 0 1 1-22.075164-77.263072l199.679889-56.191326a99.338236 99.338236 0 0 1 85.290405 16.054665 97.331403 97.331403 0 0 1 40.136661 75.256239v626.131912a100.341653 100.341653 0 0 1-86.293822 99.338236l-22.075163 5.017083-195.666223 55.187909a100.341653 100.341653 0 0 1-26.088829 3.010249z" fill="#ffffff" p-id="8550"></path><path d="M361.229949 593.520875a72.24599 72.24599 0 0 1-50.170826-20.068331C181.618391 448.025479 116.396317 337.649661 116.396317 245.33534a245.33534 245.33534 0 1 1 490.670681 0c0 59.201575-26.08883 125.427066-79.269906 197.673056-39.133244 54.184492-84.286988 100.341653-115.3929 130.444148a72.24599 72.24599 0 0 1-51.174243 20.068331z m0-512.745845c-91.310904 0-164.56031 74.252823-164.56031 164.56031 0 40.136661 22.075164 92.31432 63.215241 149.509063 26.08883 36.122995 59.201575 74.252823 101.345069 115.3929 109.372401-106.362152 164.56031-195.666222 164.56031-264.901963 0-90.307487-74.252823-164.56031-164.56031-164.56031z" fill="#ffffff" p-id="8551"></path><path d="M361.229949 386.817071c-77.263072 0-140.478314-63.215241-140.478313-140.478314s63.215241-140.478314 140.478313-140.478314 140.478314 63.215241 140.478314 140.478314-63.215241 140.478314-140.478314 140.478314z m0-200.683306a60.204992 60.204992 0 1 0 60.204992 60.204992 60.204992 60.204992 0 0 0-60.204992-60.204992zM702.391568 786.176848a40.136661 40.136661 0 0 1-15.051248-3.01025l-210.71747-88.300654a40.252054 40.252054 0 1 1 31.105912-74.252823l195.666222 82.280155 259.88488-85.290405a40.139671 40.139671 0 1 1 25.085414 76.259656l-272.929295 90.307488zM702.391568 534.3193a40.136661 40.136661 0 0 1-15.051248-3.01025l-109.372401-46.15716a40.252054 40.252054 0 1 1 31.105912-74.252823l95.32457 40.136661 259.88488-85.290404a40.139671 40.139671 0 1 1 25.085413 76.259655l-273.932711 90.307488zM58.198158 753.064102a40.136661 40.136661 0 0 1-14.047831-77.263072l189.645723-70.239157a40.164757 40.164757 0 1 1 28.095663 75.25624L72.24599 750.053853zM58.198158 542.346632a40.136661 40.136661 0 0 1-14.047831-77.263072l76.259656-28.095663a40.164757 40.164757 0 0 1 28.095663 75.256239l-76.259656 27.092246z" fill="#ffffff" p-id="8552"></path><path d="M706.405234 1001.911401a40.136661 40.136661 0 0 1-40.136661-40.136661V242.325091a40.136661 40.136661 0 0 1 80.273322 0v719.449649a40.136661 40.136661 0 0 1-40.136661 40.136661zM360.226533 890.532166a40.136661 40.136661 0 0 1-40.136661-40.136661V702.893276a40.136661 40.136661 0 0 1 80.273322 0v147.502229a40.136661 40.136661 0 0 1-40.136661 40.136661z" fill="#ffffff" p-id="8553"></path></svg>
+                        </div>
+                    </a>
+                    <a href="http://c.lhy6.top:50086/visitor/lhy" target="_blank" class="service-card" style="background-image: url('./file/s5.jpg');">
+                        <div class="service-content">
+                            <h3 class="service-title">在线联通日志</h3>
+                            <p class="service-description">WaveLog记录|可视化</p>
+                        </div>
+                        <div class="service-icon">
+                            <svg t="1755193206756" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="14445" width="24" height="24"><path d="M839.74 959.32h-651.9a81.49 81.49 0 0 1-81.48-81.49v-651.9a81.48 81.48 0 0 1 81.48-81.48h651.9a81.49 81.49 0 0 1 81.49 81.48v651.9a81.5 81.5 0 0 1-81.49 81.49zM835 877.83v-651.9H192.64v651.9z" fill="#ffffff" p-id="14446"></path><path d="M269.33 62.96m40.74 0l0.01 0q40.74 0 40.74 40.74l0 162.98q0 40.74-40.74 40.74l-0.01 0q-40.74 0-40.74-40.74l0-162.98q0-40.74 40.74-40.74Z" fill="#ffffff" p-id="14447"></path><path d="M473.05 62.96m40.74 0l0.01 0q40.74 0 40.74 40.74l0 162.98q0 40.74-40.74 40.74l-0.01 0q-40.74 0-40.74-40.74l0-162.98q0-40.74 40.74-40.74Z" fill="#ffffff" p-id="14448"></path><path d="M676.77 62.96m40.74 0l0.01 0q40.74 0 40.74 40.74l0 162.98q0 40.74-40.74 40.74l-0.01 0q-40.74 0-40.74-40.74l0-162.98q0-40.74 40.74-40.74Z" fill="#ffffff" p-id="14449"></path><path d="M269.33 388.91m40.74 0l407.44 0q40.74 0 40.74 40.74l0 0.01q0 40.74-40.74 40.74l-407.44 0q-40.74 0-40.74-40.74l0-0.01q0-40.74 40.74-40.74Z" fill="#ffffff" p-id="14450"></path><path d="M269.33 551.88m40.74 0l407.44 0q40.74 0 40.74 40.74l0 0.01q0 40.74-40.74 40.74l-407.44 0q-40.74 0-40.74-40.74l0-0.01q0-40.74 40.74-40.74Z" fill="#ffffff" p-id="14451"></path><path d="M269.33 714.86m40.74 0l407.44 0q40.74 0 40.74 40.74l0 0.01q0 40.74-40.74 40.74l-407.44 0q-40.74 0-40.74-40.74l0-0.01q0-40.74 40.74-40.74Z" fill="#ffffff" p-id="14452"></path></svg>
+                        </div>
+                    </a>
+                    <a href="#" target="_blank" class="service-card" style="background-image: url('./file/s6.jpg');">
+                        <div class="service-content">
+                            <h3 class="service-title">在线笔记服务</h3>
+                            <p class="service-description">信息整合|建立知识库</p>
+                        </div>
+                        <div class="service-icon">
+                            <svg t="1755192883696" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7385" width="24" height="24"><path d="M746.666667 64a170.666667 170.666667 0 0 1 170.666666 170.666667v554.666666a170.666667 170.666667 0 0 1-170.666666 170.666667H298.666667a170.666667 170.666667 0 0 1-170.666667-170.666667V234.666667a170.666667 170.666667 0 0 1 170.666667-170.666667h448z m0 74.666667H298.666667a96 96 0 0 0-95.893334 91.477333L202.666667 234.666667v554.666666a96 96 0 0 0 91.477333 95.893334L298.666667 885.333333h448a96 96 0 0 0 95.893333-91.477333L842.666667 789.333333V234.666667a96 96 0 0 0-91.477334-95.893334L746.666667 138.666667z" fill="#ffffff" p-id="7386"></path><path d="M224 325.333333a37.333333 37.333333 0 0 1 3.072 74.538667l-3.072 0.128H106.666667a37.333333 37.333333 0 0 1-3.072-74.538667L106.666667 325.333333h117.333333zM224 624a37.333333 37.333333 0 0 1 3.072 74.538667l-3.072 0.128H106.666667a37.333333 37.333333 0 0 1-3.072-74.538667L106.666667 624h117.333333zM693.333333 346.666667a37.333333 37.333333 0 0 1 37.205334 34.261333l0.128 3.072v256a37.333333 37.333333 0 0 1-74.538667 3.072L656 640V384c0-20.608 16.725333-37.333333 37.333333-37.333333z" fill="#ffffff" p-id="7387"></path></svg>
+                        </div>
+                    </a>
+                        <a href="https://c.lhy6.top:50084" target="_blank" class="service-card" style="background-image: url('./file/s7.jpg');">
+                        <div class="service-content">
+                            <h3 class="service-title">1Panel管理系统</h3>
+                            <p class="service-description">Docker|SSH|应用信息</p>
+                        </div>
+                        <div class="service-icon">
+                            <svg t="1755193150002" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="13335" width="28" height="28"><path d="M512 927c-55.9 0-110.1-11-161.2-32.5-49.3-20.9-93.6-50.7-131.6-88.7s-67.9-82.3-88.7-131.6C109 623.1 98 568.9 98 513s11-110.1 32.5-161.2c20.9-49.3 50.7-93.6 88.7-131.6s82.3-67.9 131.6-88.7C401.9 110 456.1 99 512 99s110.1 11 161.2 32.5c49.3 20.9 93.6 50.7 131.6 88.7s67.9 82.3 88.7 131.6C915 402.9 926 457.1 926 513s-11 110.1-32.5 161.2c-20.9 49.3-50.7 93.6-88.7 131.6s-82.3 67.9-131.6 88.7C622.1 916 567.9 927 512 927z m0-763.1c-192.5 0-349.1 156.6-349.1 349.1 0 192.5 156.6 349.1 349.1 349.1 192.5 0 349.1-156.6 349.1-349.1 0-192.5-156.6-349.1-349.1-349.1z" fill="#ffffff" p-id="13336"></path><path d="M357.5 721.3h-5.7c-25 0-45.4-20.4-45.4-45.4v-6.3l92.4-230.4c3.3-18.6 18-33.3 36.6-36.6l230.4-92.4h6.3c25 0 45.4 20.4 45.4 45.4v5.7l-85.4 237.1c-3.1 19.2-18.3 34.4-37.5 37.5l-237.1 85.4zM459.2 463l-71.6 178.5 183.9-66.3 66.3-183.9L459.2 463z" fill="#ffffff" p-id="13337"></path></svg>
+                        </div>
+                    </a>
+                    <a href="https://c.lhy6.top:50085" target="_blank" class="service-card" style="background-image: url('./file/s8.jpg');">
+                        <div class="service-content">
+                            <h3 class="service-title">Lucky管理系统</h3>
+                            <p class="service-description">DLNA|DNS|续签|反代</p>
+                        </div>
+                        <div class="service-icon">
+                            <svg t="1755193242250" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="16140" width="28" height="28"><path d="M793.6 176H230.4a83.2 83.2 0 0 0-83.2 83.2v371.2A83.2 83.2 0 0 0 230.4 713.6h563.2a83.2 83.2 0 0 0 83.2-83.2v-371.2A83.2 83.2 0 0 0 793.6 176z m-563.2 64h563.2a19.2 19.2 0 0 1 19.2 19.2v371.2a19.2 19.2 0 0 1-19.2 19.2H230.4a19.2 19.2 0 0 1-19.2-19.2v-371.2a19.2 19.2 0 0 1 19.2-19.2z" fill="#ffffff" p-id="16141"></path><path d="M544 677.3248v149.3504h-64v-149.3504z" fill="#ffffff" p-id="16142"></path><path d="M665.5232 784a32 32 0 0 1 3.2768 63.8464l-3.2768 0.1536H352.256a32 32 0 0 1-3.2768-63.8464l3.2768-0.1536h313.2672zM852.0448 528v64H185.6v-64z" fill="#ffffff" p-id="16143"></path></svg>
+                        </div>
+                    </a>
+                </div>
+            </section>
+        <!-- 历史时间轴板块 -->
+        <section class="card">
+            <h2 class="section-title">历史时间轴</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3 class="timeline-title">购回本站域名10年</h3>
+                        <p class="timeline-date">2025年8月</p>
+                        <p class="timeline-description">8月8日晚8点，买回域名，平均每年18.8</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3 class="timeline-title">服务器硬件升级</h3>
+                        <p class="timeline-date">2025年8月</p>
+                        <p class="timeline-description">改用华擎z370m-pro4|8400t|16G运存|36T储存</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3 class="timeline-title">搭建AIO物理服务器</h3>
+                        <p class="timeline-date">2024年4月</p>
+                        <p class="timeline-description">使用斐讯N1+外接2T移动硬盘+256GU盘</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3 class="timeline-title">注册本站域名一年</h3>
+                        <p class="timeline-date">2024年4月</p>
+                        <p class="timeline-description">阿里云新用户只用1元，终于无需二级域名</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3 class="timeline-title">搭建首个个人博客</h3>
+                        <p class="timeline-date">2023年3月</p>
+                        <p class="timeline-description">使用NetLify的免费服务，写好文章后推送</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3 class="timeline-title">全平台浏览量破百万</h3>
+                        <p class="timeline-date">2023年9月</p>
+                        <p class="timeline-description">发布原创免费模型[萝卜刀V1.0|V2.0|V2.1]</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3 class="timeline-title">搭建首个个人主页</h3>
+                        <p class="timeline-date">2023年3月</p>
+                        <p class="timeline-description">不懂前端，依靠修改模板、使用GithubPages</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        </main>
+        
+        <!-- 工具集导航板块 -->
+        <section class="card">
+            <h2 class="section-title">工具集导航</h2>
+            <div class="tools-grid">
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title r">开发工具</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title g">设计工具</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title y">办公工具</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title r">系统工具</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title p">网络工具</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title b">数据库工具</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card">
+                    <h3 class="tool-title">敬请期待</h3>
+                    <p class="tool-description">简介.正在开发中</p></a>
+            </div>
+        </section>
+        <section class="card">
+            <h2 class="section-title">我的技能</h2>
+            <div class="skills-content">
+                <img src="./file/skillPc.svg" alt="技能展示" class="skills-image">
+            </div>
+        </section>
+        <!-- 添加注意事项栏目 -->
+        <section class="card">
+            <h2 class="section-title">注意事项</h2>
+            <div style="padding: 1rem; background: #334155; border-radius: var(--border-radius); color: var(--light-color);">
+                <ul style="list-style-type: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 0.5rem; padding-left: 1rem; position: relative;">
+                        <span style="position: absolute; left: 0;">•</span>
+                        网站c.lhy6.top自动选择v4v6地址，4.lhy6.top强制ipv4，6.lhy6.top强制ipv6
+                    </li>
+                    <li style="margin-bottom: 0.5rem; padding-left: 1rem; position: relative;">
+                        <span style="position: absolute; left: 0;">•</span>
+                        端口500XX强制HTTPS，600XX默认HTTP
+                    </li>
+                    <li style="padding-left: 1rem; position: relative;">
+                        <span style="position: absolute; left: 0;">•</span>
+                        所有内容仅供个人学习使用
+                    </li>
+                </ul>
+            </div>
+        </section>
+        <footer>
+            <p style="margin-top: 18px">" 保持热爱，下一站见! "</p>
+            <p style="margin-top: 18px">版权所有 &copy; <span id="current-year"></span> LHY主页. 保留所有权利.</p>
+        </footer>
+    </div>
+
+    <script>
+        // 设置当前年份
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        // 打字效果文本数组
+        const texts = ['LHY', 'BG5FUG'];
+        let textIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        const typingElement = document.querySelector('.typing-text');
+        // 打字效果函数
+        function type() {
+            const currentText = texts[textIndex];
+            if (isDeleting) {
+                // 删除字符
+                typingElement.textContent = currentText.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                // 添加字符
+                typingElement.textContent = currentText.substring(0, charIndex + 1);
+                charIndex++;
+            }
+            // 添加光标
+            typingElement.innerHTML += '<span class="typing-cursor"></span>';
+            // 控制打字速度
+            let typeSpeed = 150;
+            if (isDeleting) {
+                typeSpeed /= 2; // 删除速度是打字速度的2倍
+            }
+            // 当一个词完全显示后，暂停一段时间再开始删除
+            if (!isDeleting && charIndex === currentText.length) {
+                typeSpeed = 1500; // 词完全显示后停顿1.5秒
+                isDeleting = true;
+            }
+            // 当一个词完全删除后，切换到下一个词
+            else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                textIndex = (textIndex + 1) % texts.length; // 循环切换到下一个词
+                typeSpeed = 500; // 删除完成后停顿0.5秒再开始打字
+            }
+            setTimeout(type, typeSpeed);
+        }
+        // 好句数据
+        const quotes = [
+            {text:"过去的已无法撤回，但未来还可努力书写",
+            author:"——人民日报"},
+            {text:"关关难过关关过，夜夜难熬夜熬",
+            author:"——人民日报"},
+            {text:"悲喜自渡他人难悟，悄悄崩溃默默治愈",
+            author:"——人民日报"},
+            {text:"早成者未必有成，晚达者未必不达",
+            author:"——人民日报"},
+            {text:"不可以年少而自恃，不可以年老而自弃",
+            author:"——人民日报"},
+            {text:"日日行，不怕千万里；常常做，不怕千万事",
+            author:"——人民日报"},
+            {text:"风景依然在，人已非少年",
+            author:"——人民日报"},
+            {text:"人生不可能是一帆风顺，也不会永远风起云涌",
+            author:"——人民日报"},
+            {text:"苦熬不如苦干，蛮干不如巧干",
+            author:"——人民日报"},
+            {text:"欲成大树，不与草争，将军有剑，不斩草蝇",
+            author:"——人民日报"},
+            {text:"即使世界偶尔薄凉，内心也要繁花似锦",
+            author:"——人民日报"},
+            {text:"及时当勉励，岁月不待人",
+            author:"——陶渊明"},
+            {text:"山河远阔，人间烟火，无一是你，无一不是你",
+            author:"——春和"},
+            {text:"既然选择了远方，便只顾风雨兼程",
+            author:"——汪国真"},
+            {text:"万物皆有裂痕，那是光照进来的地方",
+            author:"——莱昂纳德科恩"},
+            {text:"爱所有人，信任少数人，不负任何人",
+            author:"——莎士比亚"},
+            {text:"凡是过往，皆为序章",
+            author:"——莎士比亚"},
+            {text:"盛宴易散，良会难逢",
+            author:"——莎士比亚"},
+            {text:"等风来，不如追风去",
+            author:"——《一禅小和尚》"},
+            {text:"以笑的方式哭，在死亡的伴随下活着",
+            author:"——余华《活着》"},
+            {text:"怀抱着最好的希望，但预做最坏的打算",
+            author:"——《肖申克的救赎》"},
+            {text:"救赎之道，就在其中",
+            author:"——《肖申克的救赎》"},
+            {text:"坚强的人救赎自己，伟大的人才能救赎他人",
+            author:"——《肖申克的救赎》"},
+            {text:"人有俩颗心，一颗是贪心，一颗是不甘心",
+            author:"——《孤注一掷》"},
+            {text:"生如野草，不屈不挠",
+            author:"——《八角笼中》"},
+            {text:"哪怕赤手空拳，也要打出一片天地",
+            author:"——《八角笼中》"},
+            {text:"破笼而出，搏出生路",
+            author:"——《八角笼中》"},
+            {text:"世界以痛吻我，要我报之以歌",
+            author:"——泰戈尔"},
+            {text:"所谓无底深渊，下去也是前程万里",
+            author:"——木心"},
+            {text:"生如夏花之绚烂，死如秋叶之静美",
+            author:"——泰戈尔"},
+        ];
+        // 防止过快点击的节流函数
+        let canClick = true;
+        const CLICK_DELAY = 500; // 1秒内不能重复点击
+        // 随机更换好句
+        function changeQuote() {
+            if (!canClick) return; // 如果不能点击则直接返回
+            // 添加淡出效果
+            const quoteText = document.getElementById('quote-text');
+            const quoteAuthor = document.getElementById('quote-author');
+            canClick = false; // 设置为不能点击
+            quoteText.classList.remove('quote-visible');
+            quoteAuthor.classList.remove('quote-visible');
+            // 在淡出完成后切换内容并淡入
+            setTimeout(() => {
+                const randomIndex = Math.floor(Math.random() * quotes.length);
+                const quote = quotes[randomIndex];
+                quoteText.textContent = quote.text;
+                quoteAuthor.textContent = quote.author;
+                // 确保内容更新后再添加淡入效果
+                setTimeout(() => {
+                    quoteText.classList.add('quote-visible');
+                    quoteAuthor.classList.add('quote-visible');
+                    // 恢复点击功能
+                    setTimeout(() => {
+                        canClick = true;
+                    }, CLICK_DELAY);
+                }, 50);
+            }, 500);
+        }
+        // 页面加载时初始化一句
+        document.addEventListener('DOMContentLoaded', function() {
+            // 添加点击切换功能
+            document.getElementById('quote-section').addEventListener('click', changeQuote);
+            // 每30秒自动更换一次好句
+            setInterval(changeQuote, 10000);
+            // 启动打字效果
+            setTimeout(type, 300);
+            setTimeout(changeQuote, 1500);
+            // 启动数字动画效果
+            setTimeout(animateStats, 500);
+            // 计算并显示年龄
+            calculateAge();
+            // 设置邮箱切换功能
+            setupEmailToggle();
+        });
+        // 数字动画函数
+        function animateStats() {
+            const statElements = document.querySelectorAll('.stat-number');
+            statElements.forEach(element => {
+                // 特殊处理运行天数
+                if (element.hasAttribute('data-start-date')) {
+                    const startDate = new Date(element.getAttribute('data-start-date'));
+                    const today = new Date();
+                    const timeDiff = today.getTime() - startDate.getTime();
+                    const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
+                    element.setAttribute('data-target', daysDiff);
+                }
+                const target = +element.getAttribute('data-target');
+                const startTime = performance.now();
+                function updateValue(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / 2000, 1);
+                    // 使用缓动函数使动画更自然
+                    const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                    const current = Math.floor(easeOutQuart * target);
+                    
+                    element.textContent = formatNumber(current);
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(updateValue);
+                    }
+                }
+                
+                requestAnimationFrame(updateValue);
+            });
+        }
+        // 格式化数字显示
+        function formatNumber(num) {
+            if (num >= 100000) {
+                return (num / 1000).toFixed(0) + 'k';
+            }
+            else if (num >= 10000) {
+                return (num / 1000).toFixed(1) + 'k';
+            }
+            else if (num >= 1000) {
+                return (num / 1000).toFixed(2) + 'k';
+            }
+            return num;
+        }
+        // 计算年龄函数
+        function calculateAge() {
+            const birthDate = new Date('2009-11-21');
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age = age - 1;
+            }
+            const ageElement = document.getElementById('age');
+            if (ageElement) {
+                ageElement.textContent = age+1 + '岁';
+            }
+        }
+        // 邮箱切换功能
+        function setupEmailToggle() {
+            const emails = [
+                'lhy866@126.com',
+                'lhy8668@yeah.net',
+                'lhy6886@yeah.net',
+                'bg5fug@163.com',
+                'bg5fug@126.com',
+                'bg5fug@yeah.net',
+                'bg5fug@outlook.com',
+                'bg5fug@hotmail.com',
+                '749656150@qq.com',
+                '1482334659@qq.com',
+                'linhangyu1@163.com'
+            ];
+            let currentEmailIndex = 0;
+            const emailDisplay = document.getElementById('email-display');
+            const emailToggle = document.getElementById('email-toggle');
+            if (emailToggle) {
+                emailToggle.addEventListener('click', function() {
+                    currentEmailIndex = (currentEmailIndex + 1) % emails.length;
+                    if (emailDisplay) {
+                        emailDisplay.firstChild.textContent = emails[currentEmailIndex] + ' ';
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
