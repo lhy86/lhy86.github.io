@@ -17,7 +17,6 @@
             --light-color: #f8fafc;
             --dark-color: #0f172a;
             --gray-color: #94a3b8;
-            --border-radius: 12px;
             --box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
             --transition: all 0.3s ease;
         }
@@ -30,14 +29,6 @@
             -moz-user-select: none; /* Firefox */
             -ms-user-select: none; /* IE10+/Edge */
             user-select: none; /* Standard */
-        }
-
-        /* 允许在特定元素中选择文本 */
-        input, textarea {
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
         }
 
         body {
@@ -135,19 +126,18 @@
         .person-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.3rem;
+            gap: 0.4rem;
         }
 
         .person-tag {
             background: #334155;
             color: var(--secondary-color);
-            padding: 0.3rem 0.4rem;
-            border-radius: 8px;
-            font-size: 0.875rem;
+            padding: 0.3rem 0.5rem;
+            border-radius: 6px;
+            font-size: 1.1rem;
             font-weight: 500;
         }
 
-        /* 联系方式链接框样式 */
         .contact-links {
             display: flex;
             gap: 0.4rem;
@@ -159,10 +149,10 @@
             align-items: center;
             background: #334155;
             color: var(--secondary-color);
-            padding: 0.3rem 0.4rem;
-            border-radius: 8px;
+            padding: 0.5rem 0.6rem;
+            border-radius: 6px;
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             font-weight: 500;
             letter-spacing: -0.05em;
             transition: var(--transition);
@@ -176,7 +166,7 @@
         }
 
         .title {
-            font-size: 1rem;
+            font-size: 1.1rem;
             color: var(--gray-color);
             font-weight: 400;
             margin-bottom: 0.4rem;
@@ -186,7 +176,7 @@
             text-align: center;
             padding: 1.5rem;
             background: linear-gradient(135deg, var(--primary-color), #3b82f6);
-            border-radius: var(--border-radius);
+            border-radius: 8px;
             color: white;
             margin: 1.5rem 0;
             transition: opacity 0.5s ease-in-out;
@@ -204,13 +194,12 @@
 
         .card {
             background: #22262e;
-            border-radius: var(--border-radius);
+            border-radius: 8px;
             box-shadow: var(--box-shadow);
-            padding: 1.6rem;
-            margin-bottom: 1.6rem;
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
             transition: var(--transition);
         }
-
 
         .section-title {
             font-size: 1.5rem;
@@ -224,19 +213,7 @@
         .info-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-        }
-
-        @media (max-width: 768px) {
-            .info-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
+            gap: 1.2rem;
         }
 
         .info-item h3 {
@@ -253,13 +230,12 @@
             text-align: center;
             padding: 1.5rem;
             background: linear-gradient(135deg, var(--primary-color), #3b82f6);
-            border-radius: var(--border-radius);
+            border-radius: 8px;
             color: white;
             margin: 1.5rem 0;
             transition: opacity 0.5s ease-in-out;
         }
 
-        /* 新增的 fade-out 类 */
         .fade-out {
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
@@ -275,7 +251,6 @@
             font-weight: 500;
         }
 
-
         .timeline {
             position: relative;
             padding-left: 2rem;
@@ -284,7 +259,7 @@
             background-position: right center;
             background-repeat: no-repeat;
 
-            border-radius: var(--border-radius);
+            border-radius: 6px;
             padding: 2rem;
             backdrop-filter: blur(300px);
         }
@@ -297,59 +272,8 @@
             width: 100%;
             height: 100%;
             background: rgba(15, 23, 42, 0.7);
-            border-radius: var(--border-radius);
+            border-radius: 8px;
             z-index: -1;
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .stat-value {
-                font-size: 2rem;
-            }
-            
-            .timeline {
-                padding-left: 1.5rem;
-                background-position: center;
-                padding: 1.5rem 1.5rem 1.5rem 1rem;
-                min-height: auto;
-            }
-            
-            .timeline::before {
-                left: -2px;
-            }
-            
-            .timeline-marker {
-                left: -1.4rem;
-                width: 16px;
-                height: 16px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: repeat(1, 1fr);
-            }
-            
-            .timeline {
-                padding-left: 1.2rem;
-            }
-            
-            .timeline-marker {
-                left: -1.25rem;
-                width: 14px;
-                height: 14px;
-            }
-            
-            .timeline-content {
-                padding: 0;
-            }
-            
-            .timeline-title {
-                font-size: 1.1rem;
-            }
         }
 
         .timeline::before {
@@ -368,13 +292,6 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 2rem;
-        }
-
-        @media (min-width: 768px) {
-            .timeline-items {
-                grid-template-columns: 1fr 1fr;
-                column-gap: 3rem;
-            }
         }
 
         .timeline-item {
@@ -405,7 +322,7 @@
         }
 
         .timeline-title {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
             color: var(--light-color);
             margin-bottom: 0.2rem;
@@ -426,14 +343,12 @@
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
 
-        /* 服务板块样式 */
         .services-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
             gap: 1rem;
         }
 
-        /* 数据统计栏目样式 */
         .stats-section {
             margin-top: 2rem;
         }
@@ -441,85 +356,31 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            gap: 1.5rem;
+            gap: 1.2rem;
             text-align: center;
+            margin-bottom: 1.2rem;
         }
 
-        @media (max-width: 1024px) {
-            .stats-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .stat-value {
-                font-size: 2rem;
-            }
-            
-            .timeline {
-                padding-left: 1.5rem;
-            }
-            
-            .timeline::before {
-                left: -2px;
-            }
-            
-            .timeline-marker {
-                left: -1.4rem;
-                width: 16px;
-                height: 16px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: repeat(1, 1fr);
-            }
-            
-            .timeline {
-                padding-left: 1.2rem;
-            }
-            
-            .timeline-marker {
-                left: -1.25rem;
-                width: 14px;
-                height: 14px;
-            }
-            
-            .timeline-content {
-                padding: 1rem;
-            }
-            
-            .timeline-title {
-                font-size: 1.1rem;
-            }
-        }
-
-        /* 工具集导航板块样式 */
         .tools-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
             gap: 0.4rem;
         }
 
         .tool-card {
             background: #334155;
-            border-radius: var(--border-radius);
-            padding: 0.4rem;
+            border-radius: 6px;
+            padding: 0.4rem 0 0.4rem 0.4rem;
             transition: var(--transition);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             cursor: pointer;
-            text-decoration: none; /* 去除默认的超链接下划线 */
+            text-decoration: none;
         }
 
         .tool-card:hover {
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
             background: #3b4a5c;
-            text-decoration: none; /* 确保悬停时也没有下划线 */
+            text-decoration: none;
         }
 
         .tool-title {
@@ -542,7 +403,6 @@
             background-color: var(--primary-color);
         }
         
-        /* 不同颜色的圆点类 */
         .tool-title.b::before {
             background-color: #3b82f6; /* 蓝色 */
         }
@@ -573,7 +433,7 @@
         .stat-item {
             padding: 0.8rem 0;
             background: #22262e;
-            border-radius: var(--border-radius);
+            border-radius: 8px;
             box-shadow: var(--box-shadow);
             transition: var(--transition);
         }
@@ -585,10 +445,10 @@
         .stat-value {
             position: relative;
             display: inline-block;
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             font-weight: 700;
             color: var(--primary-color);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.2rem;
             text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
             line-height: 1;
         }
@@ -599,9 +459,9 @@
 
         .stat-unit {
             display: inline-block;
-            font-size: 2rem;
+            font-size: 1.6rem;
             vertical-align: bottom;
-            margin-left: -0.4em;
+            margin-left: -0.3em;
             position: relative;
         }
 
@@ -615,7 +475,7 @@
             justify-content: space-between;
             align-items: center;
             background: #334155;
-            border-radius: var(--border-radius);
+            border-radius: 6px;
             text-decoration: none;
             color: var(--light-color);
             transition: var(--transition);
@@ -684,7 +544,6 @@
             z-index: 0;
         }
 
-        /* 技能板块样式 */
         .skills-content {
             text-align: center;
         }
@@ -693,16 +552,8 @@
             width: 100%;
         }
 
-        /* 默认使用PC图片 */
         .skills-image {
             content: url('./file/skillPc.svg');
-        }
-
-        /* 小屏幕设备使用WAP图片 */
-        @media (max-width: 768px) {
-            .skills-image {
-                content: url('./file/skillWap.svg');
-            }
         }
 
         footer {
@@ -716,19 +567,13 @@
             body {
                 padding: 0.6rem;
             }
-            
-            header {
-                flex-direction: column;
-                text-align: center;
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
                 gap: 1rem;
+                margin-bottom: 1rem;
             }
-            
-            .person-tags {
-                justify-content: center;
-            }
-            
             .name {
-                font-size: 2rem;
+                font-size: 2.2rem;
             }
             
             .avatar {
@@ -737,16 +582,198 @@
             }
             
             .card {
-                padding: 1.5rem;
-            }
-            
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
+                padding: 1rem;
+                margin-bottom: 1rem;
             }
             
             .stat-value {
                 font-size: 2rem;
+            }
+            .skills-image {
+                content: url('./file/skillWap.svg');
+            }
+            
+            .timeline {
+                padding-left: 1.5rem;
+            }
+            
+            .timeline::before {
+                left: -2px;
+            }
+            
+            .timeline-marker {
+                left: -1.4rem;
+                width: 16px;
+                height: 16px;
+            }
+            
+            .timeline-items {
+                grid-template-columns: 1fr 1fr;
+                column-gap: 3rem;
+            }
+            
+            .stat-value {
+                font-size: 2rem;
+            }
+            
+            .timeline {
+                padding-left: 1.5rem;
+                background-position: center;
+                padding: 1.5rem 1.5rem 1.5rem 1rem;
+                min-height: auto;
+            }
+            
+            .timeline::before {
+                left: -2px;
+            }
+            
+            .timeline-marker {
+                left: -1.4rem;
+                width: 16px;
+                height: 16px;
+            }
+            
+            .title {
+                font-size: 0.9rem;
+            }
+            .typing-text {
+                font-size: 3rem;
+            }
+            .avatar {
+                width: 144px;
+                height: 144px;
+            }
+            header {
+                gap: 0.8rem;
+                padding-top: 1rem;
+            }
+            .contact-links {
+                gap:0.3rem;
+                margin-top: 0.4rem;
+            }
+            .contact-link {
+                padding:0.2rem 0.3rem;
+            }
+            .link-text {
+                font-size: 0.9rem;
+            }
+            .person-tags {
+                gap: 0.2rem;
+            }
+            .person-tag {
+                padding:0.3rem 0.4rem;
+                font-size: 0.9rem;
+            }
+            .services-grid {
+                gap: 0.8rem;
+                grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+            }
+            .tools-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+        @media (max-width: 576px) {
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .card {
+                padding: 0.8rem;
+                margin-bottom: 0.8rem;
+            }
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+                padding-top: 1rem;
+            }
+            .person-tags {
+                justify-content: center;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.8rem;
+                margin-bottom: 0.8rem;
+            }
+            .service-content {
+                padding: 0.6rem 0 0.6rem 0.6rem ;
+            }
+        }
+        @media (max-width: 480px) {
+            .stat-value {
+                font-size: 1.6rem;
+            }
+            .timeline {
+                padding-left: 1.2rem;
+            }
+            .person-tag {
+                padding: 1vw 1vw;
+                font-size: 3.6vw;
+            }
+            .timeline-marker {
+                left: -1.25rem;
+                width: 14px;
+                height: 14px;
+            }
+            
+            .timeline-content {
+                padding: 1rem;
+            }
+            .contact-link {
+                padding:1vw 1vw;
+
+            }
+            .link-text{
+                font-size: 3.6vw;
+            }
+            .timeline-title {
+                font-size: 1.1rem;
+            }
+            
+            .timeline {
+                padding-left: 1.2rem;
+            }
+            
+            .timeline-marker {
+                left: -1.25rem;
+                width: 14px;
+                height: 14px;
+            }
+            
+            .timeline-content {
+                padding: 0;
+            }
+            
+            .timeline-title {
+                font-size: 1.1rem;
+            }
+            .name {
+                font-size: 8.5vw;
+            }
+            .typing-text {
+                font-size: 12vw;
+            }
+            .avatar {
+                width: 24vw;
+                height: 24vw;
+                border-width: 0.8vw;
+            }
+            .title {
+                font-size: 3.2vw;
+            }
+            .service-title {
+                font-size: 1rem;
+            }
+            .service-description {
+                font-size: 0.75rem;
+            }
+        }
+        @media (max-width: 320px) { 
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.6rem;
             }
         }
     </style>
@@ -773,20 +800,16 @@
                 <div class="contact-links">
                     <a href="https://www.crealitycloud.cn/user-profile/2582633251/models" class="contact-link" target="_blank">
                         <svg t="1755173566302" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5695" width="20" height="20"><path d="M832 128H192c-35.2 0-64 28.8-64 64v640c0 35.2 28.8 64 64 64h640c35.2 0 64-28.8 64-64V192c0-35.2-28.8-64-64-64z m0 704H192v-96h96v17.92c0 8.32 5.76 14.72 13.44 16l208 29.44s3.2 0.64 5.12 0l208-29.44c7.68-1.28 13.44-7.68 13.44-16v-17.92H832V832z m-480-119.68V592l128-36.48v175.36l-128-18.56z m267.52-135.04l31.36 8.96-81.28 140.8-25.6 3.84v-23.04l75.52-130.56z m-75.52 2.56v-24.32l12.16 3.84-12.16 20.48z m128 97.92v34.56l-21.76 3.2 21.76-37.76z m160-5.76h-96V556.16c0-7.04-4.48-13.44-11.52-15.36l-208-59.52s-5.76-0.64-8.96 0l-208 59.52c-7.04 1.92-11.52 8.32-11.52 15.36v115.84H192V320h224l38.4 51.2c5.76 8.32 15.36 12.8 25.6 12.8v32c0 17.92 14.08 32 32 32s32-14.08 32-32V384c10.24 0 19.84-4.48 25.6-12.8l38.4-51.2H832v352zM832 256H192V192h640v64z" p-id="5696" fill="#ffffff"></path></svg>
-                        <span class="link-text">创想云</span>
-                    </a>
+                        <span class="link-text">创想云</span></a>
                     <a href="https://lhy.netlify.app/" class="contact-link" target="_blank">
                         <svg t="1754854138206" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="22702" width="19" height="19"><path d="M957.06 511.84c0 246.74-200.15 446.76-447 446.76S63 758.58 63 511.84 263.13 65.09 510 65.09s447.06 200.02 447.06 446.75z m-81.28 0c0-201.56-164.07-365.52-365.76-365.52s-365.75 164-365.75 365.52S308.33 877.37 510 877.37s365.78-163.96 365.78-365.53z" fill="#ffffff" p-id="22703"></path><path d="M713.22 511.84c0 246.74-91 446.76-203.2 446.76s-203.19-200-203.19-446.76S397.8 65.09 510 65.09s203.22 200.02 203.22 446.75z m-81.28 0c0-237.41-86.52-365.52-121.92-365.52S388.1 274.43 388.1 511.84 474.62 877.37 510 877.37s121.94-128.11 121.94-365.53z" fill="#ffffff" p-id="22704"></path><path d="M144.27 308.78h731.51v81.23H144.27zM144.27 593.07h731.51v81.23H144.27z" fill="#ffffff" p-id="22705"></path></svg>
-                        <span class="link-text">备用站</span>
-                    </a>
+                        <span class="link-text">备用站</span></a>
                     <a href="https://www.qrz.com/db/BG5FUG" class="contact-link" target="_blank">
                         <svg t="1754854598585" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="24996" width="18" height="18"><path d="M641.024 632.32l-3.584 3.072 31.744 77.312 6.144-4.608c127.488-90.624 157.184-267.264 67.072-394.24S475.648 155.648 348.16 246.272s-157.184 267.264-67.072 394.24c18.432 26.112 40.96 48.64 67.072 67.072l6.144 4.608 31.744-77.312-3.584-3.072C296.96 560.64 285.696 433.664 356.864 348.16s198.144-96.768 283.648-25.6 96.768 198.144 25.6 283.648c-7.168 9.728-15.872 18.432-25.088 26.112z" fill="#ffffff" p-id="24997"></path><path d="M512 9.728C253.952 9.216 44.544 218.112 44.032 476.672c0 166.912 88.576 321.024 232.96 404.992l6.144 3.584 31.232-75.776-4.608-2.56C128 694.784 71.168 457.216 182.272 274.944S531.968 35.84 713.728 147.456s239.104 349.696 127.488 531.456c-31.744 52.224-75.776 95.744-127.488 127.488l-4.608 2.56 31.232 75.776 6.144-3.584C970.24 751.616 1046.016 465.92 916.48 242.688c-83.456-144.384-237.568-233.472-404.48-232.96z" fill="#ffffff" p-id="24998"></path><path d="M561.664 567.808c-3.072-9.216-9.728-16.896-18.432-21.504 37.888-17.408 54.784-61.952 37.376-99.84-17.408-37.888-61.952-54.784-99.84-37.376S425.984 471.04 443.392 508.928c7.68 16.896 20.992 30.208 37.376 37.376-8.704 4.608-15.36 12.288-18.432 21.504l-139.264 393.216c-3.584 9.728-3.072 20.992 1.536 30.72 4.608 9.728 13.312 17.408 23.552 20.48 4.096 1.536 8.704 2.048 13.312 2.048 17.408 0 32.768-10.752 38.4-27.136l14.848-41.984h194.048l14.848 41.984c5.632 16.384 21.504 27.136 38.4 27.136 4.608 0 9.216-1.024 13.312-2.048 10.24-3.584 18.944-10.752 23.552-20.48 4.608-9.728 5.12-20.48 1.536-30.72l-138.752-393.216z m-125.952 318.976l11.776-33.792h128.512l11.776 33.792h-87.04z m32.768-92.16l43.52-123.392 43.52 123.392h-87.04z" fill="#ffffff" p-id="24999"></path></svg>
-                        <span class="link-text">QRZ</span>
-                    </a>
+                        <span class="link-text">QRZ</span></a>
                     <a href="https://www.hamqth.com/BG5FUG" class="contact-link" target="_blank">
                         <svg t="1754854598585" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="24996" width="18" height="18"><path d="M641.024 632.32l-3.584 3.072 31.744 77.312 6.144-4.608c127.488-90.624 157.184-267.264 67.072-394.24S475.648 155.648 348.16 246.272s-157.184 267.264-67.072 394.24c18.432 26.112 40.96 48.64 67.072 67.072l6.144 4.608 31.744-77.312-3.584-3.072C296.96 560.64 285.696 433.664 356.864 348.16s198.144-96.768 283.648-25.6 96.768 198.144 25.6 283.648c-7.168 9.728-15.872 18.432-25.088 26.112z" fill="#ffffff" p-id="24997"></path><path d="M512 9.728C253.952 9.216 44.544 218.112 44.032 476.672c0 166.912 88.576 321.024 232.96 404.992l6.144 3.584 31.232-75.776-4.608-2.56C128 694.784 71.168 457.216 182.272 274.944S531.968 35.84 713.728 147.456s239.104 349.696 127.488 531.456c-31.744 52.224-75.776 95.744-127.488 127.488l-4.608 2.56 31.232 75.776 6.144-3.584C970.24 751.616 1046.016 465.92 916.48 242.688c-83.456-144.384-237.568-233.472-404.48-232.96z" fill="#ffffff" p-id="24998"></path><path d="M561.664 567.808c-3.072-9.216-9.728-16.896-18.432-21.504 37.888-17.408 54.784-61.952 37.376-99.84-17.408-37.888-61.952-54.784-99.84-37.376S425.984 471.04 443.392 508.928c7.68 16.896 20.992 30.208 37.376 37.376-8.704 4.608-15.36 12.288-18.432 21.504l-139.264 393.216c-3.584 9.728-3.072 20.992 1.536 30.72 4.608 9.728 13.312 17.408 23.552 20.48 4.096 1.536 8.704 2.048 13.312 2.048 17.408 0 32.768-10.752 38.4-27.136l14.848-41.984h194.048l14.848 41.984c5.632 16.384 21.504 27.136 38.4 27.136 4.608 0 9.216-1.024 13.312-2.048 10.24-3.584 18.944-10.752 23.552-20.48 4.608-9.728 5.12-20.48 1.536-30.72l-138.752-393.216z m-125.952 318.976l11.776-33.792h128.512l11.776 33.792h-87.04z m32.768-92.16l43.52-123.392 43.52 123.392h-87.04z" fill="#ffffff" p-id="24999"></path></svg>
-                        <span class="link-text">HQ</span>
-                    </a>
+                        <span class="link-text">HQ</span></a>
                     <a href="https://space.bilibili.com/1921299521" class="contact-link" target="_blank">
                         <svg t="1754853865182" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="13581" width="20" height="20"><path d="M777.514667 131.669333a53.333333 53.333333 0 0 1 0 75.434667L728.746667 255.829333h49.92A160 160 0 0 1 938.666667 415.872v320a160 160 0 0 1-160 160H245.333333A160 160 0 0 1 85.333333 735.872v-320a160 160 0 0 1 160-160h49.749334L246.4 207.146667a53.333333 53.333333 0 1 1 75.392-75.434667l113.152 113.152c3.370667 3.370667 6.186667 7.04 8.448 10.965333h137.088c2.261333-3.925333 5.12-7.68 8.490667-11.008l113.109333-113.152a53.333333 53.333333 0 0 1 75.434667 0z m1.152 231.253334H245.333333a53.333333 53.333333 0 0 0-53.205333 49.365333l-0.128 4.010667v320c0 28.117333 21.76 51.157333 49.365333 53.162666l3.968 0.170667h533.333334a53.333333 53.333333 0 0 0 53.205333-49.365333l0.128-3.968v-320c0-29.44-23.893333-53.333333-53.333333-53.333334z m-426.666667 106.666666c29.44 0 53.333333 23.893333 53.333333 53.333334v53.333333a53.333333 53.333333 0 1 1-106.666666 0v-53.333333c0-29.44 23.893333-53.333333 53.333333-53.333334z m320 0c29.44 0 53.333333 23.893333 53.333333 53.333334v53.333333a53.333333 53.333333 0 1 1-106.666666 0v-53.333333c0-29.44 23.893333-53.333333 53.333333-53.333334z" p-id="13582" fill="#ffffff"></path></svg>
                     </a>
@@ -801,22 +824,18 @@
         </header>
 
         <main>
-            <section style="text-align: center; margin: 1rem 0; cursor: pointer;" id="quote-section">
-                <p id="quote-text" class="quote-fade quote-visible" style="font-size: 1.2rem; font-style: italic; color: var(--light-color); margin-bottom: 0.5rem;">
-                    ~ 这里是金句区，每日金句支持点击或自动刷新哦 ~
-                </p>
-                <p id="quote-author" class="quote-fade quote-visible" style="color: var(--gray-color);">
-                    网站正在开发中...
-                </p>
+            <section style="text-align: center; margin: 2rem 0; cursor: pointer;" id="quote-section">
+                <p id="quote-text" class="quote-fade quote-visible" style="font-size: 1.2rem; font-style: italic; color: var(--light-color);">~ 这里是金句区，每日金句支持点击或自动刷新哦 ~</p>
+                <p id="quote-author" class="quote-fade quote-visible" style="color: var(--gray-color);">网站正在开发中...</p>
             </section>
-                <!-- 数据统计栏目 -->
-            <div class="stats-grid" style="margin-bottom: 1.6rem;">
+            <!-- 数据统计栏目 -->
+            <div class="stats-grid">
                 <div class="stat-item">
                     <div class="stat-value">
                         <span class="stat-number" data-target="3500000">0</span>
                         <span class="stat-unit">+</span>
                     </div>
-                    <div class="stat-label">全平台访问量</div>
+                    <div class="stat-label">全网访问</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value">
@@ -856,28 +875,16 @@
             </div>
         </section>
         <section class="card">
-            <h2 class="section-title">信息</h2>
+            <h2 class="section-title">我的信息</h2>
             <div class="info-grid">
-                <div class="info-item">
-                    <h3>年龄</h3>
-                    <p id="age">16岁</p>
-                </div>
-                <div class="info-item">
-                    <h3>所在地</h3>
-                    <p>浙江, 中国</p>
-                </div>
-                <div class="info-item">
-                    <h3>邮箱<button id="email-toggle" style="margin-left: 10px; background: #334155; color: var(--secondary-color); border: none; border-radius: 8px; padding: 2px 8px; cursor: pointer;">切换</button></h3>
-                    <p id="email-display">lhy866@126.com </p>
-                </div>
-                <div class="info-item">
-                    <h3>QQ</h3>
-                    <p>749656150</p>
-                </div>
+                <div class="info-item"><h3>年龄</h3><p id="age">16岁</p></div>
+                <div class="info-item"><h3>所在地</h3><p>浙江, 中国</p></div>
+                <div class="info-item"><h3>邮箱<button id="email-toggle" style="margin-left: 10px; background: #334155; color: var(--secondary-color); border: none; border-radius: 8px; padding: 2px 8px; cursor: pointer;">切换</button></h3><p id="email-display">lhy866@126.com </p></div>
+                <div class="info-item"><h3>QQ</h3><p>749656150</p></div>
             </div>
         </section>
         <section class="card">
-            <h2 class="section-title">我的服务</h2>
+            <h2 class="section-title">个人服务</h2>
             <div class="services-grid">
                 <a href="https://c.lhy6.top:50088" target="_blank" class="service-card" style="background-image: url('./file/s1.jpg');">
                     <div class="service-content">
@@ -955,7 +962,7 @@
             </section>
         <!-- 历史时间轴板块 -->
         <section class="card">
-            <h2 class="section-title">历史时间轴</h2>
+            <h2 class="section-title">历史时间</h2>
             <div class="timeline">
                 <div class="timeline-item">
                     <div class="timeline-marker"></div>
@@ -1016,177 +1023,68 @@
             </div>
         </section>
         </main>
-        
         <!-- 工具集导航板块 -->
         <section class="card">
-            <h2 class="section-title">工具集导航</h2>
+            <h2 class="section-title">工具导航</h2>
             <div class="tools-grid">
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title r">开发工具</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title g">设计工具</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title y">办公工具</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title r">系统工具</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title p">网络工具</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title b">数据库工具</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
-                <a href="#" target="_blank" class="tool-card">
-                    <h3 class="tool-title">敬请期待</h3>
-                    <p class="tool-description">简介.正在开发中</p></a>
+                <a href="./file/project/单词练习.html" target="_blank" class="tool-card"><h3 class="tool-title y">单词练习</h3><p class="tool-description">根据表格生成选择</p></a>
+                <a href="./file/project/音乐播放.html" target="_blank" class="tool-card"><h3 class="tool-title g">音乐播放</h3><p class="tool-description">支持音频歌词封面</p></a>
+                <a href="./file/project/函数计算.html" target="_blank" class="tool-card"><h3 class="tool-title r">函数计算</h3><p class="tool-description">以坐标计算表达式</p></a>
+                <a href="./file/project/翻页时钟.html" target="_blank" class="tool-card"><h3 class="tool-title p">翻页时钟</h3><p class="tool-description">实时更新显示到秒</p></a>
+                <a href="./file/project/题库练习.html" target="_blank" class="tool-card"><h3 class="tool-title y">题库练习</h3><p class="tool-description">导入规范txt题库</p></a>
+                <a href="./file/project/摩斯练习.html" target="_blank" class="tool-card"><h3 class="tool-title y">摩斯练习</h3><p class="tool-description">点击按钮模拟发报</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
+                <a href="#" target="_blank" class="tool-card"><h3 class="tool-title">敬请期待</h3><p class="tool-description">简介.正在开发中</p></a>
             </div>
         </section>
         <section class="card">
-            <h2 class="section-title">我的技能</h2>
+            <h2 class="section-title">技能(未完成)</h2>
             <div class="skills-content">
                 <img src="./file/skillPc.svg" alt="技能展示" class="skills-image">
             </div>
@@ -1194,7 +1092,7 @@
         <!-- 添加注意事项栏目 -->
         <section class="card">
             <h2 class="section-title">注意事项</h2>
-            <div style="padding: 1rem; background: #334155; border-radius: var(--border-radius); color: var(--light-color);">
+            <div style="padding: 1rem; background: #334155; border-radius: 8px; color: var(--light-color);">
                 <ul style="list-style-type: none; padding: 0; margin: 0;">
                     <li style="margin-bottom: 0.5rem; padding-left: 1rem; position: relative;">
                         <span style="position: absolute; left: 0;">•</span>
@@ -1260,70 +1158,40 @@
         }
         // 好句数据
         const quotes = [
-            {text:"过去的已无法撤回，但未来还可努力书写",
-            author:"——人民日报"},
-            {text:"关关难过关关过，夜夜难熬夜熬",
-            author:"——人民日报"},
-            {text:"悲喜自渡他人难悟，悄悄崩溃默默治愈",
-            author:"——人民日报"},
-            {text:"早成者未必有成，晚达者未必不达",
-            author:"——人民日报"},
-            {text:"不可以年少而自恃，不可以年老而自弃",
-            author:"——人民日报"},
-            {text:"日日行，不怕千万里；常常做，不怕千万事",
-            author:"——人民日报"},
-            {text:"风景依然在，人已非少年",
-            author:"——人民日报"},
-            {text:"人生不可能是一帆风顺，也不会永远风起云涌",
-            author:"——人民日报"},
-            {text:"苦熬不如苦干，蛮干不如巧干",
-            author:"——人民日报"},
-            {text:"欲成大树，不与草争，将军有剑，不斩草蝇",
-            author:"——人民日报"},
-            {text:"即使世界偶尔薄凉，内心也要繁花似锦",
-            author:"——人民日报"},
-            {text:"及时当勉励，岁月不待人",
-            author:"——陶渊明"},
-            {text:"山河远阔，人间烟火，无一是你，无一不是你",
-            author:"——春和"},
-            {text:"既然选择了远方，便只顾风雨兼程",
-            author:"——汪国真"},
-            {text:"万物皆有裂痕，那是光照进来的地方",
-            author:"——莱昂纳德科恩"},
-            {text:"爱所有人，信任少数人，不负任何人",
-            author:"——莎士比亚"},
-            {text:"凡是过往，皆为序章",
-            author:"——莎士比亚"},
-            {text:"盛宴易散，良会难逢",
-            author:"——莎士比亚"},
-            {text:"等风来，不如追风去",
-            author:"——《一禅小和尚》"},
-            {text:"以笑的方式哭，在死亡的伴随下活着",
-            author:"——余华《活着》"},
-            {text:"怀抱着最好的希望，但预做最坏的打算",
-            author:"——《肖申克的救赎》"},
-            {text:"救赎之道，就在其中",
-            author:"——《肖申克的救赎》"},
-            {text:"坚强的人救赎自己，伟大的人才能救赎他人",
-            author:"——《肖申克的救赎》"},
-            {text:"人有俩颗心，一颗是贪心，一颗是不甘心",
-            author:"——《孤注一掷》"},
-            {text:"生如野草，不屈不挠",
-            author:"——《八角笼中》"},
-            {text:"哪怕赤手空拳，也要打出一片天地",
-            author:"——《八角笼中》"},
-            {text:"破笼而出，搏出生路",
-            author:"——《八角笼中》"},
-            {text:"世界以痛吻我，要我报之以歌",
-            author:"——泰戈尔"},
-            {text:"所谓无底深渊，下去也是前程万里",
-            author:"——木心"},
-            {text:"生如夏花之绚烂，死如秋叶之静美",
-            author:"——泰戈尔"},
+            {text:"过去的已无法撤回，但未来还可努力书写",author:"——人民日报"},
+            {text:"关关难过关关过，夜夜难熬夜熬",author:"——人民日报"},
+            {text:"悲喜自渡他人难悟，悄悄崩溃默默治愈",author:"——人民日报"},
+            {text:"早成者未必有成，晚达者未必不达",author:"——人民日报"},
+            {text:"不可以年少而自恃，不可以年老而自弃",author:"——人民日报"},
+            {text:"日日行，不怕千万里；常常做，不怕千万事",author:"——人民日报"},
+            {text:"风景依然在，人已非少年",author:"——人民日报"},
+            {text:"人生不可能是一帆风顺，也不会永远风起云涌",author:"——人民日报"},
+            {text:"苦熬不如苦干，蛮干不如巧干",author:"——人民日报"},
+            {text:"欲成大树，不与草争，将军有剑，不斩草蝇",author:"——人民日报"},
+            {text:"即使世界偶尔薄凉，内心也要繁花似锦",author:"——人民日报"},
+            {text:"及时当勉励，岁月不待人",author:"——陶渊明"},
+            {text:"山河远阔，人间烟火，无一是你，无一不是你",author:"——春和"},
+            {text:"既然选择了远方，便只顾风雨兼程",author:"——汪国真"},
+            {text:"万物皆有裂痕，那是光照进来的地方",author:"——莱昂纳德科恩"},
+            {text:"爱所有人，信任少数人，不负任何人",author:"——莎士比亚"},
+            {text:"凡是过往，皆为序章",author:"——莎士比亚"},
+            {text:"盛宴易散，良会难逢",author:"——莎士比亚"},
+            {text:"等风来，不如追风去",author:"——《一禅小和尚》"},
+            {text:"以笑的方式哭，在死亡的伴随下活着",author:"——余华《活着》"},
+            {text:"怀抱着最好的希望，但预做最坏的打算",author:"——《肖申克的救赎》"},
+            {text:"救赎之道，就在其中",author:"——《肖申克的救赎》"},
+            {text:"坚强的人救赎自己，伟大的人才能救赎他人",author:"——《肖申克的救赎》"},
+            {text:"人有俩颗心，一颗是贪心，一颗是不甘心",author:"——《孤注一掷》"},
+            {text:"生如野草，不屈不挠",author:"——《八角笼中》"},
+            {text:"哪怕赤手空拳，也要打出一片天地",author:"——《八角笼中》"},
+            {text:"破笼而出，搏出生路",author:"——《八角笼中》"},
+            {text:"世界以痛吻我，要我报之以歌",author:"——泰戈尔"},
+            {text:"所谓无底深渊，下去也是前程万里",author:"——木心"},
+            {text:"生如夏花之绚烂，死如秋叶之静美",author:"——泰戈尔"},
         ];
         // 防止过快点击的节流函数
         let canClick = true;
-        const CLICK_DELAY = 500; // 1秒内不能重复点击
+        const CLICK_DELAY = 500;
         // 随机更换好句
         function changeQuote() {
             if (!canClick) return; // 如果不能点击则直接返回
@@ -1350,7 +1218,6 @@
                 }, 50);
             }, 500);
         }
-        // 页面加载时初始化一句
         document.addEventListener('DOMContentLoaded', function() {
             // 添加点击切换功能
             document.getElementById('quote-section').addEventListener('click', changeQuote);
@@ -1370,7 +1237,7 @@
         function animateStats() {
             const statElements = document.querySelectorAll('.stat-number');
             statElements.forEach(element => {
-                // 特殊处理运行天数
+                // 特殊处理
                 if (element.hasAttribute('data-start-date')) {
                     const startDate = new Date(element.getAttribute('data-start-date'));
                     const today = new Date();
@@ -1383,17 +1250,14 @@
                 function updateValue(currentTime) {
                     const elapsed = currentTime - startTime;
                     const progress = Math.min(elapsed / 2000, 1);
-                    // 使用缓动函数使动画更自然
+                    // 缓动函数
                     const easeOutQuart = 1 - Math.pow(1 - progress, 4);
                     const current = Math.floor(easeOutQuart * target);
-                    
                     element.textContent = formatNumber(current);
-                    
                     if (progress < 1) {
                         requestAnimationFrame(updateValue);
                     }
                 }
-                
                 requestAnimationFrame(updateValue);
             });
         }
@@ -1427,18 +1291,12 @@
         // 邮箱切换功能
         function setupEmailToggle() {
             const emails = [
-                'lhy866@126.com',
-                'lhy8668@yeah.net',
-                'lhy6886@yeah.net',
-                'bg5fug@163.com',
-                'bg5fug@126.com',
-                'bg5fug@yeah.net',
-                'bg5fug@outlook.com',
-                'bg5fug@hotmail.com',
-                '749656150@qq.com',
-                '1482334659@qq.com',
-                'linhangyu1@163.com'
-            ];
+                'lhy866@126.com','lhy8668@yeah.net',
+                'lhy6886@yeah.net','bg5fug@163.com',
+                'bg5fug@126.com','bg5fug@yeah.net',
+                'bg5fug@outlook.com','bg5fug@hotmail.com',
+                '749656150@qq.com','1482334659@qq.com',
+                'linhangyu1@163.com'];
             let currentEmailIndex = 0;
             const emailDisplay = document.getElementById('email-display');
             const emailToggle = document.getElementById('email-toggle');
