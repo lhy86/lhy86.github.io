@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>摩尔斯码编码练习</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 12px;
+            background-color: #111;
+            user-select: none;
+        }
+        h1 {
+            color: #aaa;
+            margin-bottom: 0px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+        #morse-button {
+            display: block;
+            width: 220px;
+            height: 220px;
+            margin: 30px auto;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            color: white;
+            font-size: 26px;
+            font-weight: bold;
+            border: none;
+            outline: none;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.1s;
+            position: relative;
+            overflow: hidden;
+        }
+        #morse-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        #morse-button::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        #morse-button:active::after {
+            opacity: 1;
+        }
+        .display-container {
+            width: 95%;
+            max-width: 700px;
+            margin: 0px auto;
+        }
+        .label {
+            text-align: left;
+            font-weight: bold;
+            color: #aaa;
+            margin: 15px 0 5px 0;
+            font-size: 16px;
+        }
+        #morse-sequence, #decoded-text {
+            max-width: 90vw;
+            min-height: 80px;
+            padding: 6px;
+            border-radius: 10px;
+            font-size: 18px;
+            line-height: 1.2;
+            text-align: left;
+            overflow-wrap: break-word;
+            border: 2px solid #ddd;
+        }
+        #morse-sequence {
+            background-color: white;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+        }
+        #decoded-text {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            border-color: #0984e3;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        #clear-btn {
+            padding: 12px 25px;
+            font-size: 18px;
+            font-weight: bold;
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 15px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+    </style>
+</head>
+<body>
+    <h1>摩尔斯码编码练习</h1>
+    <div class="subtitle">高速模式 - 实时自动解码</div>
+    <div class="display-container">
+        <div class="label">摩尔斯码序列：</div>
+        <div id="morse-sequence">开始输入摩尔斯码...</div>
+        
+        <div class="label">实时解码结果：</div>
+        <div id="decoded-text">解码结果将实时显示在这里</div>
+    </div>
+    <button id="clear-btn">清空所有内容</button>
+    <button id="morse-button">按住输入</button>
+<script>
+    // 摩尔斯码字典（保持不变）
+    const morseCode = {
+        '·—': 'A', '—···': 'B', '—·—·': 'C', '—··': 'D', '·': 'E',
+        '··—·': 'F', '——·': 'G', '····': 'H', '··': 'I', '·———': 'J',
+        '—·—': 'K', '·—··': 'L', '——': 'M', '—·': 'N', '———': 'O',
+        '·——·': 'P', '——·—': 'Q', '·—·': 'R', '···': 'S', '—': 'T',
+        '··—': 'U', '···—': 'V', '·——': 'W', '—··—': 'X', '—·——': 'Y',
+        '——··': 'Z',
+        '·————': '1', '··———': '2', '···——': '3', '····—': '4', '·····': '5',
+        '—····': '6', '——···': '7', '———··': '8', '————·': '9', '—————': '0',
+        '·—·—·—': '.', '——··——': ',', '··——··': '?', '—··—': '/', '—·——·': "'",
+        '—·—·——': ':', '—···—': ';', '—·—·—·': '=', '·————·': '(', '·—·—·': '"',
+        '·—···': '@', '——·—·': '!'
+    };
+
+    const button = document.getElementById('morse-button');
+    const morseSequence = document.getElementById('morse-sequence');
+    const decodedText = document.getElementById('decoded-text');
+    const clearBtn = document.getElementById('clear-btn');
+    
+    // 高速参数设置
+    const SHORT_PRESS_THRESHOLD = 150;
+    const RECOGNITION_DELAY = 450;
+    const TONE_FREQUENCY = 600;  // 发音频率
+    const TONE_VOLUME = 0.3;     // 音量
+
+    let pressStartTime = 0;
+    let currentMorse = '';
+    let recognitionTimer = null;
+    let fullMorseSequence = [];
+    let fullDecodedText = '';
+
+    // 音频相关
+    let audioContext = null;
+    let activeOscillator = null;  // 保存当前正在播放的振荡器
+
+    // 初始化音频上下文
+    function initAudio() {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    // 按下时开始发声
+    function startTone() {
+        initAudio();
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+
+        // 创建振荡器和音量节点
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.type = 'sine';
+        oscillator.frequency.value = TONE_FREQUENCY;
+        gainNode.gain.value = TONE_VOLUME;
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.start();
+
+        activeOscillator = {
+            oscillator,
+            gainNode
+        };
+    }
+
+    // 松开时停止发声
+    function stopTone() {
+        if (activeOscillator) {
+            activeOscillator.oscillator.stop();
+            activeOscillator = null;
+        }
+    }
+
+    // 按钮按下事件：开始计时 + 开始发声
+    button.addEventListener('mousedown', (e) => {
+        pressStartTime = Date.now();
+        button.textContent = '输入中...';
+        startTone();  // 立即开始发声
+        e.preventDefault();
+    });
+
+    button.addEventListener('touchstart', (e) => {
+        pressStartTime = Date.now();
+        button.textContent = '输入中...';
+        startTone();  // 支持触摸设备
+        e.preventDefault();
+    });
+
+    // 按钮释放事件
+    const handleRelease = () => {
+        if (pressStartTime === 0) return;
+
+        // 停止声音
+        stopTone();
+
+        const pressDuration = Date.now() - pressStartTime;
+        const symbol = pressDuration < SHORT_PRESS_THRESHOLD ? '·' : '—';
+
+        currentMorse += symbol;
+        updateMorseDisplay(symbol);
+        resetRecognitionTimer();
+
+        pressStartTime = 0;
+        button.textContent = '按住输入';
+    };
+
+    button.addEventListener('mouseup', handleRelease);
+    button.addEventListener('mouseleave', () => {
+        if (pressStartTime !== 0) {
+            stopTone();  // 即使意外离开，也停止声音
+            pressStartTime = 0;
+            button.textContent = '按住输入';
+        }
+    });
+    button.addEventListener('touchend', handleRelease);
+    button.addEventListener('touchcancel', () => {
+        if (pressStartTime !== 0) {
+            stopTone();
+            pressStartTime = 0;
+            button.textContent = '按住输入';
+        }
+    });
+
+    // 更新摩尔斯码显示（保持不变）
+    function updateMorseDisplay(symbol) {
+        if (morseSequence.textContent === '开始输入摩尔斯码...' || 
+            morseSequence.textContent.trim() === '') {
+            morseSequence.textContent = symbol + ' ';
+        } else {
+            const text = morseSequence.textContent.trimEnd();
+            morseSequence.textContent = text + symbol + ' ';
+        }
+    }
+
+    // 重置识别计时器（保持不变）
+    function resetRecognitionTimer() {
+        if (recognitionTimer) {
+            clearTimeout(recognitionTimer);
+        }
+        
+        recognitionTimer = setTimeout(() => {
+            if (currentMorse && currentMorse.trim() !== '') {
+                processCurrentMorse();
+            }
+        }, RECOGNITION_DELAY);
+    }
+
+    // 处理当前摩尔斯码（保持不变）
+    function processCurrentMorse() {
+        const cleanedMorse = currentMorse.trim();
+        let recognizedChar = '?';
+        
+        for (const [morse, char] of Object.entries(morseCode)) {
+            if (morse === cleanedMorse) {
+                recognizedChar = char;
+                break;
+            }
+        }
+        
+        fullMorseSequence.push({
+            morse: cleanedMorse,
+            char: recognizedChar
+        });
+        
+        const lines = morseSequence.textContent.trim().split('  ');
+        const lastLine = lines.length > 0 ? lines[lines.length - 1] : '';
+        
+        if (lastLine !== '' && lastLine !== '开始输入摩尔斯码...') {
+            morseSequence.textContent = morseSequence.textContent.trim() + '  ';
+        }
+        
+        fullDecodedText += recognizedChar;
+        decodedText.textContent = fullDecodedText;
+        
+        currentMorse = '';
+        recognitionTimer = null;
+    }
+
+    // 空格键分隔字母（保持不变）
+    document.addEventListener('keydown', (e) => {
+        if (e.key === ' ') {
+            e.preventDefault();
+            if (currentMorse) {
+                processCurrentMorse();
+            } else {
+                fullDecodedText += ' ';
+                decodedText.textContent = fullDecodedText;
+            }
+        }
+    });
+
+    // 右键删除（保持不变）
+    morseSequence.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        if (fullMorseSequence.length > 0) {
+            fullMorseSequence.pop();
+            fullDecodedText = fullDecodedText.slice(0, -1);
+            decodedText.textContent = fullDecodedText || '解码结果将实时显示在这里';
+            
+            let displayText = '';
+            fullMorseSequence.forEach((item, index) => {
+                for (let char of item.morse) {
+                    displayText += char + ' ';
+                }
+                if (index < fullMorseSequence.length - 1) {
+                    displayText += '  ';
+                }
+            });
+            
+            morseSequence.textContent = displayText || '开始输入摩尔斯码...';
+            
+            currentMorse = '';
+            if (recognitionTimer) {
+                clearTimeout(recognitionTimer);
+                recognitionTimer = null;
+            }
+        }
+    });
+
+    // 清空功能（保持不变）
+    clearBtn.addEventListener('click', () => {
+        morseSequence.textContent = '开始输入摩尔斯码...';
+        decodedText.textContent = '解码结果将实时显示在这里';
+        currentMorse = '';
+        fullMorseSequence = [];
+        fullDecodedText = '';
+        if (recognitionTimer) {
+            clearTimeout(recognitionTimer);
+            recognitionTimer = null;
+        }
+    });
+
+    // 禁止文本选择
+    document.addEventListener('selectstart', (e) => {
+        e.preventDefault();
+    });
+
+    // 快捷键：Esc 清空
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            clearBtn.click();
+        }
+    });
+</script>
+</body>
+</html>

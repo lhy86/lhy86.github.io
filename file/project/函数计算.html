@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LHY-拉格朗日插值计算器</title>
+    <style>
+:root {
+    /* 作者：lhy6.top  B站：1921299521 */
+    /* 辅助AI：code-Claude3.7-sonnet-thinking 未经作者允许禁止任何形式转载 */
+    --primary-color: #4361ee;
+    --danger-color: #ef233c;
+    --background-color: #f8f9fa;
+    --card-background: #ffffff;
+    --text-color: #2b2d42;
+    --input-background: #f8f9fa;
+    --input-border: #dee2e6;
+    --point-hover: #e9ecef;
+    --result-background: #f8f9fa;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --border-radius: 12px;
+    --button-hover: #3251d4;
+    --danger-hover: #d90429;
+}
+
+/* 暗色主题变量 */
+@media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] {
+        --primary-color: #748ffc;
+        --danger-color: #ff4d6d;
+        --background-color: #1a1b1e;
+        --card-background: #2d2e32;
+        --text-color: #e9ecef;
+        --input-background: #3d3e42;
+        --input-border: #4d4e52;
+        --point-hover: #3d3e42;
+        --result-background: #3d3e42;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        --button-hover: #5a78ee;
+        --danger-hover: #ff6b84;
+    }
+}
+
+/* 手动设置暗色主题 */
+:root[data-theme="dark"] {
+    --primary-color: #748ffc;
+    --danger-color: #ff4d6d;
+    --background-color: #1a1b1e;
+    --card-background: #2d2e32;
+    --text-color: #e9ecef;
+    --input-background: #3d3e42;
+    --input-border: #4d4e52;
+    --point-hover: #3d3e42;
+    --result-background: #3d3e42;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --button-hover: #5a78ee;
+    --danger-hover: #ff6b84;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    padding: 20px;
+    min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+h1 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 0rem;
+    font-size: 2rem;
+    transition: color 0.3s ease;
+}
+h3 {
+    text-align: center;
+    color: #888;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--button-hover);
+    transform: translateY(-2px);
+}
+
+.delete-btn {
+    background-color: var(--danger-color);
+    color: white;
+    padding: 8px 15px;
+    font-size: 0.9rem;
+}
+
+.delete-btn:hover {
+    background-color: var(--danger-hover);
+}
+
+.points-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.point-input {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+    background-color: var(--input-background);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.point-input:hover {
+    background-color: var(--point-hover);
+}
+
+.point-input:only-child .delete-btn {
+    display: none;
+}
+
+input {
+    width: 120px;
+    padding: 8px 12px;
+    border: 2px solid var(--input-border);
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: var(--input-background);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+#result {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: var(--result-background);
+    border-left: 4px solid var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.error {
+    color: var(--danger-color);
+    padding: 10px;
+    border-radius: 8px;
+    background-color: rgba(239, 35, 60, 0.1);
+    margin-top: 10px;
+}
+
+.result-title {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.result-formula {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.1rem;
+    word-break: break-word;
+}
+
+/* 主题切换按钮样式 */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--card-background);
+    border: 2px solid var(--primary-color);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    box-shadow: var(--shadow);
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+}
+
+/* 添加动画效果 */
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(10px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+.point-input {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* 移动端适配 */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+    h3 {
+        font-size: 1rem;
+    }
+
+    .point-input {
+        flex-wrap: wrap;
+    }
+
+    input {
+        width: calc(50% - 10px);
+    }
+
+    .delete-btn {
+        width: 100%;
+        margin-top: 8px;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    .theme-toggle {
+        top: 10px;
+        right: 10px;
+        width: 35px;
+        height: 35px;
+    }
+}
+
+/* 适配打印样式 */
+@media print {
+    .theme-toggle,
+    .button-group button:not(.calculate) {
+        display: none;
+    }
+
+    body {
+        background: white;
+        padding: 0;
+    }
+
+    .container {
+        box-shadow: none;
+        padding: 0;
+    }
+
+    #result {
+        border: 1px solid #ddd;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" title="切换主题">
+        🌓
+    </button>
+    <div class="container">
+        <h1>拉格朗日插值计算器</h1>
+        <h3>作者：lhy6.top</h3>
+        <div class="button-group">
+            <button class="btn-primary" onclick="addPoint()">添加坐标点</button>
+            <button class="btn-primary" onclick="calculate()">计算插值多项式</button>
+        </div>
+        <div id="points-container" class="points-container">
+            <div class="point-input">
+                <input type="number" step="any" placeholder="x坐标">
+                <input type="number" step="any" placeholder="y坐标">
+                <button class="delete-btn" onclick="removePoint(this)">删除</button>
+            </div>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+
+
+
+
+
+
+        // 主题切换功能
+        const themeToggle = document.getElementById('themeToggle');
+        const root = document.documentElement;
+        
+        // 获取系统主题偏好
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        // 从本地存储获取用户主题设置
+        const savedTheme = localStorage.getItem('theme') || 'auto';
+        root.setAttribute('data-theme', savedTheme);
+        
+        // 更新主题图标
+        function updateThemeIcon() {
+            const currentTheme = root.getAttribute('data-theme');
+            themeToggle.textContent = currentTheme === 'dark' ? '🌙' : 
+                                    currentTheme === 'light' ? '☀️' : '🌓';
+        }
+        
+        // 切换主题
+        function toggleTheme() {
+            const currentTheme = root.getAttribute('data-theme');
+            let newTheme;
+            
+            if (currentTheme === 'auto') {
+                newTheme = 'light';
+            } else if (currentTheme === 'light') {
+                newTheme = 'dark';
+            } else {
+                newTheme = 'auto';
+            }
+            
+            root.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon();
+        }
+        
+        // 监听主题切换按钮点击
+        themeToggle.addEventListener('click', toggleTheme);
+        
+        // 监听系统主题变化
+        prefersDarkScheme.addListener((e) => {
+            if (root.getAttribute('data-theme') === 'auto') {
+                updateThemeIcon();
+            }
+        });
+        // 初始化主题图标
+        updateThemeIcon();
+
+
+
+
+
+        function addPoint() {
+            const container = document.getElementById('points-container');
+            const div = document.createElement('div');
+            div.className = 'point-input';
+            div.innerHTML = `
+                <input type="number" step="any" placeholder="x坐标">
+                <input type="number" step="any" placeholder="y坐标">
+                <button class="delete-btn" onclick="removePoint(this)">删除</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removePoint(button) {
+            const container = document.getElementById('points-container');
+            if (container.children.length > 1) {
+                button.parentElement.remove();
+            }
+        }
+
+        function simplifyPolynomial(terms) {
+            // 合并同类项
+            const combined = {};
+            terms.forEach(term => {
+                const power = term.power;
+                if (combined[power]) {
+                    combined[power] += term.coefficient;
+                } else {
+                    combined[power] = term.coefficient;
+                }
+            });
+
+            // 构建多项式字符串
+            const parts = [];
+            Object.keys(combined)
+                .sort((a, b) => b - a) // 按幂次降序排列
+                .forEach(power => {
+                    let coef = combined[power];
+                    if (Math.abs(coef) < 1e-10) return; // 忽略接近0的系数
+                    
+                    coef = Math.round(coef * 100000000) / 100000000; // 保留小数
+                    let term = '';
+                    
+                    if (power === '0') {
+                        term = coef.toString();
+                    } else if (power === '1') {
+                        term = coef === 1 ? 'x' : coef === -1 ? '-x' : coef + 'x';
+                    } else {
+                        term = coef === 1 ? 'x^' + power : 
+                               coef === -1 ? '-x^' + power : 
+                               coef + 'x^' + power;
+                    }
+                    
+                    if (parts.length === 0) {
+                        parts.push(term);
+                    } else {
+                        parts.push((coef >= 0 ? ' + ' : ' - ') + term.replace(/^-/, ''));
+                    }
+                });
+
+            return parts.length > 0 ? parts.join('') : '0';
+        }
+
+        function calculate() {
+            const pointInputs = document.querySelectorAll('.point-input');
+            const points = [];
+            const resultDiv = document.getElementById('result');
+
+            // 收集输入的点
+            for (const pointInput of pointInputs) {
+                const inputs = pointInput.querySelectorAll('input');
+                const x = parseFloat(inputs[0].value);
+                const y = parseFloat(inputs[1].value);
+                
+                if (isNaN(x) || isNaN(y)) {
+                    resultDiv.innerHTML = '<div class="error">请填写所有坐标值！</div>';
+                    return;
+                }
+                points.push({x, y});
+            }
+
+            // 检查x坐标是否有重复
+            const xValues = points.map(p => p.x);
+            if (new Set(xValues).size !== points.length) {
+                resultDiv.innerHTML = '<div class="error">x坐标值不能重复！</div>';
+                return;
+            }
+
+            // 计算拉格朗日插值多项式的系数
+            const terms = [];
+            for (let i = 0; i < points.length; i++) {
+                let numerator = points[i].y;
+                for (let j = 0; j < points.length; j++) {
+                    if (i !== j) {
+                        numerator /= (points[i].x - points[j].x);
+                    }
+                }
+
+                // 计算每一项的系数
+                const coefficients = new Array(points.length).fill(0);
+                coefficients[0] = 1;
+                for (let j = 0; j < points.length; j++) {
+                    if (i !== j) {
+                        for (let k = points.length - 1; k >= 0; k--) {
+                            if (k > 0) {
+                                coefficients[k] = coefficients[k - 1] - points[j].x * coefficients[k];
+                            } else {
+                                coefficients[k] = -points[j].x * coefficients[k];
+                            }
+                        }
+                    }
+                }
+
+                // 将每一项添加到terms数组
+                for (let power = 0; power < points.length; power++) {
+                    terms.push({
+                        coefficient: numerator * coefficients[power],
+                        power: power
+                    });
+                }
+            }
+
+            // 化简并显示结果
+            const simplified = simplifyPolynomial(terms);
+            resultDiv.innerHTML = `<strong>拉格朗日插值多项式：</strong><br>f(x) = ${simplified}`;
+        }
+
+        // 初始添加一个点
+        addPoint();
+    </script>
+</body>
+</html>

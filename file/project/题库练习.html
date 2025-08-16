@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>题目练习</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #333333;
+      --accent-color: #4a90e2;
+      --accent-hover: #307ecc;
+      --card-bg: #f9f9f9;
+      --border-radius: 12px;
+      --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+      --success-color: #4caf50;
+      --error-color: #f44336;
+    }
+
+    /* 深色主题变量 */
+    [data-theme="dark"] {
+      --bg-color: #121212;
+      --text-color: #f5f5f5;
+      --accent-color: #307ecc;
+      --accent-hover: #4a90e2;
+      --card-bg: #1e1e1e;
+      --shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      transition: var(--transition);
+      line-height: 1.6;
+    }
+
+    #app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 12px;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+      color: var(--text-color);
+    }
+
+    /* 主题切换按钮组 */
+    .theme-toggle-group {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      background: var(--card-bg);
+      padding: 8px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+    }
+
+    .theme-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: transparent;
+      color: var(--text-color);
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+
+    .theme-btn.active {
+      background-color: var(--accent-color);
+      color: white;
+    }
+
+    .theme-btn:hover:not(.active) {
+      background-color: rgba(74, 144, 226, 0.1);
+    }
+
+    /* 上传区域 */
+    #upload-section {
+      text-align: center;
+      padding: 20px 16px;
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      border: 2px dashed rgba(74, 144, 226, 0.3);
+    }
+
+    #upload-section:hover {
+      border-color: var(--accent-color);
+    }
+
+    .file-label {
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: var(--accent-color);
+      color: white;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      margin-top: 16px;
+      box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+    }
+
+    .file-label:hover {
+      background-color: var(--accent-hover);
+      transform: translateY(-2px);
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    /* 统计信息 */
+    #stats {
+      font-size: 16px;
+      margin-bottom: 12px;
+      padding: 12px;
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      text-align: center;
+      font-weight: 500;
+      box-shadow: var(--shadow);
+    }
+
+    /* 题目容器 */
+    #question-container {
+      margin-top: 12px;
+      background-color: var(--card-bg);
+      padding: 24px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    /* 选项按钮 */
+    .option-button {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      margin: 12px 0;
+      font-size: 16px;
+      background-color: transparent;
+      border: 2px solid rgba(74, 144, 226, 0.3);
+      color: var(--text-color);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: left;
+    }
+
+    .option-button:hover {
+      border-color: var(--accent-color);
+      background-color: rgba(74, 144, 226, 0.1);
+    }
+
+    .option-button.correct {
+      background-color: rgba(76, 175, 80, 0.2);
+      border-color: var(--success-color);
+      color: var(--text-color);
+    }
+
+    .option-button.incorrect {
+      background-color: rgba(244, 67, 54, 0.1);
+      border-color: var(--error-color);
+      color: var(--text-color);
+    }
+
+    /* 反馈区域 */
+    .feedback {
+      border-radius: var(--border-radius);
+      margin-top: 20px;
+    }
+
+    .feedback p {
+      margin: 10px 0;
+    }
+
+    .correct-feedback {
+      color: var(--success-color);
+    }
+
+    .explanation {
+      background-color: rgba(74, 144, 226, 0.1);
+      padding: 12px;
+      border-radius: var(--border-radius);
+      margin-top: 16px;
+    }
+
+    /* 下一题按钮 */
+    #next-button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      margin-top: 12px;
+      width: 100%;
+      box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+    }
+
+    #next-button:hover {
+      background-color: var(--accent-hover);
+      transform: translateY(-2px);
+    }
+
+    /* 加载状态 */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-left: 10px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="theme-toggle-group">
+      <button onclick="applyTheme('auto')" class="theme-btn" id="auto-btn">自动</button>
+      <button onclick="applyTheme('light')" class="theme-btn" id="light-btn">浅色</button>
+      <button onclick="applyTheme('dark')" class="theme-btn" id="dark-btn">深色</button>
+    </div>
+
+    <div id="upload-section">
+      <h2>题目练习</h2>
+      <p>点击或拖拽导入题库文件（.txt）</p>
+      <label class="file-label" for="file-input">
+        选择文件
+        <span id="loading-indicator" class="loading" style="display: none;"></span>
+      </label>
+      <input type="file" id="file-input" accept=".txt" />
+    </div>
+
+    <div id="quiz-section" style="display: none;">
+      <div id="stats">已做题数：0，正确率：0%</div>
+      <div id="question-container"></div>
+      <button id="next-button" style="display:none;">下一题</button>
+    </div>
+  </div>
+
+  <script>
+    let shuffledQuestions = [];
+    let currentQuestionIndex = 0;
+    let totalAnswered = 0;
+    let correctCount = 0;
+    let currentTheme = 'auto';
+
+    // 初始化主题
+    function initTheme() {
+      // 检查本地存储中的主题偏好
+      const savedTheme = localStorage.getItem('themePreference');
+      if (savedTheme) {
+        currentTheme = savedTheme;
+      }
+      applyTheme(currentTheme);
+      
+      // 监听系统主题变化
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        if (currentTheme === 'auto') {
+          applyTheme('auto');
+        }
+      });
+    }
+
+    // 应用主题
+    function applyTheme(theme) {
+      currentTheme = theme;
+      localStorage.setItem('themePreference', theme);
+      
+      // 更新按钮状态
+      document.getElementById('auto-btn').classList.remove('active');
+      document.getElementById('light-btn').classList.remove('active');
+      document.getElementById('dark-btn').classList.remove('active');
+      document.getElementById(`${theme}-btn`).classList.add('active');
+      
+      // 应用主题
+      const root = document.documentElement;
+      if (theme === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+      } else if (theme === 'light') {
+        root.removeAttribute('data-theme');
+      } else {
+        // 自动模式
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (isDark) {
+          root.setAttribute('data-theme', 'dark');
+        } else {
+          root.removeAttribute('data-theme');
+        }
+      }
+    }
+
+    // 监听文件选择
+    document.getElementById('file-input').addEventListener('change', handleFileSelect);
+    document.addEventListener('dragover', e => {
+      e.preventDefault();
+      document.getElementById('upload-section').style.borderColor = 'var(--accent-color)';
+    }, false);
+    
+    document.addEventListener('dragleave', e => {
+      e.preventDefault();
+      document.getElementById('upload-section').style.borderColor = 'rgba(74, 144, 226, 0.3)';
+    }, false);
+    
+    document.addEventListener('drop', e => {
+      e.preventDefault();
+      document.getElementById('upload-section').style.borderColor = 'rgba(74, 144, 226, 0.3)';
+      const file = e.dataTransfer.files[0];
+      if (file && file.name.endsWith('.txt')) {
+        processFile(file);
+      }
+    }, false);
+
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (file) {
+        processFile(file);
+      }
+    }
+
+    function processFile(file) {
+      const loadingIndicator = document.getElementById('loading-indicator');
+      loadingIndicator.style.display = 'inline-block';
+      
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        setTimeout(() => {
+          loadingIndicator.style.display = 'none';
+          const text = e.target.result;
+          const questions = parseQuestions(text);
+          if (questions.length === 0) {
+            alert('未解析到题目，请检查文件格式');
+            return;
+          }
+          initializeQuiz(questions);
+        }, 500); // 添加短暂延迟让用户看到加载状态
+      };
+      reader.readAsText(file, 'UTF-8');
+    }
+
+    function parseQuestions(text) {
+      const questions = [];
+      const blocks = text.split('[I]').slice(1);
+      blocks.forEach(block => {
+        let question = '', choices = [], explanation = '';
+        const lines = block.trim().split('\n');
+        lines.forEach(line => {
+          line = line.trim();
+          if (line.startsWith('[Q]')) {
+            question = line.substring(3).trim();
+          } else if (line.startsWith('[A]') || line.startsWith('[B]') || line.startsWith('[C]') || line.startsWith('[D]')) {
+            choices.push(line.substring(3).trim());
+          } else if (line.startsWith('[P]')) {
+            explanation = line.substring(3).trim();
+          }
+        });
+        if (question && choices.length === 4) {
+          questions.push({
+            question,
+            choices,
+            correct: choices[0],
+            explanation
+          });
+        }
+      });
+      return questions;
+    }
+
+    function initializeQuiz(questions) {
+      document.getElementById('upload-section').style.display = 'none';
+      document.getElementById('quiz-section').style.display = 'block';
+      shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+      currentQuestionIndex = 0;
+      totalAnswered = 0;
+      correctCount = 0;
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const container = document.getElementById('question-container');
+      container.innerHTML = '';
+      const current = shuffledQuestions[currentQuestionIndex];
+      const shuffledChoices = [...current.choices].sort(() => Math.random() - 0.5);
+      
+      const questionDiv = document.createElement('div');
+      questionDiv.innerHTML = `<h3>${current.question}</h3>`;
+      
+      shuffledChoices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.textContent = choice;
+        btn.className = 'option-button';
+        btn.addEventListener('click', () => handleAnswer(choice, current, shuffledChoices));
+        questionDiv.appendChild(btn);
+      });
+      
+      container.appendChild(questionDiv);
+      document.getElementById('next-button').style.display = 'none';
+      updateStats();
+    }
+
+    function handleAnswer(selected, question, choices) {
+      // 禁用所有选项按钮
+      const buttons = document.querySelectorAll('.option-button');
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        if (btn.textContent === question.correct) {
+          btn.classList.add('correct');
+        } else if (btn.textContent === selected && selected !== question.correct) {
+          btn.classList.add('incorrect');
+        }
+      });
+
+      totalAnswered++;
+      const isCorrect = selected === question.correct;
+      
+      if (isCorrect) {
+        correctCount++;
+        // 正确时延迟后自动下一题
+        setTimeout(() => {
+          currentQuestionIndex = (currentQuestionIndex + 1) % shuffledQuestions.length;
+          showQuestion();
+        },200);
+      } else {
+        const container = document.getElementById('question-container');
+        const feedback = document.createElement('div');
+        feedback.className = 'feedback';
+        feedback.innerHTML = `
+          <p class="correct-feedback">正确答案：${question.correct}</p>
+          ${question.explanation ? `<div class="explanation"><p>解析：${question.explanation}</p></div>` : ''}
+        `;
+        container.appendChild(feedback);
+        document.getElementById('next-button').style.display = 'block';
+      }
+      
+      updateStats();
+    }
+
+    document.getElementById('next-button').addEventListener('click', () => {
+      currentQuestionIndex = (currentQuestionIndex + 1) % shuffledQuestions.length;
+      showQuestion();
+    });
+
+    function updateStats() {
+      const stats = document.getElementById('stats');
+      const rate = totalAnswered === 0 ? 0 : (correctCount / totalAnswered * 100).toFixed(2);
+      stats.textContent = `已做题数：${totalAnswered}，正确率：${rate}%`;
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', initTheme);
+  </script>
+</body>
+</html>

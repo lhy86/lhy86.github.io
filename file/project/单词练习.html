@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单词练习</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+        }
+        .container {
+            background-color: #2d2d2d;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .upload-section {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 40px 20px;
+            border: 2px dashed #555;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .upload-section.dragover {
+            border-color: #0071e3;
+            background-color: rgba(0, 113, 227, 0.1);
+        }
+        .upload-section h2 {
+            color: #f0f0f0;
+        }
+        .upload-section p {
+            color: #bbb;
+        }
+        .exercise-section {
+            display: none;
+            text-align: center;
+        }
+        .word-display {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #ffffff;
+            margin: 20px 0;
+        }
+        .phonetic {
+            font-size: 1.2em;
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        .option-btn {
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #555;
+            border-radius: 8px;
+            background-color: #3d3d3d;
+            color: #f0f0f0;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+        .option-btn:hover {
+            border-color: #0071e3;
+            background-color: #4a4a4a;
+        }
+        .option-btn.correct {
+            background-color: #2c5e2c;
+            border-color: #28a745;
+            color: #a0e0a0;
+        }
+        .option-btn.incorrect {
+            background-color: #5e2c2c;
+            border-color: #dc3545;
+            color: #f0a0a0;
+        }
+        .option-label {
+            font-weight: bold;
+            margin-right: 8px;
+            color: #0071e3;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background-color: #3d3d3d;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #0071e3;
+        }
+        .stat-label {
+            color: #aaa;
+            font-size: 0.9em;
+        }
+        .next-btn {
+            background-color: #0071e3;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+        .next-btn:hover {
+            background-color: #005bbd;
+        }
+        .next-btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        .result-message {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 15px 0;
+            min-height: 1.5em;
+        }
+        .correct-message {
+            color: #4caf50;
+        }
+        .incorrect-message {
+            color: #f44336;
+        }
+        #fileInput {
+            display: none;
+        }
+        .file-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #0071e3;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 20px 0;
+        }
+        .file-label:hover {
+            background-color: #005bbd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; color: #f0f0f0;">单词练习系统</h1>
+        
+        <div class="upload-section" id="uploadSection">
+            <h2>导入单词表</h2>
+            <p>请选择或拖拽您的XLS文件（支持.xls和.xlsx格式）</p>
+            <label for="fileInput" class="file-label">选择文件</label>
+            <input type="file" id="fileInput" accept=".xls,.xlsx">
+            <button id="loadSampleBtn" class="file-label" style="margin-left: 10px; background-color: #28a745;">加载示例文件</button>
+            <p style="font-size: 0.9em; color: #888;">文件格式：从第二行开始，A列为序号，B列为单词，C列为音标，D列为中文意思</p>
+            <div id="dropZone" style="padding: 20px; margin-top: 10px;">
+                <p>或将文件拖拽到此处</p>
+            </div>
+        </div>
+        
+        <div class="exercise-section" id="exerciseSection">
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="currentNumber">0</div>
+                    <div class="stat-label">当前题号</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalQuestions">0</div>
+                    <div class="stat-label">总题数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="correctCount">0</div>
+                    <div class="stat-label">答对题数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="accuracyRate">0%</div>
+                    <div class="stat-label">正确率</div>
+                </div>
+            </div>
+            
+            <div class="word-display" id="wordDisplay"></div>
+            <div class="phonetic" id="phoneticDisplay"></div>
+            
+            <div class="result-message" id="resultMessage"></div>
+            
+            <div class="options" id="optionsContainer"></div>
+            
+            <button class="next-btn" id="nextBtn" disabled>下一题</button>
+        </div>
+    </div>
+
+    <script>
+        let wordsData = [];
+        let currentIndex = 0;
+        let correctCount = 0;
+        let answered = false;
+
+        document.getElementById('fileInput').addEventListener('change', handleFile);
+        document.getElementById('loadSampleBtn').addEventListener('click', loadSampleFile);
+        
+        // 添加拖拽事件监听
+        const uploadSection = document.getElementById('uploadSection');
+        const dropZone = document.getElementById('dropZone');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadSection.addEventListener(eventName, preventDefaults, false);
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadSection.addEventListener(eventName, highlight, false);
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadSection.addEventListener(eventName, unhighlight, false);
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            uploadSection.classList.add('dragover');
+            dropZone.style.backgroundColor = 'rgba(0, 113, 227, 0.2)';
+            dropZone.style.borderColor = '#0071e3';
+        }
+        
+        function unhighlight() {
+            uploadSection.classList.remove('dragover');
+            dropZone.style.backgroundColor = '';
+            dropZone.style.borderColor = '';
+        }
+        
+        // 修复拖拽释放后没有加载的问题
+        dropZone.addEventListener('drop', handleDrop, false);
+        uploadSection.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length) {
+                processFile(files[0]);
+            }
+        }
+        
+        function processFile(file) {
+            // 添加更详细的文件类型检查
+            if (!file || !file.name) {
+                alert('未选择文件！');
+                return;
+            }
+            
+            if (!file.name.match(/\.(xls|xlsx)$/i)) {
+                alert('请选择正确的XLS文件！');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    // 转换为JSON，动态确定范围而不是使用固定的A1:D1000
+                    // 获取工作表的有效范围
+                    const ref = worksheet['!ref'];
+                    if (!ref) {
+                        alert('无法读取工作表范围信息');
+                        return;
+                    }
+                    
+                    const range = XLSX.utils.decode_range(ref);
+                    const startRow = range.s.r; // 通常为0
+                    const endRow = Math.min(range.e.r, 100000); // 设置合理的上限防止读取过多空白行
+                    
+                    // 构建动态范围字符串，从第2行开始（跳过标题行）
+                    const dynamicRange = `A${startRow + 2}:D${endRow + 1}`;
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, {range: dynamicRange, header: ['index', 'word', 'phonetic', 'meaning']});
+                    
+                    // 更严格的过滤掉空行和无效数据
+                    wordsData = jsonData.filter(item => {
+                        // 检查是否是有效对象
+                        if (!item || typeof item !== 'object') return false;
+                        
+                        // 检查单词和意思是否存在且不为空
+                        const word = item.word ? item.word.toString().trim() : '';
+                        const meaning = item.meaning ? item.meaning.toString().trim() : '';
+                        
+                        return word !== '' && meaning !== '';
+                    });
+                    
+                    if (wordsData.length > 0) {
+                        startExercise();
+                    } else {
+                        alert('未找到有效的单词数据，请检查文件格式');
+                    }
+                } catch (error) {
+                    console.error('文件解析错误:', error);
+                    alert('文件解析失败，请确保选择的是正确的XLS文件');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function handleFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            processFile(file);
+        }
+        
+        function loadSampleFile() {
+            // 创建一个 XMLHttpRequest 对象来加载示例文件
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', './example/单词练习.xls', true);
+            xhr.responseType = 'arraybuffer';
+            
+            xhr.onload = function(e) {
+                if (xhr.status === 200) {
+                    try {
+                        const data = new Uint8Array(xhr.response);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        
+                        // 转换为JSON，动态确定范围而不是使用固定的A1:D1000
+                        // 获取工作表的有效范围
+                        const ref = worksheet['!ref'];
+                        if (!ref) {
+                            alert('无法读取工作表范围信息');
+                            return;
+                        }
+                        
+                        const range = XLSX.utils.decode_range(ref);
+                        const startRow = range.s.r; // 通常为0
+                        const endRow = Math.min(range.e.r, 100000); // 设置合理的上限防止读取过多空白行
+                        
+                        // 构建动态范围字符串，从第2行开始（跳过标题行）
+                        const dynamicRange = `A${startRow + 2}:D${endRow + 1}`;
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, {range: dynamicRange, header: ['index', 'word', 'phonetic', 'meaning']});
+                        
+                        // 更严格的过滤掉空行和无效数据
+                        wordsData = jsonData.filter(item => {
+                            // 检查是否是有效对象
+                            if (!item || typeof item !== 'object') return false;
+                            
+                            // 检查单词和意思是否存在且不为空
+                            const word = item.word ? item.word.toString().trim() : '';
+                            const meaning = item.meaning ? item.meaning.toString().trim() : '';
+                            
+                            return word !== '' && meaning !== '';
+                        });
+                        
+                        if (wordsData.length > 0) {
+                            startExercise();
+                        } else {
+                            alert('未找到有效的单词数据，请检查文件格式');
+                        }
+                    } catch (error) {
+                        console.error('文件解析错误:', error);
+                        alert('示例文件加载失败: ' + error.message);
+                    }
+                } else {
+                    alert('无法加载示例文件，请确保example文件夹中包含单词练习.xls文件，且浏览器允许本地文件访问');
+                }
+            };
+            
+            xhr.onerror = function() {
+                alert('加载示例文件时发生网络错误，这可能是因为浏览器安全策略限制了本地文件访问。请将页面部署到Web服务器上运行，或者使用Chrome启动参数--allow-file-access-from-files');
+            };
+            
+            xhr.send();
+        }
+        
+        // 添加额外的拖拽事件监听器到整个窗口
+        window.addEventListener('dragover', function(e) {
+            e.preventDefault();
+        });
+        
+        window.addEventListener('drop', function(e) {
+            e.preventDefault();
+            if (e.dataTransfer.files.length) {
+                processFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        function startExercise() {
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('exerciseSection').style.display = 'block';
+            
+            currentIndex = 0;
+            correctCount = 0;
+            answered = false;
+            
+            // 打乱单词顺序
+            wordsData = shuffleArray(wordsData);
+            
+            // 添加键盘事件监听
+            document.addEventListener('keydown', handleKeyboardInput);
+            
+            updateStats();
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentIndex >= wordsData.length) {
+                endExercise();
+                return;
+            }
+
+            answered = false;
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('resultMessage').textContent = '';
+            document.getElementById('resultMessage').className = 'result-message';
+
+            const currentWord = wordsData[currentIndex];
+            
+            document.getElementById('wordDisplay').textContent = currentWord.word;
+            document.getElementById('phoneticDisplay').textContent = currentWord.phonetic || '';
+            
+            // 生成选项
+            const options = generateOptions(currentWord.meaning);
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            // 添加ABCD标签
+            const optionLabels = ['A', 'B', 'C', 'D'];
+            options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.innerHTML = `<span class="option-label">${optionLabels[index]}.</span> ${option}`;
+                button.dataset.optionIndex = index;
+                button.dataset.optionLabel = optionLabels[index];
+                button.addEventListener('click', () => checkAnswer(option, currentWord.meaning, button));
+                optionsContainer.appendChild(button);
+            });
+            
+            // 添加键盘事件监听
+            document.addEventListener('keydown', handleKeyboardInput);
+            
+            // 添加键盘事件监听
+            document.addEventListener('keydown', handleKeyboardInput);
+        }
+
+        // 处理键盘输入
+        function handleKeyboardInput(e) {
+            // 只在练习进行中且未答题时处理键盘事件
+            if (!wordsData.length || answered) return;
+            
+            const key = e.key.toLowerCase();
+            let optionIndex = -1;
+            
+            // 处理字母键
+            if (key === 'a') optionIndex = 0;
+            else if (key === 'b') optionIndex = 1;
+            else if (key === 'c') optionIndex = 2;
+            else if (key === 'd') optionIndex = 3;
+            // 处理数字键
+            else if (key === '1') optionIndex = 0;
+            else if (key === '2') optionIndex = 1;
+            else if (key === '3') optionIndex = 2;
+            else if (key === '4') optionIndex = 3;
+            
+            // 如果按下了有效选项键
+            if (optionIndex >= 0 && optionIndex < 4) {
+                const buttons = document.querySelectorAll('.option-btn');
+                if (optionIndex < buttons.length) {
+                    const button = buttons[optionIndex];
+                    const optionText = button.textContent.substring(3); // 去掉 "A. " 前缀
+                    const correctAnswer = wordsData[currentIndex].meaning;
+                    checkAnswer(optionText, correctAnswer, button);
+                }
+            }
+        }
+
+        function generateOptions(correctAnswer) {
+            const options = [correctAnswer];
+            
+            // 从其他单词中随机选择3个意思作为干扰项
+            while (options.length < 4 && wordsData.length > 3) {
+                const randomIndex = Math.floor(Math.random() * wordsData.length);
+                const randomMeaning = wordsData[randomIndex].meaning;
+                
+                if (!options.includes(randomMeaning)) {
+                    options.push(randomMeaning);
+                }
+            }
+            
+            // 打乱选项顺序
+            return shuffleArray(options);
+        }
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function checkAnswer(selectedAnswer, correctAnswer, buttonElement) {
+            if (answered) return;
+            
+            answered = true;
+            // 移除键盘事件监听器
+            document.removeEventListener('keydown', handleKeyboardInput);
+            
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.disabled = true);
+            
+            if (selectedAnswer === correctAnswer) {
+                buttonElement.classList.add('correct');
+                correctCount++;
+                document.getElementById('resultMessage').textContent = '回答正确！';
+                document.getElementById('resultMessage').className = 'result-message correct-message';
+                
+                // 答对后自动进入下一题
+                setTimeout(() => {
+                    currentIndex++;
+                    showQuestion();
+                },200);
+            } else {
+                buttonElement.classList.add('incorrect');
+                // 高亮正确答案
+                buttons.forEach(btn => {
+                    if (btn.textContent.substring(3) === correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+                document.getElementById('resultMessage').textContent = '回答错误！';
+                document.getElementById('resultMessage').className = 'result-message incorrect-message';
+                
+                document.getElementById('nextBtn').disabled = false;
+            }
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('currentNumber').textContent = currentIndex + 1;
+            document.getElementById('totalQuestions').textContent = wordsData.length;
+            document.getElementById('correctCount').textContent = correctCount;
+            
+            const accuracyRate = wordsData.length > 0 ? Math.round((correctCount / (currentIndex + (answered ? 1 : 0))) * 100) : 0;
+            document.getElementById('accuracyRate').textContent = `${accuracyRate}%`;
+        }
+
+        function endExercise() {
+            // 移除键盘事件监听器
+            document.removeEventListener('keydown', handleKeyboardInput);
+            
+            const accuracyRate = wordsData.length > 0 ? Math.round((correctCount / wordsData.length) * 100) : 0;
+            alert(`练习完成！\n总题数：${wordsData.length}\n答对题数：${correctCount}\n正确率：${accuracyRate}%`);
+            
+            // 重新开始
+            document.getElementById('uploadSection').style.display = 'block';
+            document.getElementById('exerciseSection').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            wordsData = [];
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            currentIndex++;
+            showQuestion();
+        });
+    </script>
+</body>
+</html>
