@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>LHY导航</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #151517;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin: 16px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #f1f1f1;
+        }
+
+        .search-container {
+            display: flex;
+            max-width: 480px;
+            margin: 0 auto 12px;
+            gap: 8px;
+        }
+
+        .search-select {
+            background: #2C2C2E;
+            border: 1px solid #38383A;
+            border-radius: 6px;
+            color: #e0e0e0;
+            padding: 10px 6px;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+            max-width: 70px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px;
+            background: #2C2C2E;
+            border: 1px solid #38383A;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 14px;
+            outline: none;
+            width: calc(90vw - 160px)
+        }
+
+        .search-input:focus {
+            border-color: #5686FE;
+        }
+
+        .search-btn {
+            background: #5686FE;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            padding: 0 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s;
+            width: 60px;
+        }
+
+        .search-btn:hover {
+            background: #396dee;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .nav-category {
+            background: #2C2C2E;
+            border-radius: 6px;
+            padding: 8px;
+            border: 1px solid #38383A;
+        }
+
+        .category-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .category-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 6px;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 6px 0px;
+            text-decoration: none;
+            color: #b0b0b0;
+            background: #464647;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: center;
+            transition: all 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .nav-link:hover {
+            background: #679EFE;
+            color: white;
+        }
+
+        footer {
+            text-align: center;
+            color: #888;
+            font-size: 13px;
+            padding-bottom: 12px;
+        }
+
+        @media (max-width: 369px) {
+            .nav-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .category-links {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (min-width: 370px) and (max-width: 575px) {
+            .nav-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            .category-links {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (min-width: 576px) and (max-width: 739px) {
+            .nav-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            .category-links {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (min-width: 740px) and (max-width: 969px){
+            .nav-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .category-links {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (min-width: 970px){
+            .nav-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .category-links {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LHY导航</h1>
+            <div class="search-container">
+                <select class="search-select" id="search-select">
+                    <option value="qwen">千问</option>
+                    <option value="bing">必应</option>
+                    <option value="baidu">百度</option>
+                    <option value="bili">B站</option>
+                    <option value="douyin">抖音</option>
+                    <option value="douban">豆瓣</option>
+                    <option value="music">音乐</option>
+                    <option value="btbtl">影视</option>
+                    <option value="seed">种子</option>
+                    <option value="ciba">单词</option>
+                </select>
+                <input type="text" class="search-input" id="search-input" placeholder="请输入">
+                <button class="search-btn" id="search-btn">搜索</button>
+            </div>
+        </div>
+
+        <div class="nav-grid">
+            <div class="nav-category">
+                <h3 class="category-title">🔍 资料查询</h3>
+                <div class="category-links">
+                    <a href="https://chat.qwen.ai" class="nav-link">Qwen</a>
+                    <a href="https://chat.deepseek.com" class="nav-link">Deepseek</a>
+                    <a href="https://www.doubao.com/chat/" class="nav-link">豆包</a>
+                    <a href="https://chat.openai.com" class="nav-link">ChatGPT</a>
+                    <a href="https://yiyan.baidu.com" class="nav-link">文心一言</a>
+                    <a href="https://www.coze.cn/" class="nav-link">扣子</a>
+                    <a href="https://www.kimi.com/" class="nav-link">Kimi</a>
+                    <a href="https://www.huggingface.co" class="nav-link">HuggingFace</a>
+                    <a href="https://hf-mirror.com/" class="nav-link">HF镜像</a>
+                </div>
+            </div>
+
+            <div class="nav-category">
+                <h3 class="category-title">📧 社交通讯</h3>
+                <div class="category-links">
+                    <a href="https://www.douyin.com" class="nav-link">抖音</a>
+                    <a href="https://www.bilibili.com" class="nav-link">B站</a>
+                    <a href="https://cybermap.kaspersky.com/cn" class="nav-link">网络攻击</a>
+                    <a href="https://www.youtube.com" class="nav-link">Youtube</a>
+                </div>
+            </div>
+
+            <div class="nav-category">
+                <h3 class="category-title">💻 开发办公</h3>
+                <div class="category-links">
+                    <a href="https://leetcode.cn" class="nav-link">力扣</a>
+                    <a href="https://github.com" class="nav-link">GitHub</a>
+                    <a href="https://www.csdn.net/" class="nav-link">CSDN</a>
+                    <a href="https://bgithub.xyz" class="nav-link">GH镜像</a>
+                    <a href="https://www.zjzwfw.gov.cn/zjservice-fe/#/home" class="nav-link">浙江政务</a>
+                    <a href="https://wx.mail.qq.com/" class="nav-link">QQ邮箱</a>
+                    <a href="https://mail.163.com" class="nav-link">163邮箱</a>
+                    <a href="https://126.com" class="nav-link">126邮箱</a>
+                    <a href="https://www.zjzwfw.gov.cn/zjservice-fe/#/home" class="nav-link">浙江政务</a>
+                </div>
+            </div>
+
+            <div class="nav-category">
+                <h3 class="category-title">📚 知识管理</h3>
+                <div class="category-links">
+                    <a href="https://eyecannndy.com/" class="nav-link">视频转场</a>
+                    <a href="https://www.shipxy.com/" class="nav-link">船讯网</a>
+                    <a href="https://spaceaware.io/" class="nav-link">实时卫星</a>
+                    <a href="https://www.n2yo.com" class="nav-link">卫星追踪</a>
+                    <a href="https://zh.zlib1412.ru/" class="nav-link">ZLibrary</a>
+                    <a href="https://icon-icons.com/zh/" class="nav-link">免费图标</a>
+                    <a href="https://iconpark.oceanengine.com/official" class="nav-link">IconPark</a>
+                    <a href="https://icons8.com/icons/set/popular--animated" class="nav-link">动态图标</a>
+                    <a href="https://ptable.com/" class="nav-link">元素周期表</a>
+                    <a href="http://120.55.160.240:5678/" class="nav-link">临时小雅1</a>
+                    <a href="http://218.75.97.134:5678/" class="nav-link">临时小雅2</a>
+                    <a href="http://218.75.97.134:5678/" class="nav-link">临时小雅3</a>
+                </div>
+            </div>
+            
+            <div class="nav-category">
+                <h3 class="category-title">🛠️ 效率工具</h3>
+                <div class="category-links">
+                    <a href="https://www.processon.com" class="nav-link">流程图</a>
+                    <a href="https://cli.im/" class="nav-link">二维码</a>
+                    <a href="https://www.desmos.com/calculator?lang=zh-CN" class="nav-link">DESMOS</a>
+                    <a href="https://versus.com/cn" class="nav-link">对比</a>
+                    <a href="https://vocalremover.org/zh/" class="nav-link">音频编辑</a>
+                    <a href="https://ttsmaker.cn/" class="nav-link">AI配音</a>
+                    <a href="https://tugaigai.com/online_ps/" class="nav-link">在线PS</a>
+                    <a href="https://www.latexlive.com/home" class="nav-link">LaTeX编辑</a>
+                    <a href="https://convert.freelrc.com/" class="nav-link">云音乐转换</a>
+                    <a href="https://dlj.bz/" class="nav-link">短链接1</a>
+                    <a href="https://mke.cn/manage/" class="nav-link">短链接2</a>
+                    <a href="https://123apps.com/" class="nav-link">文件处理</a>
+                </div>
+            </div>
+            
+            <div class="nav-category">
+                <h3 class="category-title">☁️ 网络服务</h3>
+                <div class="category-links">
+                    <a href="https://www.aliyun.com" class="nav-link">阿里云</a>
+                    <a href="https://test.ustc.edu.cn/" class="nav-link">网络测速</a>
+                    <a href="https://www.itdog.cn/" class="nav-link">ITDOG</a>
+                    <a href="https://ipw.cn/" class="nav-link">IPW</a>
+                    <a href="https://www.zoomeye.org/" class="nav-link">ZOOMEYE</a>
+                    <a href="https://cowtransfer.com/" class="nav-link">奶牛快传</a>
+                    <a href="https://www.saobby.com/webcounter" class="nav-link">访问统计</a>
+                    <a href="https://kdown.moiu.cn/" class="nav-link">KDown</a>
+                    <a href="https://mf.dp.wpurl.cc/user/parse" class="nav-link">闪链</a>
+                    <a href="https://ping.pe/" class="nav-link">Ping</a>
+                </div>
+            </div>
+            <div class="nav-category">
+                <h3 class="category-title">🎨 影音浏览</h3>
+                <div class="category-links">
+                    <a href="https://www.douban.com" class="nav-link">豆瓣</a>
+                    <a href="https://www.themoviedb.org/" class="nav-link">TMDB</a>
+                    <a href="http://www.impawards.com/" class="nav-link">IMPA</a>
+                    <a href="https://www.yuhuage.blog/" class="nav-link">雨花阁</a>
+                    <a href="https://www.tedms.cn/" class="nav-link">TED下载</a>
+                    <a href="https://www.btbtla.com/" class="nav-link">BTBTL</a>
+                    <a href="https://www.seedhub.cc" class="nav-link">SeedHub</a>
+                    <a href="https://hunhepan.com/search" class="nav-link">混合盘</a>
+                    <a href="https://www.zhongchuangwl.com/" class="nav-link">资源搜</a>
+                    <a href="https://4kbt.org/" class="nav-link">4KBT</a>
+                    <a href="https://www.yydsok.com/v/" class="nav-link">视频解析</a>
+                    <a href="https://vidhub.tv/" class="nav-link">VIDHUB</a>
+                    <a href="https://zimuku.org/" class="nav-link">字幕库</a>
+                    <a href="http://45.150.164.153:12580/" class="nav-link">磁力狗</a>
+                    <a href="https://www.dgcol.com/" class="nav-link">动感酷音乐</a>
+                    <a href="https://xmwav.net/" class="nav-link">熊猫无损</a>
+                </div>
+            </div>
+            <div class="nav-category">
+                <h3 class="category-title">🎮 休闲娱乐</h3>
+                <div class="category-links">
+                    <a href="https://www.geo-fs.com/geofs.php?v=3.9" class="nav-link">GEOFS</a>
+                    <a href="https://www.autopiano.cn/" class="nav-link">自由钢琴</a>
+                    <a href="https://slowroads.io/" class="nav-link">Slowroads</a>
+                    <a href="https://iogames.space/" class="nav-link">IO游戏</a>
+                    <a href="https://www.arealme.com/zh" class="nav-link">ARealMe</a>
+                    <a href="https://type.method.ac/" class="nav-link">KernType</a>
+                    <a href="https://boolean.method.ac/" class="nav-link">布尔运算</a>
+                    <a href="https://win11.blueedge.me/" class="nav-link">模拟Win11</a>
+                    <a href="https://cdn.playnn.com/game/black8/" class="nav-link">在线台球</a>
+                    <a href="https://wuziqi.cn/" class="nav-link">在线五子棋</a>
+                    <a href="https://www.jingziqi.com/" class="nav-link">在线三子棋</a>
+                    <a href="https://dazi.kukuw.com/" class="nav-link">在线打字测试</a>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p style="margin-top: 18px">" 保持热爱，下一站见! "</p>
+            <p style="margin-top: 12px">版权所有 &copy; <span id="current-year"></span> <a href="https://lhy6.top/" style="color: #aaa;">LHY主页.</a> 保留所有权利.</p>
+        </footer>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const searchBtn = document.getElementById('search-btn');
+        const searchSelect = document.getElementById('search-select');
+        const navLinks = document.querySelectorAll('.nav-link');
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // 搜索引擎配置
+        const searchEngines = {
+            bing: 'https://www.bing.com/search?q=',
+            douyin: 'https://www.douyin.com/jingxuan/search/',
+            baidu: 'https://www.baidu.com/s?wd=',
+            qwen: 'https://chat.qwen.ai/?text=请用中文回答，详细专业。用户搜索：',
+            bili: 'https://search.bilibili.com/all?keyword=',
+            douban: 'https://www.douban.com/search?q=',
+            btbtl: 'https://www.btbtla.com/search/',
+            seed: 'https://www.seedhub.cc/s/',
+            music: 'https://www.dgcol.com/dgcsrc/?keyword=',
+            ciba: 'https://www.iciba.com/word?w=',
+        };
+
+        // 页面加载时自动聚焦到搜索框
+        window.addEventListener('load', function() {
+            searchInput.focus();
+        });
+
+        // 搜索功能
+        function performSearch() {
+            const query = searchInput.value.trim();
+
+            const selectedEngine = searchSelect.value;
+            url = searchEngines[selectedEngine] + encodeURIComponent(query);
+            window.open(url, '_blank');
+            
+        }
+
+        // 搜索输入框事件
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // 搜索按钮事件
+        searchBtn.addEventListener('click', performSearch);
+
+        // 导航链接搜索过滤
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            if (!searchTerm) {
+                // 如果搜索框为空，显示所有链接
+                navLinks.forEach(link => {
+                    link.style.display = 'block';
+                });
+            } else {
+                navLinks.forEach(link => {
+                    const linkText = link.textContent.toLowerCase();
+                    link.style.display = linkText.includes(searchTerm) ? 'block' : 'none';
+                });
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.open(this.href, '_blank');
+            });
+        });
+    </script>
+</body>
+</html>
