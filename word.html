@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单词练习系统</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #1e1e1e;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent: #4CAF50;
+            --error: #f44336;
+            --warning: #ff9800;
+            --border: #404040;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .setup-page {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .setup-section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            border: 2px dashed var(--border);
+        }
+        
+        .setup-section.drag-over {
+            border-color: var(--accent);
+            background: rgba(76, 175, 80, 0.1);
+        }
+        
+        h1 {
+            color: var(--accent);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        h2 {
+            color: var(--accent);
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #45a049;
+        }
+        
+        .btn-secondary {
+            background: var(--bg-tertiary);
+        }
+        
+        .btn-secondary:hover {
+            background: #3a3a3a;
+        }
+        
+        .btn-error {
+            background: var(--error);
+        }
+        
+        .btn-error:hover {
+            background: #da190b;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .practice-page {
+            padding: 20px;
+        }
+        
+        .stats {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--accent);
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+        
+        .question-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .word {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+        
+        .phonetic {
+            font-size: 1.3em;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        
+        .weight {
+            font-size: 1.1em;
+            color: var(--warning);
+            margin-bottom: 30px;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .option {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+        }
+        
+        .option:hover {
+            border-color: var(--accent);
+            background: rgba(76, 175, 80, 0.1);
+        }
+        
+        .option.selected {
+            border-color: var(--accent);
+            background: rgba(76, 175, 80, 0.2);
+        }
+        
+        .option.correct {
+            border-color: var(--accent);
+            background: rgba(76, 175, 80, 0.3);
+        }
+        
+        .option.incorrect {
+            border-color: var(--error);
+            background: rgba(244, 67, 54, 0.2);
+        }
+        
+        .feedback {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2em;
+            display: none;
+        }
+        
+        .feedback.show {
+            display: block;
+        }
+        
+        .feedback.correct {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+        
+        .feedback.incorrect {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.3s;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .file-info {
+            margin: 10px 0;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            .word {
+                font-size: 2em;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 设置页面 -->
+        <div id="setupPage" class="page active">
+            <h1>单词练习系统</h1>
+            
+            <div class="setup-section" id="vocabularySection">
+                <h2>词汇题库</h2>
+                <p>请导入包含以下列的表格文件：序号、单词、音标、中文意思、权重（可选）</p>
+                <input type="file" id="vocabularyFile" class="file-input" accept=".xlsx,.xls,.csv">
+                <button class="btn" onclick="document.getElementById('vocabularyFile').click()">选择题库文件</button>
+                <div id="vocabularyInfo" class="file-info"></div>
+            </div>
+            
+            <div class="setup-section" id="progressSection">
+                <h2>练习进度</h2>
+                <p>可选：导入之前的练习进度文件</p>
+                <input type="file" id="progressFile" class="file-input" accept=".xlsx,.xls,.csv">
+                <button class="btn btn-secondary" onclick="document.getElementById('progressFile').click()">选择进度文件</button>
+                <div id="progressInfo" class="file-info"></div>
+            </div>
+            
+            <button id="startButton" class="btn" disabled>开始练习</button>
+        </div>
+        
+        <!-- 练习页面 -->
+        <div id="practicePage" class="page">
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="timer">00:00</div>
+                    <div class="stat-label">练习时长</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalCount">0</div>
+                    <div class="stat-label">总题数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="completedCount">0</div>
+                    <div class="stat-label">已做题数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="correctCount">0</div>
+                    <div class="stat-label">正确数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="accuracy">0%</div>
+                    <div class="stat-label">正确率</div>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="question-card">
+                <div class="word" id="currentWord"></div>
+                <div class="phonetic" id="currentPhonetic"></div>
+                <div class="weight" id="currentWeight">权重: <span id="weightValue"></span></div>
+                
+                <div class="options" id="optionsContainer">
+                    <!-- 选项将通过JavaScript动态生成 -->
+                </div>
+                
+                <div class="feedback" id="feedback"></div>
+                
+                <div class="controls">
+                    <button id="nextButton" class="btn" style="display:none;">下一题</button>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="exportProgress()">导出进度</button>
+                <button class="btn btn-secondary" onclick="exportVocabulary()">导出新题库</button>
+                <button class="btn btn-secondary" onclick="goToSetup()">返回设置</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let vocabularyData = [];
+        let progressData = [];
+        let currentQuestion = null;
+        let currentOptions = [];
+        let startTime = null;
+        let timerInterval = null;
+        let currentStats = {
+            total: 0,
+            completed: 0,
+            correct: 0,
+            timer: 0
+        };
+        let currentWeights = new Map(); // 记录每个单词的权重变化
+
+        // 文件输入事件监听
+        document.getElementById('vocabularyFile').addEventListener('change', handleVocabularyFile);
+        document.getElementById('progressFile').addEventListener('change', handleProgressFile);
+
+        // 拖拽功能
+        setupDragAndDrop();
+
+        // 开始按钮事件
+        document.getElementById('startButton').addEventListener('click', startPractice);
+
+        // 下一题按钮事件
+        document.getElementById('nextButton').addEventListener('click', nextQuestion);
+
+        function setupDragAndDrop() {
+            const vocabularySection = document.getElementById('vocabularySection');
+            const progressSection = document.getElementById('progressSection');
+
+            // 题库区域拖拽
+            vocabularySection.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                vocabularySection.classList.add('drag-over');
+            });
+
+            vocabularySection.addEventListener('dragleave', () => {
+                vocabularySection.classList.remove('drag-over');
+            });
+
+            vocabularySection.addEventListener('drop', (e) => {
+                e.preventDefault();
+                vocabularySection.classList.remove('drag-over');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileDrop(files[0], 'vocabulary');
+                }
+            });
+
+            // 进度区域拖拽
+            progressSection.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                progressSection.classList.add('drag-over');
+            });
+
+            progressSection.addEventListener('dragleave', () => {
+                progressSection.classList.remove('drag-over');
+            });
+
+            progressSection.addEventListener('drop', (e) => {
+                e.preventDefault();
+                progressSection.classList.remove('drag-over');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileDrop(files[0], 'progress');
+                }
+            });
+        }
+
+        function handleFileDrop(file, type) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                    
+                    if (type === 'vocabulary') {
+                        processVocabularyData(jsonData);
+                    } else if (type === 'progress') {
+                        processProgressData(jsonData);
+                    }
+                } catch (error) {
+                    alert(`文件处理失败: ${error.message}`);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function handleVocabularyFile(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('vocabularyInfo').textContent = `已选择: ${file.name}`;
+                readFile(file, 'vocabulary');
+            }
+        }
+
+        function handleProgressFile(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('progressInfo').textContent = `已选择: ${file.name}`;
+                readFile(file, 'progress');
+            }
+        }
+
+        function readFile(file, type) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                    
+                    if (type === 'vocabulary') {
+                        processVocabularyData(jsonData);
+                    } else if (type === 'progress') {
+                        processProgressData(jsonData);
+                    }
+                } catch (error) {
+                    alert(`文件处理失败: ${error.message}`);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processVocabularyData(data) {
+            // 移除标题行
+            const rows = data.slice(1);
+            vocabularyData = [];
+
+            for (let row of rows) {
+                if (row.length >= 4) { // 至少需要4列：序号、单词、音标、中文意思
+                    const item = {
+                        id: row[0] || '',
+                        word: row[1] || '',
+                        phonetic: row[2] || '',
+                        meaning: row[3] || '',
+                        weight: row[4] || 5 // 如果没有权重列，默认为5
+                    };
+                    vocabularyData.push(item);
+                    currentWeights.set(item.word, item.weight); // 初始化权重记录
+                }
+            }
+
+            checkReadyToStart();
+        }
+
+        function processProgressData(data) {
+            // 移除标题行
+            const rows = data.slice(1);
+            progressData = [];
+
+            for (let row of rows) {
+                if (row.length >= 5) {
+                    progressData.push({
+                        startTime: row[0] || '',
+                        endTime: row[1] || '',
+                        count: row[2] || 0,
+                        correct: row[3] || 0,
+                        accuracy: row[4] || 0
+                    });
+                }
+            }
+        }
+
+        function checkReadyToStart() {
+            const startButton = document.getElementById('startButton');
+            startButton.disabled = vocabularyData.length === 0;
+        }
+
+        function startPractice() {
+            if (vocabularyData.length === 0) {
+                alert('请先导入题库文件！');
+                return;
+            }
+
+            // 初始化统计信息
+            currentStats = {
+                total: vocabularyData.length,
+                completed: 0,
+                correct: 0,
+                timer: 0
+            };
+
+            // 开始计时
+            startTime = new Date();
+            startTimer();
+
+            // 显示练习页面
+            document.getElementById('setupPage').classList.remove('active');
+            document.getElementById('practicePage').classList.add('active');
+
+            // 更新统计显示
+            updateStatsDisplay();
+
+            // 开始第一题
+            loadNextQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                currentStats.timer++;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(currentStats.timer / 60).toString().padStart(2, '0');
+            const seconds = (currentStats.timer % 60).toString().padStart(2, '0');
+            document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('totalCount').textContent = currentStats.total;
+            document.getElementById('completedCount').textContent = currentStats.completed;
+            document.getElementById('correctCount').textContent = currentStats.correct;
+            
+            const accuracy = currentStats.completed > 0 ? 
+                Math.round((currentStats.correct / currentStats.completed) * 100) : 0;
+            document.getElementById('accuracy').textContent = `${accuracy}%`;
+
+            // 更新进度条
+            const progressPercent = currentStats.total > 0 ? 
+                (currentStats.completed / currentStats.total) * 100 : 0;
+            document.getElementById('progressFill').style.width = `${progressPercent}%`;
+        }
+
+        function loadNextQuestion() {
+            if (vocabularyData.length === 0) {
+                alert('题库已空！');
+                return;
+            }
+
+            // 选择当前问题
+            const availableWords = vocabularyData.filter(item => 
+                currentWeights.get(item.word) > 0 // 只选择权重大于0的单词
+            );
+            
+            if (availableWords.length === 0) {
+                alert('所有单词权重都已降为0，练习结束！');
+                return;
+            }
+
+            const randomIndex = Math.floor(Math.random() * availableWords.length);
+            currentQuestion = availableWords[randomIndex];
+
+            // 生成选项（包含正确答案和3个错误答案）
+            const correctMeaning = currentQuestion.meaning;
+            const otherMeanings = vocabularyData
+                .filter(item => item.word !== currentQuestion.word)
+                .map(item => item.meaning)
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 3);
+
+            currentOptions = [correctMeaning, ...otherMeanings].sort(() => Math.random() - 0.5);
+
+            // 显示问题
+            document.getElementById('currentWord').textContent = currentQuestion.word;
+            document.getElementById('currentPhonetic').textContent = currentQuestion.phonetic;
+            document.getElementById('weightValue').textContent = currentWeights.get(currentQuestion.word);
+
+            // 显示选项
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            currentOptions.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = option;
+                optionDiv.addEventListener('click', () => selectOption(optionDiv, option));
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            // 重置反馈和按钮
+            document.getElementById('feedback').classList.remove('show', 'correct', 'incorrect');
+            document.getElementById('nextButton').style.display = 'none';
+        }
+
+        function selectOption(optionElement, selectedMeaning) {
+            // 防止重复选择
+            const options = document.querySelectorAll('.option');
+            options.forEach(opt => opt.style.pointerEvents = 'none');
+
+            const isCorrect = selectedMeaning === currentQuestion.meaning;
+            
+            // 标记选项状态
+            optionElement.classList.add(isCorrect ? 'correct' : 'incorrect');
+            
+            if (!isCorrect) {
+                // 标记正确答案
+                options.forEach(opt => {
+                    if (opt.textContent === currentQuestion.meaning) {
+                        opt.classList.add('correct');
+                    }
+                });
+            }
+
+            // 更新权重
+            updateWeight(currentQuestion.word, isCorrect);
+
+            // 更新统计
+            currentStats.completed++;
+            if (isCorrect) {
+                currentStats.correct++;
+            }
+
+            // 显示反馈
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = isCorrect ? '正确！' : `错误！正确答案是：${currentQuestion.meaning}`;
+            feedback.className = `feedback show ${isCorrect ? 'correct' : 'incorrect'}`;
+
+            // 更新显示
+            updateStatsDisplay();
+
+            if (isCorrect) {
+                // 正确时自动下一题
+                setTimeout(() => {
+                    loadNextQuestion();
+                }, 200);
+            } else {
+                // 错误时显示下一题按钮
+                document.getElementById('nextButton').style.display = 'inline-block';
+            }
+        }
+
+        function updateWeight(word, isCorrect) {
+            let currentWeight = currentWeights.get(word) || 5;
+            
+            if (isCorrect) {
+                // 正确时权重减1，但不低于1
+                currentWeight = Math.max(1, currentWeight - 1);
+            } else {
+                // 错误时权重加1，但不超过10
+                currentWeight = Math.min(10, currentWeight + 1);
+            }
+            
+            currentWeights.set(word, currentWeight);
+        }
+
+        function nextQuestion() {
+            loadNextQuestion();
+        }
+
+        function exportProgress() {
+            const endTime = new Date();
+            const sessionData = {
+                startTime: startTime.toLocaleString('sv-SE'),
+                endTime: endTime.toLocaleString('sv-SE'),
+                count: currentStats.completed,
+                correct: currentStats.correct,
+                accuracy: currentStats.completed > 0 ? 
+                    Math.round((currentStats.correct / currentStats.completed) * 10000) / 100 : 0
+            };
+
+            progressData.push(sessionData);
+
+            const ws = XLSX.utils.json_to_sheet([
+                ['开始时间', '结束时间', '练习数量', '正确数量', '正确率'],
+                ...progressData.map(item => [
+                    item.startTime,
+                    item.endTime,
+                    item.count,
+                    item.correct,
+                    item.accuracy + '%'
+                ])
+            ]);
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '练习进度');
+            XLSX.writeFile(wb, `单词练习进度_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        }
+
+        function exportVocabulary() {
+            // 更新词汇数据中的权重
+            const updatedVocabulary = vocabularyData
+                .filter(item => currentWeights.get(item.word) > 0) // 只保留权重大于0的单词
+                .map(item => ({
+                    ...item,
+                    weight: currentWeights.get(item.word)
+                }));
+
+            const ws = XLSX.utils.json_to_sheet([
+                ['序号', '单词', '音标', '中文意思', '权重'],
+                ...updatedVocabulary.map(item => [
+                    item.id,
+                    item.word,
+                    item.phonetic,
+                    item.meaning,
+                    item.weight
+                ])
+            ]);
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '词汇题库');
+            XLSX.writeFile(wb, `更新后的词汇题库_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        }
+
+        function goToSetup() {
+            // 停止计时
+            clearInterval(timerInterval);
+            
+            // 重置数据
+            vocabularyData = [];
+            progressData = [];
+            currentWeights.clear();
+            
+            // 返回设置页面
+            document.getElementById('practicePage').classList.remove('active');
+            document.getElementById('setupPage').classList.add('active');
+            
+            // 清空文件信息
+            document.getElementById('vocabularyInfo').textContent = '';
+            document.getElementById('progressInfo').textContent = '';
+            document.getElementById('vocabularyFile').value = '';
+            document.getElementById('progressFile').value = '';
+        }
+
+        // 初始化
+        checkReadyToStart();
+    </script>
+</body>
+</html>
