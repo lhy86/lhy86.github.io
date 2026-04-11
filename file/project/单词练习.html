@@ -1,791 +1,756 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>单词练习系统</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        :root {
-            --bg-primary: #1a1a1a;
-            --bg-secondary: #2d2d2d;
-            --bg-tertiary: #1e1e1e;
-            --text-primary: #ffffff;
-            --text-secondary: #b3b3b3;
-            --accent: #4CAF50;
-            --error: #f44336;
-            --warning: #ff9800;
-            --border: #404040;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .page {
-            display: none;
-        }
-        
-        .page.active {
-            display: block;
-        }
-        
-        .setup-page {
-            text-align: center;
-            padding: 40px 20px;
-        }
-        
-        .setup-section {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 30px;
-            margin: 20px 0;
-            border: 2px dashed var(--border);
-        }
-        
-        .setup-section.drag-over {
-            border-color: var(--accent);
-            background: rgba(76, 175, 80, 0.1);
-        }
-        
-        h1 {
-            color: var(--accent);
-            margin-bottom: 30px;
-            font-size: 2.5em;
-        }
-        
-        h2 {
-            color: var(--accent);
-            margin-bottom: 20px;
-            font-size: 1.8em;
-        }
-        
-        .btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 10px;
-            transition: background 0.3s;
-        }
-        
-        .btn:hover {
-            background: #45a049;
-        }
-        
-        .btn-secondary {
-            background: var(--bg-tertiary);
-        }
-        
-        .btn-secondary:hover {
-            background: #3a3a3a;
-        }
-        
-        .btn-error {
-            background: var(--error);
-        }
-        
-        .btn-error:hover {
-            background: #da190b;
-        }
-        
-        .file-input {
-            display: none;
-        }
-        
-        .practice-page {
-            padding: 20px;
-        }
-        
-        .stats {
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-        }
-        
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: var(--accent);
-        }
-        
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.9em;
-        }
-        
-        .question-card {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .word {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: var(--text-primary);
-        }
-        
-        .phonetic {
-            font-size: 1.3em;
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-            font-style: italic;
-        }
-        
-        .weight {
-            font-size: 1.1em;
-            color: var(--warning);
-            margin-bottom: 30px;
-        }
-        
-        .options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .option {
-            background: var(--bg-tertiary);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1.1em;
-        }
-        
-        .option:hover {
-            border-color: var(--accent);
-            background: rgba(76, 175, 80, 0.1);
-        }
-        
-        .option.selected {
-            border-color: var(--accent);
-            background: rgba(76, 175, 80, 0.2);
-        }
-        
-        .option.correct {
-            border-color: var(--accent);
-            background: rgba(76, 175, 80, 0.3);
-        }
-        
-        .option.incorrect {
-            border-color: var(--error);
-            background: rgba(244, 67, 54, 0.2);
-        }
-        
-        .feedback {
-            margin: 20px 0;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 1.2em;
-            display: none;
-        }
-        
-        .feedback.show {
-            display: block;
-        }
-        
-        .feedback.correct {
-            background: rgba(76, 175, 80, 0.2);
-            border: 1px solid var(--accent);
-            color: var(--accent);
-        }
-        
-        .feedback.incorrect {
-            background: rgba(244, 67, 54, 0.2);
-            border: 1px solid var(--error);
-            color: var(--error);
-        }
-        
-        .controls {
-            text-align: center;
-            margin: 20px 0;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: var(--bg-tertiary);
-            border-radius: 3px;
-            margin: 20px 0;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: var(--accent);
-            transition: width 0.3s;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-        
-        .file-info {
-            margin: 10px 0;
-            color: var(--text-secondary);
-            font-size: 0.9em;
-        }
-        
-        @media (max-width: 768px) {
-            .options {
-                grid-template-columns: 1fr;
-            }
-            
-            .word {
-                font-size: 2em;
-            }
-            
-            .stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>VocabFlow — 单词练习系统</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2333;--surface3:#21262d;
+  --border:#30363d;--border-light:#484f58;
+  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+  --accent:#58a6ff;--accent-dim:rgba(88,166,255,.15);
+  --green:#3fb950;--green-dim:rgba(63,185,80,.15);
+  --red:#f85149;--red-dim:rgba(248,81,73,.15);
+  --orange:#d29922;--orange-dim:rgba(210,153,34,.15);
+  --purple:#bc8cff;
+  --radius:12px;--radius-sm:8px;--radius-xs:6px;
+  --shadow:0 8px 32px rgba(0,0,0,.4);
+  --transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+html{font-size:16px;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg);color:var(--text);min-height:100dvh;
+  display:flex;flex-direction:column;overflow-x:hidden;
+  line-height:1.5;
+}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── Toast ── */
+#toast-container{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.toast{
+  pointer-events:auto;padding:14px 20px;border-radius:var(--radius-sm);
+  background:var(--surface2);border:1px solid var(--border);color:var(--text);
+  font-size:.9rem;box-shadow:var(--shadow);
+  transform:translateX(120%);opacity:0;transition:var(--transition);
+  max-width:360px;display:flex;align-items:center;gap:10px;
+}
+.toast.show{transform:translateX(0);opacity:1}
+.toast.success{border-color:var(--green);background:var(--green-dim)}
+.toast.error{border-color:var(--red);background:var(--red-dim)}
+.toast.info{border-color:var(--accent);background:var(--accent-dim)}
+.toast svg{flex-shrink:0;width:18px;height:18px}
+
+/* ── Views ── */
+.view{display:none;flex:1;animation:fadeUp .4s ease}
+.view.active{display:flex;flex-direction:column}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Import View ── */
+.import-view{align-items:center;justify-content:center;padding:24px;gap:32px}
+.brand{text-align:center}
+.brand h1{font-size:2rem;font-weight:700;letter-spacing:-.02em}
+.brand h1 span{color:var(--accent)}
+.brand p{color:var(--text2);margin-top:6px;font-size:.95rem}
+.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;width:100%;max-width:640px}
+.drop-zone{
+  background:var(--surface);border:2px dashed var(--border);border-radius:var(--radius);
+  padding:36px 24px;text-align:center;cursor:pointer;transition:var(--transition);
+  position:relative;overflow:hidden;
+}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:var(--accent-dim)}
+.drop-zone.loaded{border-color:var(--green);border-style:solid}
+.drop-zone .icon{font-size:2rem;margin-bottom:12px;display:block}
+.drop-zone h3{font-size:1rem;font-weight:600;margin-bottom:4px}
+.drop-zone p{font-size:.82rem;color:var(--text2)}
+.drop-zone .file-name{font-size:.82rem;color:var(--green);margin-top:8px;font-weight:500}
+.drop-zone input{display:none}
+.start-area{text-align:center;width:100%;max-width:640px}
+.btn-start{
+  width:100%;padding:16px;border:none;border-radius:var(--radius);
+  background:var(--accent);color:#fff;font-size:1.05rem;font-weight:600;
+  cursor:pointer;transition:var(--transition);letter-spacing:.01em;
+}
+.btn-start:disabled{opacity:.3;cursor:not-allowed}
+.btn-start:not(:disabled):hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 4px 20px rgba(88,166,255,.3)}
+.btn-start:not(:disabled):active{transform:translateY(0)}
+.format-hint{color:var(--text3);font-size:.78rem;margin-top:10px}
+
+/* ── Practice View ── */
+.practice-view{padding:0;max-width:720px;width:100%;margin:0 auto}
+.top-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:var(--bg);z-index:10;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.top-bar-left{display:flex;align-items:center;gap:14px}
+.top-bar .logo{font-weight:700;font-size:1rem;color:var(--text)}
+.top-bar .logo span{color:var(--accent)}
+.timer-badge{
+  display:flex;align-items:center;gap:5px;
+  background:var(--surface);padding:5px 12px;border-radius:20px;
+  font-size:.82rem;color:var(--text2);font-variant-numeric:tabular-nums;
+}
+.top-bar-right{display:flex;gap:8px}
+.icon-btn{
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text2);width:36px;height:36px;border-radius:var(--radius-xs);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:var(--transition);font-size:.9rem;
+}
+.icon-btn:hover{background:var(--surface2);color:var(--text);border-color:var(--border-light)}
+.icon-btn.danger:hover{color:var(--red);border-color:var(--red)}
+
+/* Stats Strip */
+.stats-strip{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  border-bottom:1px solid var(--border);
+}
+.stat-cell{padding:14px 8px;text-align:center;border-right:1px solid var(--border)}
+.stat-cell:last-child{border-right:none}
+.stat-cell .val{font-size:1.15rem;font-weight:700;font-variant-numeric:tabular-nums;transition:var(--transition)}
+.stat-cell .lbl{font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.stat-cell.accent .val{color:var(--accent)}
+.stat-cell.green .val{color:var(--green)}
+.stat-cell.orange .val{color:var(--orange)}
+.stat-cell.purple .val{color:var(--purple)}
+
+/* Progress */
+.progress-track{height:3px;background:var(--surface);width:100%}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--purple));transition:width .5s ease;border-radius:0 2px 2px 0}
+
+/* Question Area */
+.question-area{flex:1;display:flex;flex-direction:column;padding:32px 20px 20px}
+.word-display{text-align:center;margin-bottom:28px}
+.word-text{
+  font-size:2.6rem;font-weight:700;letter-spacing:-.02em;
+  line-height:1.2;margin-bottom:6px;
+}
+.phonetic-text{font-size:1.1rem;color:var(--text2);font-style:italic}
+.weight-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  margin-top:10px;padding:4px 12px;border-radius:20px;
+  font-size:.78rem;font-weight:500;
+  background:var(--orange-dim);color:var(--orange);
+}
+
+/* Options */
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.option-btn{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px 18px;text-align:left;font-size:.95rem;color:var(--text);
+  cursor:pointer;transition:var(--transition);position:relative;
+  display:flex;align-items:flex-start;gap:10px;line-height:1.45;
+}
+.option-btn .key{
+  flex-shrink:0;width:24px;height:24px;border-radius:6px;
+  background:var(--surface2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:600;color:var(--text3);
+  transition:var(--transition);
+}
+.option-btn:hover:not(.disabled){border-color:var(--accent);background:var(--accent-dim)}
+.option-btn:hover:not(.disabled) .key{border-color:var(--accent);color:var(--accent)}
+.option-btn.correct{border-color:var(--green)!important;background:var(--green-dim)!important}
+.option-btn.correct .key{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+.option-btn.wrong{border-color:var(--red)!important;background:var(--red-dim)!important}
+.option-btn.wrong .key{border-color:var(--red);color:var(--red);background:var(--red-dim)}
+.option-btn.disabled{cursor:default;opacity:.6}
+.option-btn.correct.disabled,.option-btn.wrong.disabled{opacity:1}
+
+/* Feedback */
+.feedback-bar{
+  padding:14px 18px;border-radius:var(--radius-sm);margin-bottom:16px;
+  font-size:.92rem;font-weight:500;display:none;align-items:center;gap:8px;
+  animation:fadeUp .3s ease;
+}
+.feedback-bar.show{display:flex}
+.feedback-bar.is-correct{background:var(--green-dim);color:var(--green);border:1px solid rgba(63,185,80,.25)}
+.feedback-bar.is-wrong{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,81,73,.25)}
+.feedback-bar .detail{font-weight:400;opacity:.85;margin-left:4px}
+
+/* Next Button */
+.next-area{text-align:center;margin-top:auto;padding-bottom:12px}
+.btn-next{
+  padding:13px 40px;border:none;border-radius:var(--radius-sm);
+  background:var(--accent);color:#fff;font-size:.95rem;font-weight:600;
+  cursor:pointer;transition:var(--transition);display:none;
+}
+.btn-next.show{display:inline-flex;align-items:center;gap:6px}
+.btn-next:hover{filter:brightness(1.15)}
+
+/* ── Summary Modal ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:100;align-items:center;justify-content:center;padding:20px;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+}
+.modal-overlay.show{display:flex}
+.modal{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);max-width:480px;width:100%;
+  padding:32px;animation:fadeUp .35s ease;max-height:90dvh;overflow-y:auto;
+}
+.modal h2{font-size:1.3rem;margin-bottom:20px;text-align:center}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.summary-card{background:var(--surface2);border-radius:var(--radius-sm);padding:16px;text-align:center}
+.summary-card .sv{font-size:1.6rem;font-weight:700}
+.summary-card .sl{font-size:.78rem;color:var(--text2);margin-top:2px}
+.modal-actions{display:flex;gap:10px;flex-wrap:wrap}
+.modal-actions .btn{
+  flex:1;min-width:120px;padding:12px 16px;border:1px solid var(--border);
+  border-radius:var(--radius-sm);background:var(--surface2);
+  color:var(--text);font-size:.88rem;font-weight:500;cursor:pointer;
+  transition:var(--transition);text-align:center;
+}
+.modal-actions .btn:hover{background:var(--surface3);border-color:var(--border-light)}
+.modal-actions .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.modal-actions .btn.primary:hover{filter:brightness(1.1)}
+
+/* ── Export Menu ── */
+.export-menu{
+  position:absolute;right:0;top:42px;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:6px;min-width:180px;box-shadow:var(--shadow);
+  display:none;z-index:20;
+}
+.export-menu.show{display:block}
+.export-menu button{
+  display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;
+  border:none;background:none;color:var(--text);font-size:.88rem;
+  border-radius:var(--radius-xs);cursor:pointer;transition:var(--transition);text-align:left;
+}
+.export-menu button:hover{background:var(--surface2)}
+.export-menu button svg{width:16px;height:16px;color:var(--text2)}
+
+/* ── Mastered Animation ── */
+@keyframes masteredPop{
+  0%{transform:scale(0);opacity:0}
+  50%{transform:scale(1.2);opacity:1}
+  100%{transform:scale(1);opacity:1}
+}
+.mastered-badge{
+  display:inline-flex;align-items:center;gap:4px;padding:4px 12px;
+  background:linear-gradient(135deg,var(--green-dim),var(--accent-dim));
+  border:1px solid var(--green);border-radius:20px;font-size:.82rem;
+  color:var(--green);font-weight:600;animation:masteredPop .5s ease;
+  margin-top:6px;
+}
+
+/* ── Responsive ── */
+@media(max-width:600px){
+  .upload-grid{grid-template-columns:1fr}
+  .brand h1{font-size:1.6rem}
+  .options-grid{grid-template-columns:1fr}
+  .word-text{font-size:2rem}
+  .stats-strip{grid-template-columns:repeat(5,1fr)}
+  .stat-cell{padding:10px 4px}
+  .stat-cell .val{font-size:.95rem}
+  .stat-cell .lbl{font-size:.62rem}
+  .question-area{padding:24px 16px 16px}
+  .top-bar{padding:12px 16px}
+  .summary-grid{grid-template-columns:1fr 1fr}
+  .modal{padding:24px 20px}
+  .modal-actions{flex-direction:column}
+  .modal-actions .btn{min-width:auto}
+}
+@media(max-width:360px){
+  .stats-strip{grid-template-columns:repeat(3,1fr)}
+  .stat-cell:nth-child(4),.stat-cell:nth-child(5){display:none}
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <!-- 设置页面 -->
-        <div id="setupPage" class="page active">
-            <h1>单词练习系统</h1>
-            
-            <div class="setup-section" id="vocabularySection">
-                <h2>词汇题库</h2>
-                <p>请导入包含以下列的表格文件：序号、单词、音标、中文意思、权重（可选）</p>
-                <input type="file" id="vocabularyFile" class="file-input" accept=".xlsx,.xls,.csv">
-                <button class="btn" onclick="document.getElementById('vocabularyFile').click()">选择题库文件</button>
-                <div id="vocabularyInfo" class="file-info"></div>
-            </div>
-            
-            <div class="setup-section" id="progressSection">
-                <h2>练习进度</h2>
-                <p>可选：导入之前的练习进度文件</p>
-                <input type="file" id="progressFile" class="file-input" accept=".xlsx,.xls,.csv">
-                <button class="btn btn-secondary" onclick="document.getElementById('progressFile').click()">选择进度文件</button>
-                <div id="progressInfo" class="file-info"></div>
-            </div>
-            
-            <button id="startButton" class="btn" disabled>开始练习</button>
-        </div>
-        
-        <!-- 练习页面 -->
-        <div id="practicePage" class="page">
-            <div class="stats">
-                <div class="stat-item">
-                    <div class="stat-value" id="timer">00:00</div>
-                    <div class="stat-label">练习时长</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="totalCount">0</div>
-                    <div class="stat-label">总题数</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="completedCount">0</div>
-                    <div class="stat-label">已做题数</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="correctCount">0</div>
-                    <div class="stat-label">正确数</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="accuracy">0%</div>
-                    <div class="stat-label">正确率</div>
-                </div>
-            </div>
-            
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-            
-            <div class="question-card">
-                <div class="word" id="currentWord"></div>
-                <div class="phonetic" id="currentPhonetic"></div>
-                <div class="weight" id="currentWeight">权重: <span id="weightValue"></span></div>
-                
-                <div class="options" id="optionsContainer">
-                    <!-- 选项将通过JavaScript动态生成 -->
-                </div>
-                
-                <div class="feedback" id="feedback"></div>
-                
-                <div class="controls">
-                    <button id="nextButton" class="btn" style="display:none;">下一题</button>
-                </div>
-            </div>
-            
-            <div class="action-buttons">
-                <button class="btn btn-secondary" onclick="exportProgress()">导出进度</button>
-                <button class="btn btn-secondary" onclick="exportVocabulary()">导出新题库</button>
-                <button class="btn btn-secondary" onclick="goToSetup()">返回设置</button>
-            </div>
-        </div>
+
+<div id="toast-container"></div>
+
+<!-- ====== IMPORT VIEW ====== -->
+<div id="importView" class="view active import-view">
+  <div class="brand">
+    <h1>Vocab<span>Flow</span></h1>
+    <p>高效背单词，智能权重练习系统</p>
+  </div>
+  <div class="upload-grid">
+    <div class="drop-zone" id="vocabZone" tabindex="0">
+      <span class="icon">📚</span>
+      <h3>词汇题库</h3>
+      <p>拖放或点击选择 .xlsx / .csv</p>
+      <div class="file-name" id="vocabFileName"></div>
+      <input type="file" id="vocabInput" accept=".xlsx,.xls,.csv">
     </div>
+    <div class="drop-zone" id="progressZone" tabindex="0">
+      <span class="icon">📊</span>
+      <h3>练习进度（可选）</h3>
+      <p>导入历史练习记录</p>
+      <div class="file-name" id="progressFileName"></div>
+      <input type="file" id="progressInput" accept=".xlsx,.xls,.csv">
+    </div>
+  </div>
+  <div class="start-area">
+    <button class="btn-start" id="btnStart" disabled>开始练习</button>
+    <div class="format-hint">题库格式：序号 | 单词 | 音标 | 中文意思 | 权重（可选，默认5）</div>
+  </div>
+</div>
 
-    <script>
-        // 全局变量
-        let vocabularyData = [];
-        let progressData = [];
-        let currentQuestion = null;
-        let currentOptions = [];
-        let startTime = null;
-        let timerInterval = null;
-        let currentStats = {
-            total: 0,
-            completed: 0,
-            correct: 0,
-            timer: 0
-        };
-        let currentWeights = new Map(); // 记录每个单词的权重变化
+<!-- ====== PRACTICE VIEW ====== -->
+<div id="practiceView" class="view practice-view">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="logo">Vocab<span>Flow</span></div>
+      <div class="timer-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span id="timerDisplay">00:00</span>
+      </div>
+    </div>
+    <div class="top-bar-right" style="position:relative">
+      <button class="icon-btn" id="btnMenu" title="导出">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      </button>
+      <div class="export-menu" id="exportMenu">
+        <button onclick="exportVocabulary()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+          导出题库
+        </button>
+        <button onclick="exportProgress()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          导出进度
+        </button>
+      </div>
+      <button class="icon-btn danger" id="btnQuit" title="结束练习">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
 
-        // 文件输入事件监听
-        document.getElementById('vocabularyFile').addEventListener('change', handleVocabularyFile);
-        document.getElementById('progressFile').addEventListener('change', handleProgressFile);
+  <div class="stats-strip">
+    <div class="stat-cell accent"><div class="val" id="sRemain">0</div><div class="lbl">剩余</div></div>
+    <div class="stat-cell"><div class="val" id="sDone">0</div><div class="lbl">已答</div></div>
+    <div class="stat-cell green"><div class="val" id="sCorrect">0</div><div class="lbl">正确</div></div>
+    <div class="stat-cell orange"><div class="val" id="sAccuracy">—</div><div class="lbl">正确率</div></div>
+    <div class="stat-cell purple"><div class="val" id="sMastered">0</div><div class="lbl">已掌握</div></div>
+  </div>
 
-        // 拖拽功能
-        setupDragAndDrop();
+  <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
 
-        // 开始按钮事件
-        document.getElementById('startButton').addEventListener('click', startPractice);
+  <div class="question-area" id="questionArea">
+    <div class="word-display">
+      <div class="word-text" id="wordText"></div>
+      <div class="phonetic-text" id="phoneticText"></div>
+      <div class="weight-badge" id="weightBadge">权重 <strong id="weightVal"></strong></div>
+    </div>
+    <div class="options-grid" id="optionsGrid"></div>
+    <div class="feedback-bar" id="feedbackBar">
+      <span id="feedbackIcon"></span>
+      <span id="feedbackMsg"></span>
+    </div>
+    <div class="next-area">
+      <button class="btn-next" id="btnNext">下一题 <span style="opacity:.6;font-size:.8em">Enter ↵</span></button>
+    </div>
+  </div>
+</div>
 
-        // 下一题按钮事件
-        document.getElementById('nextButton').addEventListener('click', nextQuestion);
+<!-- ====== SUMMARY MODAL ====== -->
+<div class="modal-overlay" id="summaryModal">
+  <div class="modal">
+    <h2>🎉 练习总结</h2>
+    <div class="summary-grid">
+      <div class="summary-card"><div class="sv" id="smTime">00:00</div><div class="sl">练习时长</div></div>
+      <div class="summary-card"><div class="sv" id="smTotal">0</div><div class="sl">答题总数</div></div>
+      <div class="summary-card"><div class="sv green" style="color:var(--green)" id="smCorrect">0</div><div class="sl">正确数</div></div>
+      <div class="summary-card"><div class="sv" style="color:var(--orange)" id="smAccuracy">0%</div><div class="sl">正确率</div></div>
+      <div class="summary-card"><div class="sv" style="color:var(--purple)" id="smMastered">0</div><div class="sl">已掌握</div></div>
+      <div class="summary-card"><div class="sv" style="color:var(--accent)" id="smRemain">0</div><div class="sl">剩余单词</div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="exportVocabulary()">📄 导出题库</button>
+      <button class="btn" onclick="exportProgress()">📊 导出进度</button>
+      <button class="btn primary" onclick="closeSummaryAndReset()">返回首页</button>
+    </div>
+  </div>
+</div>
 
-        function setupDragAndDrop() {
-            const vocabularySection = document.getElementById('vocabularySection');
-            const progressSection = document.getElementById('progressSection');
+<script>
+/* ================================================================
+   VocabFlow — 全局状态
+   ================================================================ */
+let vocab = [];            // 当前词库 [{id,word,phonetic,meaning,weight}]
+let allMeanings = [];      // 所有释义（用于生成选项）
+let progressHistory = [];  // 历史进度
+let session = { done:0, correct:0, mastered:0, seconds:0 };
+let timerHandle = null;
+let startTimestamp = null;
+let currentQ = null;       // 当前题 {item, options, correctIdx}
+let answered = false;
+let initialTotal = 0;
 
-            // 题库区域拖拽
-            vocabularySection.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                vocabularySection.classList.add('drag-over');
-            });
+/* ================================================================
+   Toast 系统
+   ================================================================ */
+function toast(msg, type='info', duration=2800){
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icons = {
+    success:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    error:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+    info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+  };
+  t.innerHTML = (icons[type]||icons.info) + `<span>${msg}</span>`;
+  c.appendChild(t);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('show')));
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},duration);
+}
 
-            vocabularySection.addEventListener('dragleave', () => {
-                vocabularySection.classList.remove('drag-over');
-            });
+/* ================================================================
+   文件处理
+   ================================================================ */
+function parseFile(file){
+  return new Promise((resolve,reject)=>{
+    const r = new FileReader();
+    r.onload = e=>{
+      try{
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data,{type:'array'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        resolve(XLSX.utils.sheet_to_json(ws,{header:1}));
+      }catch(err){reject(err)}
+    };
+    r.onerror = ()=>reject(new Error('读取失败'));
+    r.readAsArrayBuffer(file);
+  });
+}
 
-            vocabularySection.addEventListener('drop', (e) => {
-                e.preventDefault();
-                vocabularySection.classList.remove('drag-over');
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handleFileDrop(files[0], 'vocabulary');
-                }
-            });
+function setupDropZone(zoneId, inputId, nameLabelId, handler){
+  const zone = document.getElementById(zoneId);
+  const input = document.getElementById(inputId);
+  zone.addEventListener('click',()=>input.click());
+  zone.addEventListener('keydown',e=>{if(e.key==='Enter')input.click()});
+  ['dragover','dragenter'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.add('drag-over')}));
+  ['dragleave','drop'].forEach(ev=>zone.addEventListener(ev,()=>zone.classList.remove('drag-over')));
+  zone.addEventListener('drop',async e=>{
+    e.preventDefault();
+    if(e.dataTransfer.files.length){await handler(e.dataTransfer.files[0],zone,nameLabelId)}
+  });
+  input.addEventListener('change',async e=>{
+    if(e.target.files.length){await handler(e.target.files[0],zone,nameLabelId)}
+  });
+}
 
-            // 进度区域拖拽
-            progressSection.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                progressSection.classList.add('drag-over');
-            });
+async function handleVocabFile(file,zone,labelId){
+  try{
+    const rows = await parseFile(file);
+    const data = rows.slice(1).filter(r=>r.length>=4 && r[1]);
+    if(!data.length) throw new Error('未找到有效数据行');
+    vocab = data.map(r=>({
+      id: r[0]??'',
+      word: String(r[1]).trim(),
+      phonetic: String(r[2]??'').trim(),
+      meaning: String(r[3]??'').trim(),
+      weight: Math.max(1, parseInt(r[4])||5)
+    }));
+    allMeanings = [...new Set(vocab.map(v=>v.meaning))];
+    document.getElementById(labelId).textContent = `✓ ${file.name} (${vocab.length} 词)`;
+    zone.classList.add('loaded');
+    toast(`成功加载 ${vocab.length} 个单词`,'success');
+    checkReady();
+  }catch(err){toast(`题库加载失败: ${err.message}`,'error')}
+}
 
-            progressSection.addEventListener('dragleave', () => {
-                progressSection.classList.remove('drag-over');
-            });
+async function handleProgressFile(file,zone,labelId){
+  try{
+    const rows = await parseFile(file);
+    progressHistory = rows.slice(1).filter(r=>r.length>=5).map(r=>({
+      startTime:r[0]??'', endTime:r[1]??'', count:r[2]??0, correct:r[3]??0, accuracy:r[4]??0
+    }));
+    document.getElementById(labelId).textContent = `✓ ${file.name} (${progressHistory.length} 条记录)`;
+    zone.classList.add('loaded');
+    toast(`加载 ${progressHistory.length} 条历史记录`,'success');
+  }catch(err){toast(`进度加载失败: ${err.message}`,'error')}
+}
 
-            progressSection.addEventListener('drop', (e) => {
-                e.preventDefault();
-                progressSection.classList.remove('drag-over');
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handleFileDrop(files[0], 'progress');
-                }
-            });
-        }
+setupDropZone('vocabZone','vocabInput','vocabFileName',handleVocabFile);
+setupDropZone('progressZone','progressInput','progressFileName',handleProgressFile);
 
-        function handleFileDrop(file, type) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                    
-                    if (type === 'vocabulary') {
-                        processVocabularyData(jsonData);
-                    } else if (type === 'progress') {
-                        processProgressData(jsonData);
-                    }
-                } catch (error) {
-                    alert(`文件处理失败: ${error.message}`);
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
+function checkReady(){
+  document.getElementById('btnStart').disabled = vocab.length === 0;
+}
 
-        function handleVocabularyFile(e) {
-            const file = e.target.files[0];
-            if (file) {
-                document.getElementById('vocabularyInfo').textContent = `已选择: ${file.name}`;
-                readFile(file, 'vocabulary');
-            }
-        }
+/* ================================================================
+   练习核心
+   ================================================================ */
+function startPractice(){
+  if(!vocab.length)return;
+  initialTotal = vocab.length;
+  session = {done:0,correct:0,mastered:0,seconds:0};
+  startTimestamp = new Date();
+  answered = false;
+  switchView('practiceView');
+  startTimer();
+  updateStats();
+  nextQuestion();
+}
 
-        function handleProgressFile(e) {
-            const file = e.target.files[0];
-            if (file) {
-                document.getElementById('progressInfo').textContent = `已选择: ${file.name}`;
-                readFile(file, 'progress');
-            }
-        }
+function startTimer(){
+  clearInterval(timerHandle);
+  timerHandle = setInterval(()=>{
+    session.seconds++;
+    const m = String(Math.floor(session.seconds/60)).padStart(2,'0');
+    const s = String(session.seconds%60).padStart(2,'0');
+    document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+  },1000);
+}
 
-        function readFile(file, type) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                    
-                    if (type === 'vocabulary') {
-                        processVocabularyData(jsonData);
-                    } else if (type === 'progress') {
-                        processProgressData(jsonData);
-                    }
-                } catch (error) {
-                    alert(`文件处理失败: ${error.message}`);
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
+function weightedPick(arr){
+  const total = arr.reduce((s,v)=>s+v.weight,0);
+  let r = Math.random()*total;
+  for(const item of arr){r-=item.weight;if(r<=0)return item}
+  return arr[arr.length-1];
+}
 
-        function processVocabularyData(data) {
-            // 移除标题行
-            const rows = data.slice(1);
-            vocabularyData = [];
+function nextQuestion(){
+  answered = false;
+  const fb = document.getElementById('feedbackBar');
+  fb.classList.remove('show','is-correct','is-wrong');
+  document.getElementById('btnNext').classList.remove('show');
 
-            for (let row of rows) {
-                if (row.length >= 4) { // 至少需要4列：序号、单词、音标、中文意思
-                    const item = {
-                        id: row[0] || '',
-                        word: row[1] || '',
-                        phonetic: row[2] || '',
-                        meaning: row[3] || '',
-                        weight: row[4] || 5 // 如果没有权重列，默认为5
-                    };
-                    vocabularyData.push(item);
-                    currentWeights.set(item.word, item.weight); // 初始化权重记录
-                }
-            }
+  if(!vocab.length){showSummary();return}
 
-            checkReadyToStart();
-        }
+  const item = weightedPick(vocab);
 
-        function processProgressData(data) {
-            // 移除标题行
-            const rows = data.slice(1);
-            progressData = [];
+  // 生成选项 — 1正确 + 3干扰
+  let wrongPool = allMeanings.filter(m=>m!==item.meaning);
+  // 如果干扰不够，填充
+  while(wrongPool.length<3){wrongPool.push('—')}
+  shuffle(wrongPool);
+  const wrongs = wrongPool.slice(0,3);
+  const options = [item.meaning,...wrongs];
+  shuffle(options);
+  const correctIdx = options.indexOf(item.meaning);
 
-            for (let row of rows) {
-                if (row.length >= 5) {
-                    progressData.push({
-                        startTime: row[0] || '',
-                        endTime: row[1] || '',
-                        count: row[2] || 0,
-                        correct: row[3] || 0,
-                        accuracy: row[4] || 0
-                    });
-                }
-            }
-        }
+  currentQ = {item, options, correctIdx};
+  renderQuestion();
+}
 
-        function checkReadyToStart() {
-            const startButton = document.getElementById('startButton');
-            startButton.disabled = vocabularyData.length === 0;
-        }
+function renderQuestion(){
+  const {item, options} = currentQ;
+  document.getElementById('wordText').textContent = item.word;
+  document.getElementById('phoneticText').textContent = item.phonetic || '';
+  document.getElementById('weightVal').textContent = item.weight;
 
-        function startPractice() {
-            if (vocabularyData.length === 0) {
-                alert('请先导入题库文件！');
-                return;
-            }
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  const keys = ['A','B','C','D'];
+  options.forEach((opt,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="key">${keys[i]}</span><span>${opt}</span>`;
+    btn.addEventListener('click',()=>handleAnswer(i));
+    grid.appendChild(btn);
+  });
+  updateStats();
+}
 
-            // 初始化统计信息
-            currentStats = {
-                total: vocabularyData.length,
-                completed: 0,
-                correct: 0,
-                timer: 0
-            };
+function handleAnswer(idx){
+  if(answered)return;
+  answered = true;
 
-            // 开始计时
-            startTime = new Date();
-            startTimer();
+  const {item, options, correctIdx} = currentQ;
+  const isCorrect = idx === correctIdx;
+  const btns = document.querySelectorAll('.option-btn');
 
-            // 显示练习页面
-            document.getElementById('setupPage').classList.remove('active');
-            document.getElementById('practicePage').classList.add('active');
+  // 视觉反馈
+  btns.forEach((b,i)=>{
+    b.classList.add('disabled');
+    if(i===correctIdx) b.classList.add('correct');
+    if(i===idx && !isCorrect) b.classList.add('wrong');
+  });
 
-            // 更新统计显示
-            updateStatsDisplay();
+  // 更新权重
+  if(isCorrect){
+    item.weight -= 1;
+    session.correct++;
+  } else {
+    item.weight += 3;
+  }
+  session.done++;
 
-            // 开始第一题
-            loadNextQuestion();
-        }
+  // 检查是否掌握（权重 <=0）
+  let mastered = false;
+  if(item.weight <= 0){
+    mastered = true;
+    session.mastered++;
+    vocab = vocab.filter(v=>v.word !== item.word);
+  }
 
-        function startTimer() {
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                currentStats.timer++;
-                updateTimerDisplay();
-            }, 1000);
-        }
+  // 反馈条
+  const fb = document.getElementById('feedbackBar');
+  fb.classList.remove('is-correct','is-wrong');
+  if(isCorrect){
+    fb.classList.add('show','is-correct');
+    document.getElementById('feedbackIcon').textContent = '✓';
+    document.getElementById('feedbackMsg').innerHTML = mastered
+      ? '回答正确！<span class="detail">🌟 该词已掌握，从题库移除</span>'
+      : '回答正确！';
+  } else {
+    fb.classList.add('show','is-wrong');
+    document.getElementById('feedbackIcon').textContent = '✗';
+    document.getElementById('feedbackMsg').innerHTML = `回答错误 <span class="detail">→ ${item.meaning}</span>`;
+  }
 
-        function updateTimerDisplay() {
-            const minutes = Math.floor(currentStats.timer / 60).toString().padStart(2, '0');
-            const seconds = (currentStats.timer % 60).toString().padStart(2, '0');
-            document.getElementById('timer').textContent = `${minutes}:${seconds}`;
-        }
+  document.getElementById('weightVal').textContent = Math.max(0, item.weight);
+  updateStats();
 
-        function updateStatsDisplay() {
-            document.getElementById('totalCount').textContent = currentStats.total;
-            document.getElementById('completedCount').textContent = currentStats.completed;
-            document.getElementById('correctCount').textContent = currentStats.correct;
-            
-            const accuracy = currentStats.completed > 0 ? 
-                Math.round((currentStats.correct / currentStats.completed) * 100) : 0;
-            document.getElementById('accuracy').textContent = `${accuracy}%`;
+  if(isCorrect){
+    setTimeout(()=>{if(answered)nextQuestion()}, mastered ? 1200 : 200);
+  } else {
+    document.getElementById('btnNext').classList.add('show');
+  }
+}
 
-            // 更新进度条
-            const progressPercent = currentStats.total > 0 ? 
-                (currentStats.completed / currentStats.total) * 100 : 0;
-            document.getElementById('progressFill').style.width = `${progressPercent}%`;
-        }
+function updateStats(){
+  document.getElementById('sRemain').textContent = vocab.length;
+  document.getElementById('sDone').textContent = session.done;
+  document.getElementById('sCorrect').textContent = session.correct;
+  document.getElementById('sAccuracy').textContent = session.done
+    ? Math.round(session.correct/session.done*100)+'%' : '—';
+  document.getElementById('sMastered').textContent = session.mastered;
 
-        function loadNextQuestion() {
-            if (vocabularyData.length === 0) {
-                alert('题库已空！');
-                return;
-            }
+  const pct = initialTotal ? ((initialTotal - vocab.length)/initialTotal*100) : 0;
+  document.getElementById('progressBar').style.width = pct+'%';
+}
 
-            // 选择当前问题
-            const availableWords = vocabularyData.filter(item => 
-                currentWeights.get(item.word) > 0 // 只选择权重大于0的单词
-            );
-            
-            if (availableWords.length === 0) {
-                alert('所有单词权重都已降为0，练习结束！');
-                return;
-            }
+/* ================================================================
+   导出
+   ================================================================ */
+function exportVocabulary(){
+  const rows = [['序号','单词','音标','中文意思','权重']];
+  vocab.forEach(v=>rows.push([v.id,v.word,v.phonetic,v.meaning,v.weight]));
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'词汇题库');
+  XLSX.writeFile(wb,`词汇题库_${dateStr()}.xlsx`);
+  toast('题库已导出','success');
+  closeExportMenu();
+}
 
-            const randomIndex = Math.floor(Math.random() * availableWords.length);
-            currentQuestion = availableWords[randomIndex];
+function exportProgress(){
+  const endTime = new Date();
+  const acc = session.done ? Math.round(session.correct/session.done*10000)/100 : 0;
+  progressHistory.push({
+    startTime: startTimestamp ? fmtDate(startTimestamp) : '',
+    endTime: fmtDate(endTime),
+    count: session.done,
+    correct: session.correct,
+    accuracy: acc
+  });
+  const rows = [['开始时间','结束时间','练习数量','正确数量','正确率']];
+  progressHistory.forEach(p=>rows.push([p.startTime,p.endTime,p.count,p.correct,p.accuracy+'%']));
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'练习进度');
+  XLSX.writeFile(wb,`练习进度_${dateStr()}.xlsx`);
+  toast('进度已导出','success');
+  closeExportMenu();
+}
 
-            // 生成选项（包含正确答案和3个错误答案）
-            const correctMeaning = currentQuestion.meaning;
-            const otherMeanings = vocabularyData
-                .filter(item => item.word !== currentQuestion.word)
-                .map(item => item.meaning)
-                .sort(() => Math.random() - 0.5)
-                .slice(0, 3);
+function dateStr(){return new Date().toISOString().slice(0,10)}
+function fmtDate(d){return d.toLocaleString('sv-SE').replace('T',' ')}
 
-            currentOptions = [correctMeaning, ...otherMeanings].sort(() => Math.random() - 0.5);
+/* ================================================================
+   Summary
+   ================================================================ */
+function showSummary(){
+  clearInterval(timerHandle);
+  const m = String(Math.floor(session.seconds/60)).padStart(2,'0');
+  const s = String(session.seconds%60).padStart(2,'0');
+  document.getElementById('smTime').textContent = `${m}:${s}`;
+  document.getElementById('smTotal').textContent = session.done;
+  document.getElementById('smCorrect').textContent = session.correct;
+  document.getElementById('smAccuracy').textContent = session.done
+    ? Math.round(session.correct/session.done*100)+'%' : '0%';
+  document.getElementById('smMastered').textContent = session.mastered;
+  document.getElementById('smRemain').textContent = vocab.length;
+  document.getElementById('summaryModal').classList.add('show');
+}
 
-            // 显示问题
-            document.getElementById('currentWord').textContent = currentQuestion.word;
-            document.getElementById('currentPhonetic').textContent = currentQuestion.phonetic;
-            document.getElementById('weightValue').textContent = currentWeights.get(currentQuestion.word);
+function closeSummaryAndReset(){
+  document.getElementById('summaryModal').classList.remove('show');
+  resetToImport();
+}
 
-            // 显示选项
-            const optionsContainer = document.getElementById('optionsContainer');
-            optionsContainer.innerHTML = '';
-            currentOptions.forEach((option, index) => {
-                const optionDiv = document.createElement('div');
-                optionDiv.className = 'option';
-                optionDiv.textContent = option;
-                optionDiv.addEventListener('click', () => selectOption(optionDiv, option));
-                optionsContainer.appendChild(optionDiv);
-            });
+function resetToImport(){
+  clearInterval(timerHandle);
+  vocab=[];allMeanings=[];progressHistory=[];
+  session={done:0,correct:0,mastered:0,seconds:0};
+  currentQ=null;answered=false;initialTotal=0;startTimestamp=null;
+  document.getElementById('vocabFileName').textContent='';
+  document.getElementById('progressFileName').textContent='';
+  document.getElementById('vocabInput').value='';
+  document.getElementById('progressInput').value='';
+  document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('loaded'));
+  document.getElementById('btnStart').disabled=true;
+  switchView('importView');
+}
 
-            // 重置反馈和按钮
-            document.getElementById('feedback').classList.remove('show', 'correct', 'incorrect');
-            document.getElementById('nextButton').style.display = 'none';
-        }
+/* ================================================================
+   Navigation & Menus
+   ================================================================ */
+function switchView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
 
-        function selectOption(optionElement, selectedMeaning) {
-            // 防止重复选择
-            const options = document.querySelectorAll('.option');
-            options.forEach(opt => opt.style.pointerEvents = 'none');
+document.getElementById('btnStart').addEventListener('click',startPractice);
+document.getElementById('btnNext').addEventListener('click',()=>{if(answered)nextQuestion()});
 
-            const isCorrect = selectedMeaning === currentQuestion.meaning;
-            
-            // 标记选项状态
-            optionElement.classList.add(isCorrect ? 'correct' : 'incorrect');
-            
-            if (!isCorrect) {
-                // 标记正确答案
-                options.forEach(opt => {
-                    if (opt.textContent === currentQuestion.meaning) {
-                        opt.classList.add('correct');
-                    }
-                });
-            }
+// Export menu toggle
+document.getElementById('btnMenu').addEventListener('click',e=>{
+  e.stopPropagation();
+  document.getElementById('exportMenu').classList.toggle('show');
+});
+function closeExportMenu(){document.getElementById('exportMenu').classList.remove('show')}
+document.addEventListener('click',closeExportMenu);
 
-            // 更新权重
-            updateWeight(currentQuestion.word, isCorrect);
+// Quit button
+document.getElementById('btnQuit').addEventListener('click',()=>{
+  if(session.done>0){showSummary()}else{resetToImport()}
+});
 
-            // 更新统计
-            currentStats.completed++;
-            if (isCorrect) {
-                currentStats.correct++;
-            }
+/* ================================================================
+   Keyboard Shortcuts
+   ================================================================ */
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('practiceView').classList.contains('active'))return;
+  if(document.getElementById('summaryModal').classList.contains('show'))return;
 
-            // 显示反馈
-            const feedback = document.getElementById('feedback');
-            feedback.textContent = isCorrect ? '正确！' : `错误！正确答案是：${currentQuestion.meaning}`;
-            feedback.className = `feedback show ${isCorrect ? 'correct' : 'incorrect'}`;
+  if(!answered){
+    const map = {'1':0,'2':1,'3':2,'4':3,'a':0,'b':1,'c':2,'d':3};
+    const idx = map[e.key.toLowerCase()];
+    if(idx!==undefined){
+      const btns = document.querySelectorAll('.option-btn');
+      if(btns[idx])handleAnswer(idx);
+    }
+  } else {
+    if(e.key==='Enter'||e.key===' '){e.preventDefault();nextQuestion()}
+  }
+});
 
-            // 更新显示
-            updateStatsDisplay();
-
-            if (isCorrect) {
-                // 正确时自动下一题
-                setTimeout(() => {
-                    loadNextQuestion();
-                }, 200);
-            } else {
-                // 错误时显示下一题按钮
-                document.getElementById('nextButton').style.display = 'inline-block';
-            }
-        }
-
-        function updateWeight(word, isCorrect) {
-            let currentWeight = currentWeights.get(word) || 5;
-            
-            if (isCorrect) {
-                // 正确时权重减1，但不低于1
-                currentWeight = Math.max(1, currentWeight - 1);
-            } else {
-                // 错误时权重加1，但不超过10
-                currentWeight = Math.min(10, currentWeight + 1);
-            }
-            
-            currentWeights.set(word, currentWeight);
-        }
-
-        function nextQuestion() {
-            loadNextQuestion();
-        }
-
-        function exportProgress() {
-            const endTime = new Date();
-            const sessionData = {
-                startTime: startTime.toLocaleString('sv-SE'),
-                endTime: endTime.toLocaleString('sv-SE'),
-                count: currentStats.completed,
-                correct: currentStats.correct,
-                accuracy: currentStats.completed > 0 ? 
-                    Math.round((currentStats.correct / currentStats.completed) * 10000) / 100 : 0
-            };
-
-            progressData.push(sessionData);
-
-            const ws = XLSX.utils.json_to_sheet([
-                ['开始时间', '结束时间', '练习数量', '正确数量', '正确率'],
-                ...progressData.map(item => [
-                    item.startTime,
-                    item.endTime,
-                    item.count,
-                    item.correct,
-                    item.accuracy + '%'
-                ])
-            ]);
-
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, '练习进度');
-            XLSX.writeFile(wb, `单词练习进度_${new Date().toISOString().slice(0, 10)}.xlsx`);
-        }
-
-        function exportVocabulary() {
-            // 更新词汇数据中的权重
-            const updatedVocabulary = vocabularyData
-                .filter(item => currentWeights.get(item.word) > 0) // 只保留权重大于0的单词
-                .map(item => ({
-                    ...item,
-                    weight: currentWeights.get(item.word)
-                }));
-
-            const ws = XLSX.utils.json_to_sheet([
-                ['序号', '单词', '音标', '中文意思', '权重'],
-                ...updatedVocabulary.map(item => [
-                    item.id,
-                    item.word,
-                    item.phonetic,
-                    item.meaning,
-                    item.weight
-                ])
-            ]);
-
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, '词汇题库');
-            XLSX.writeFile(wb, `更新后的词汇题库_${new Date().toISOString().slice(0, 10)}.xlsx`);
-        }
-
-        function goToSetup() {
-            // 停止计时
-            clearInterval(timerInterval);
-            
-            // 重置数据
-            vocabularyData = [];
-            progressData = [];
-            currentWeights.clear();
-            
-            // 返回设置页面
-            document.getElementById('practicePage').classList.remove('active');
-            document.getElementById('setupPage').classList.add('active');
-            
-            // 清空文件信息
-            document.getElementById('vocabularyInfo').textContent = '';
-            document.getElementById('progressInfo').textContent = '';
-            document.getElementById('vocabularyFile').value = '';
-            document.getElementById('progressFile').value = '';
-        }
-
-        // 初始化
-        checkReadyToStart();
-    </script>
+/* ================================================================
+   Utils
+   ================================================================ */
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+</script>
 </body>
 </html>
-
