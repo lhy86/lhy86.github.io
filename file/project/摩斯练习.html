@@ -1,372 +1,895 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>摩尔斯码编码练习</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 12px;
-            background-color: #111;
-            user-select: none;
-        }
-        h1 {
-            color: #aaa;
-            margin-bottom: 0px;
-        }
-        .subtitle {
-            color: #666;
-            font-size: 16px;
-            margin-bottom: 6px;
-        }
-        #morse-button {
-            display: block;
-            width: 220px;
-            height: 220px;
-            margin: 30px auto;
-            border-radius: 50%;
-            background: linear-gradient(145deg, #e74c3c, #c0392b);
-            color: white;
-            font-size: 26px;
-            font-weight: bold;
-            border: none;
-            outline: none;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
-            cursor: pointer;
-            transition: all 0.1s;
-            position: relative;
-            overflow: hidden;
-        }
-        #morse-button:active {
-            transform: scale(0.95);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        #morse-button::after {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        #morse-button:active::after {
-            opacity: 1;
-        }
-        .display-container {
-            width: 95%;
-            max-width: 700px;
-            margin: 0px auto;
-        }
-        .label {
-            text-align: left;
-            font-weight: bold;
-            color: #aaa;
-            margin: 15px 0 5px 0;
-            font-size: 16px;
-        }
-        #morse-sequence, #decoded-text {
-            max-width: 90vw;
-            min-height: 80px;
-            padding: 6px;
-            border-radius: 10px;
-            font-size: 18px;
-            line-height: 1.2;
-            text-align: left;
-            overflow-wrap: break-word;
-            border: 2px solid #ddd;
-        }
-        #morse-sequence {
-            background-color: white;
-            margin-bottom: 15px;
-            font-family: 'Courier New', monospace;
-        }
-        #decoded-text {
-            background: linear-gradient(135deg, #74b9ff, #0984e3);
-            color: white;
-            border-color: #0984e3;
-            font-weight: bold;
-            font-size: 20px;
-        }
-        #clear-btn {
-            padding: 12px 25px;
-            font-size: 18px;
-            font-weight: bold;
-            background: linear-gradient(145deg, #3498db, #2980b9);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            margin: 15px 0;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: all 0.2s;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>CW 莫尔斯电码练习</title>
+<style>
+:root {
+  --bg: #0d1117; --bg2: #161b22; --bg3: #21262d; --bg4: #30363d;
+  --fg: #e6edf3; --fg2: #8b949e; --fg3: #6e7681;
+  --accent: #58a6ff; --accent2: #1f6feb; --green: #3fb950;
+  --red: #f85149; --yellow: #d29922; --orange: #db6d28;
+  --radius: 8px; --gap: 6px;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { font-family: -apple-system,'Segoe UI',Roboto,'Noto Sans SC',sans-serif; background:var(--bg); color:var(--fg); min-height:100vh; min-height:100dvh; overflow-x:hidden; font-size:14px; }
+.container { max-width:480px; margin:0 auto; padding:6px; display:flex; flex-direction:column; min-height:100vh; min-height:100dvh; }
+header { display:flex; align-items:center; justify-content:space-between; padding:6px 4px; }
+header h1 { font-size:16px; font-weight:700; background:linear-gradient(90deg,var(--accent),var(--green)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; display:flex; align-items:center; gap:6px; }
+header h1::before { content:'⚡'; -webkit-text-fill-color:var(--yellow); }
+.hdr-btns { display:flex; gap:4px; }
+.icon-btn { width:32px; height:32px; border:1px solid var(--bg4); background:var(--bg2); color:var(--fg2); border-radius:var(--radius); cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center; }
+.icon-btn:hover,.icon-btn.active { background:var(--accent2); color:#fff; border-color:var(--accent); }
+
+.stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; padding:4px 0; }
+.stat-item { background:var(--bg2); border:1px solid var(--bg4); border-radius:var(--radius); padding:5px 4px; text-align:center; }
+.stat-val { font-size:16px; font-weight:700; color:var(--accent); }
+.stat-lbl { font-size:10px; color:var(--fg3); margin-top:1px; }
+
+.mode-tabs { display:flex; gap:4px; padding:4px 0; }
+.mode-tab { flex:1; padding:8px; border:1px solid var(--bg4); background:var(--bg2); color:var(--fg2); border-radius:var(--radius); cursor:pointer; font-size:13px; font-weight:600; text-align:center; transition:.2s; }
+.mode-tab.active { background:var(--accent2); color:#fff; border-color:var(--accent); }
+
+.panel { background:var(--bg2); border:1px solid var(--bg4); border-radius:var(--radius); padding:8px; margin-bottom:6px; }
+.panel-title { font-size:12px; color:var(--fg3); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+
+.settings-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.set-item { display:flex; flex-direction:column; gap:2px; }
+.set-item label { font-size:11px; color:var(--fg3); }
+.set-item select, .set-item input[type=range] { width:100%; background:var(--bg3); border:1px solid var(--bg4); color:var(--fg); border-radius:4px; padding:4px; font-size:12px; }
+.set-item input[type=range] { -webkit-appearance:none; height:6px; padding:0; cursor:pointer; }
+.set-item input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; background:var(--accent); border-radius:50%; }
+.set-val { font-size:11px; color:var(--accent); font-weight:600; text-align:right; }
+
+.rx-area, .tx-area { display:none; flex-direction:column; gap:6px; flex:1; }
+.rx-area.show, .tx-area.show { display:flex; }
+
+.play-row { display:flex; gap:6px; align-items:center; }
+.btn { padding:8px 16px; border:1px solid var(--bg4); background:var(--bg3); color:var(--fg); border-radius:var(--radius); cursor:pointer; font-size:13px; font-weight:600; transition:.15s; display:flex; align-items:center; gap:4px; }
+.btn:active { transform:scale(.96); }
+.btn-primary { background:var(--accent2); border-color:var(--accent); color:#fff; }
+.btn-primary:hover { background:var(--accent); }
+.btn-sm { padding:5px 10px; font-size:12px; }
+
+.display-box { background:var(--bg); border:1px solid var(--bg4); border-radius:var(--radius); padding:8px 10px; min-height:36px; font-family:'Courier New',monospace; font-size:18px; letter-spacing:3px; display:flex; align-items:center; flex-wrap:wrap; gap:2px; position:relative; }
+.display-char { display:inline-flex; align-items:center; justify-content:center; width:24px; height:28px; border-radius:4px; font-weight:700; }
+.display-char.correct { color:var(--green); background:rgba(63,185,80,.1); }
+.display-char.wrong { color:var(--red); background:rgba(248,81,73,.1); }
+.display-char.pending { color:var(--fg2); border-bottom:2px solid var(--accent); }
+.display-char.cursor { animation:blink 1s infinite; border-bottom:2px solid var(--accent); }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.answer-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(44px,1fr)); gap:4px; }
+.ans-btn { height:44px; border:1px solid var(--bg4); background:var(--bg3); color:var(--fg); border-radius:var(--radius); cursor:pointer; font-size:16px; font-weight:700; transition:.15s; font-family:'Courier New',monospace; }
+.ans-btn:active { transform:scale(.93); background:var(--accent2); }
+.ans-btn.del-btn { background:var(--bg2); color:var(--red); font-size:18px; }
+.ans-btn:disabled { opacity:.4; cursor:default; transform:none; }
+
+.result-msg { text-align:center; padding:6px; border-radius:var(--radius); font-weight:700; font-size:14px; min-height:30px; display:flex; align-items:center; justify-content:center; gap:6px; }
+.result-msg.ok { background:rgba(63,185,80,.12); color:var(--green); }
+.result-msg.fail { background:rgba(248,81,73,.12); color:var(--red); }
+
+.tx-sub-tabs { display:flex; gap:4px; }
+.tx-sub-tab { flex:1; padding:6px; border:1px solid var(--bg4); background:var(--bg2); color:var(--fg2); border-radius:var(--radius); cursor:pointer; font-size:12px; text-align:center; font-weight:600; }
+.tx-sub-tab.active { background:var(--accent2); color:#fff; border-color:var(--accent); }
+
+.morse-display { background:var(--bg); border:1px solid var(--bg4); border-radius:var(--radius); padding:8px; min-height:50px; font-family:'Courier New',monospace; font-size:20px; letter-spacing:2px; word-break:break-all; line-height:1.6; color:var(--yellow); }
+.decoded-display { background:var(--bg); border:1px solid var(--bg4); border-radius:var(--radius); padding:8px; min-height:32px; font-family:'Courier New',monospace; font-size:18px; letter-spacing:3px; color:var(--green); }
+
+.key-area { display:flex; flex-direction:column; gap:6px; align-items:center; margin-top:auto; padding-bottom:10px; }
+.straight-key { width:100%; height:70px; border:2px solid var(--accent); background:var(--bg3); color:var(--accent); border-radius:12px; cursor:pointer; font-size:16px; font-weight:700; transition:.1s; user-select:none; touch-action:none; }
+.straight-key:active, .straight-key.pressing { background:var(--accent2); border-color:var(--accent); color:#fff; box-shadow:0 0 20px rgba(88,166,255,.3); }
+
+.paddle-area { display:flex; gap:8px; width:100%; }
+.paddle-btn { flex:1; height:70px; border:2px solid var(--bg4); background:var(--bg3); color:var(--fg); border-radius:12px; cursor:pointer; font-size:14px; font-weight:700; user-select:none; touch-action:none; transition:.1s; }
+.paddle-btn.dit-pad { border-color:var(--green); color:var(--green); }
+.paddle-btn.dah-pad { border-color:var(--orange); color:var(--orange); }
+.paddle-btn.pressing { box-shadow:0 0 20px rgba(88,166,255,.3); opacity:.8; }
+.paddle-btn.dit-pad.pressing { background:rgba(63,185,80,.2); }
+.paddle-btn.dah-pad.pressing { background:rgba(219,109,40,.2); }
+
+.mouse-zone { width:100%; height:60px; border:2px dashed var(--bg4); border-radius:12px; display:flex; align-items:center; justify-content:center; color:var(--fg3); font-size:12px; cursor:crosshair; user-select:none; background:var(--bg); }
+.mouse-zone.active { border-color:var(--accent); }
+
+.tx-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; }
+.tx-stat { background:var(--bg); border:1px solid var(--bg4); border-radius:4px; padding:4px; text-align:center; }
+.tx-stat .v { font-size:14px; font-weight:700; color:var(--accent); }
+.tx-stat .l { font-size:10px; color:var(--fg3); }
+
+.help-overlay { position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:100; display:none; justify-content:center; align-items:center; padding:16px; }
+.help-overlay.show { display:flex; }
+.help-content { background:var(--bg2); border:1px solid var(--bg4); border-radius:12px; padding:16px; max-width:440px; width:100%; max-height:80vh; overflow-y:auto; }
+.help-content h2 { font-size:16px; margin-bottom:10px; color:var(--accent); }
+.help-content h3 { font-size:13px; margin:10px 0 4px; color:var(--yellow); }
+.help-content p, .help-content li { font-size:12px; color:var(--fg2); line-height:1.6; }
+.help-content ul { padding-left:18px; }
+.help-content .close-help { margin-top:12px; width:100%; }
+
+.settings-overlay { position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:100; display:none; justify-content:center; align-items:center; padding:16px; }
+.settings-overlay.show { display:flex; }
+.settings-content { background:var(--bg2); border:1px solid var(--bg4); border-radius:12px; padding:16px; max-width:400px; width:100%; max-height:80vh; overflow-y:auto; }
+.settings-content h2 { font-size:16px; margin-bottom:10px; color:var(--accent); }
+
+.progress-bar { height:3px; background:var(--bg4); border-radius:2px; overflow:hidden; }
+.progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--green)); transition:width .3s; }
+
+.char-set-btns { display:flex; gap:4px; flex-wrap:wrap; }
+.char-set-btn { padding:4px 8px; font-size:11px; border:1px solid var(--bg4); background:var(--bg3); color:var(--fg2); border-radius:4px; cursor:pointer; }
+.char-set-btn.active { background:var(--accent2); color:#fff; border-color:var(--accent); }
+
+.tx-toolbar { display:flex; gap:4px; flex-wrap:wrap; }
+</style>
 </head>
 <body>
-    <h1>摩尔斯码编码练习</h1>
-    <div class="subtitle">高速模式 - 实时自动解码</div>
-    <div class="display-container">
-        <div class="label">摩尔斯码序列：</div>
-        <div id="morse-sequence">开始输入摩尔斯码...</div>
-        
-        <div class="label">实时解码结果：</div>
-        <div id="decoded-text">解码结果将实时显示在这里</div>
+<div class="container">
+  <header>
+    <h1>CW 练习</h1>
+    <div class="hdr-btns">
+      <button class="icon-btn" id="btnSettings" title="设置">⚙</button>
+      <button class="icon-btn" id="btnHelp" title="帮助">?</button>
     </div>
-    <button id="clear-btn">清空所有内容</button>
-    <button id="morse-button">按住输入</button>
+  </header>
+
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-val" id="statTotal">0</div><div class="stat-lbl">练习数</div></div>
+    <div class="stat-item"><div class="stat-val" id="statCorrect">0%</div><div class="stat-lbl">正确率</div></div>
+    <div class="stat-item"><div class="stat-val" id="statStreak">0</div><div class="stat-lbl">连对</div></div>
+    <div class="stat-item"><div class="stat-val" id="statChars">0</div><div class="stat-lbl">字符数</div></div>
+  </div>
+
+  <div class="mode-tabs">
+    <div class="mode-tab active" data-mode="rx">📡 抄收模式</div>
+    <div class="mode-tab" data-mode="tx">📤 发送模式</div>
+  </div>
+
+  <div class="rx-area show" id="rxArea">
+    <div class="panel">
+      <div class="play-row">
+        <button class="btn btn-primary" id="btnPlay">▶ 播放</button>
+        <button class="btn btn-sm" id="btnReplay">🔄 重播</button>
+        <button class="btn btn-sm" id="btnSkip">⏭ 跳过</button>
+        <div style="flex:1"></div>
+        <button class="btn btn-sm" id="btnShowAnswer">👁</button>
+      </div>
+      <div class="progress-bar" style="margin-top:6px"><div class="progress-fill" id="playProgress" style="width:0%"></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">你的输入</div>
+      <div class="display-box" id="rxDisplay"></div>
+    </div>
+
+    <div class="result-msg" id="rxResult"></div>
+
+    <div class="panel" style="flex:1">
+      <div class="answer-grid" id="answerGrid"></div>
+    </div>
+  </div>
+
+  <div class="tx-area" id="txArea">
+    <div class="tx-sub-tabs">
+      <div class="tx-sub-tab active" data-sub="straight">🔑 手动键</div>
+      <div class="tx-sub-tab" data-sub="paddle">⚡ 电键</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">莫尔斯输出</div>
+      <div class="morse-display" id="morseDisplay"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">自动解码</div>
+      <div class="decoded-display" id="decodedDisplay"></div>
+    </div>
+
+    <div class="tx-stats">
+      <div class="tx-stat"><div class="v" id="txWpm">0</div><div class="l">WPM</div></div>
+      <div class="tx-stat"><div class="v" id="txElements">0</div><div class="l">元素数</div></div>
+      <div class="tx-stat"><div class="v" id="txCharsDecoded">0</div><div class="l">解码字符</div></div>
+    </div>
+
+    <div class="tx-toolbar">
+      <button class="btn btn-sm" id="btnTxClear">🗑 清空</button>
+      <button class="btn btn-sm" id="btnTxTest">📋 测试音</button>
+    </div>
+
+    <div class="key-area">
+      <div id="straightKeyArea" style="width:100%">
+        <button class="straight-key" id="straightKey">按 住 发 报<br><span style="font-size:11px;opacity:.6">空格键 / 触摸</span></button>
+      </div>
+      <div id="paddleKeyArea" style="width:100%;display:none">
+        <div class="paddle-area">
+          <button class="paddle-btn dit-pad" id="ditPad">· 滴<br><span style="font-size:11px;opacity:.6">A / 左键</span></button>
+          <button class="paddle-btn dah-pad" id="dahPad">— 嗒<br><span style="font-size:11px;opacity:.6">D / 右键</span></button>
+        </div>
+        <div class="mouse-zone" id="mouseZone" oncontextmenu="return false">🖱 鼠标操作区 (左键=滴 右键=嗒)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="settings-overlay" id="settingsOverlay">
+  <div class="settings-content">
+    <h2>⚙ 设置</h2>
+    <div class="settings-grid">
+      <div class="set-item">
+        <label>字符个数 <span class="set-val" id="valLen">3</span></label>
+        <input type="range" id="setLen" min="1" max="8" value="3">
+      </div>
+      <div class="set-item">
+        <label>速度 WPM <span class="set-val" id="valWpm">15</span></label>
+        <input type="range" id="setWpm" min="5" max="40" value="15">
+      </div>
+      <div class="set-item">
+        <label>频率 Hz <span class="set-val" id="valFreq">650</span></label>
+        <input type="range" id="setFreq" min="400" max="1000" step="50" value="650">
+      </div>
+      <div class="set-item">
+        <label>音量 <span class="set-val" id="valVol">70</span>%</label>
+        <input type="range" id="setVol" min="10" max="100" value="70">
+      </div>
+      <div class="set-item" style="grid-column:1/-1">
+        <label>额外干扰按钮数 <span class="set-val" id="valExtra">4</span></label>
+        <input type="range" id="setExtra" min="2" max="10" value="4">
+      </div>
+      <div class="set-item" style="grid-column:1/-1">
+        <label>字符集</label>
+        <div class="char-set-btns" id="charSetBtns">
+          <div class="char-set-btn active" data-set="alpha">字母</div>
+          <div class="char-set-btn" data-set="num">数字</div>
+          <div class="char-set-btn active" data-set="mixed">混合</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:12px;justify-content:center" id="closeSettings">确定</button>
+  </div>
+</div>
+
+<div class="help-overlay" id="helpOverlay">
+  <div class="help-content">
+    <h2>📖 操作说明</h2>
+    <h3>🎧 抄收模式</h3>
+    <ul>
+      <li>点击<b>播放</b>收听莫尔斯码音频</li>
+      <li>从按钮中<b>按顺序</b>点击你听到的字符</li>
+      <li>输入满后自动判定，全对自动下一题</li>
+      <li>点击 <b>⌫</b> 删除最后一个输入</li>
+      <li>点击 <b>👁</b> 查看答案</li>
+    </ul>
+    <h3>📤 发送模式 — 手动键</h3>
+    <ul>
+      <li><b>按住</b>屏幕按钮或<b>空格键</b>发报</li>
+      <li>按住时间短 = 滴(·)，长 = 嗒(—)</li>
+      <li>系统自动适应你的发报速度和节奏</li>
+      <li>松开后自动检测字符/单词间隔并解码</li>
+    </ul>
+    <h3>⚡ 发送模式 — 电键 (Paddle)</h3>
+    <ul>
+      <li>两个按钮分别对应<b>滴(·)</b>和<b>嗒(—)</b></li>
+      <li><b>屏幕点击</b>：直接点击对应按钮</li>
+      <li><b>鼠标</b>：在操作区内，左键=滴，右键=嗒</li>
+      <li><b>键盘</b>：<b>A/1</b>=滴，<b>D/2</b>=嗒</li>
+      <li>按住可连续发送，自动按当前WPM定时</li>
+    </ul>
+    <h3>⚙ 设置</h3>
+    <ul>
+      <li><b>字符个数</b>：每题1~8个字符</li>
+      <li><b>WPM</b>：发送/接收速度</li>
+      <li><b>频率</b>：音调高低</li>
+      <li><b>字符集</b>：可选字母、数字或混合</li>
+    </ul>
+    <button class="btn btn-primary close-help" style="width:100%;justify-content:center" id="closeHelp">知道了</button>
+  </div>
+</div>
+
 <script>
-    // 摩尔斯码字典（保持不变）
-    const morseCode = {
-        '·—': 'A', '—···': 'B', '—·—·': 'C', '—··': 'D', '·': 'E',
-        '··—·': 'F', '——·': 'G', '····': 'H', '··': 'I', '·———': 'J',
-        '—·—': 'K', '·—··': 'L', '——': 'M', '—·': 'N', '———': 'O',
-        '·——·': 'P', '——·—': 'Q', '·—·': 'R', '···': 'S', '—': 'T',
-        '··—': 'U', '···—': 'V', '·——': 'W', '—··—': 'X', '—·——': 'Y',
-        '——··': 'Z',
-        '·————': '1', '··———': '2', '···——': '3', '····—': '4', '·····': '5',
-        '—····': '6', '——···': '7', '———··': '8', '————·': '9', '—————': '0',
-        '·—·—·—': '.', '——··——': ',', '··——··': '?', '—··—': '/', '—·——·': "'",
-        '—·—·——': ':', '—···—': ';', '—·—·—·': '=', '·————·': '(', '·—·—·': '"',
-        '·—···': '@', '——·—·': '!'
-    };
+const MORSE = {
+  'A':'·−','B':'−···','C':'−·−·','D':'−··','E':'·','F':'··−·','G':'−−·','H':'····',
+  'I':'··','J':'·−−−','K':'−·−','L':'·−··','M':'−−','N':'−·','O':'−−−','P':'·−−·',
+  'Q':'−−·−','R':'·−·','S':'···','T':'−','U':'··−','V':'···−','W':'·−−','X':'−··−',
+  'Y':'−·−−','Z':'−−··',
+  '0':'−−−−−','1':'·−−−−','2':'··−−−','3':'···−−','4':'····−','5':'·····',
+  '6':'−····','7':'−−···','8':'−−−··','9':'−−−−·'
+};
+const DECODE_MAP = {};
+for(let k in MORSE) DECODE_MAP[MORSE[k]] = k;
 
-    const button = document.getElementById('morse-button');
-    const morseSequence = document.getElementById('morse-sequence');
-    const decodedText = document.getElementById('decoded-text');
-    const clearBtn = document.getElementById('clear-btn');
-    
-    // 高速参数设置
-    const SHORT_PRESS_THRESHOLD = 150;
-    const RECOGNITION_DELAY = 450;
-    const TONE_FREQUENCY = 600;  // 发音频率
-    const TONE_VOLUME = 0.3;     // 音量
+const ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const NUMS = '0123456789'.split('');
+const ALL = [...ALPHA, ...NUMS];
 
-    let pressStartTime = 0;
-    let currentMorse = '';
-    let recognitionTimer = null;
-    let fullMorseSequence = [];
-    let fullDecodedText = '';
+let audioCtx = null;
+function getCtx(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
 
-    // 音频相关
-    let audioContext = null;
-    let activeOscillator = null;  // 保存当前正在播放的振荡器
+// Settings
+let cfg = { len:3, wpm:15, freq:650, vol:0.7, extra:4, charSet:'mixed' };
+const el = id => document.getElementById(id);
 
-    // 初始化音频上下文
-    function initAudio() {
-        if (!audioContext) {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
+// Stats
+let stats = { total:0, correct:0, streak:0, chars:0 };
+function updateStats(){
+  el('statTotal').textContent = stats.total;
+  el('statCorrect').textContent = stats.total ? Math.round(stats.correct/stats.total*100)+'%' : '0%';
+  el('statStreak').textContent = stats.streak;
+  el('statChars').textContent = stats.chars;
+}
+
+// Char set
+function getCharSet(){
+  if(cfg.charSet==='alpha') return ALPHA;
+  if(cfg.charSet==='num') return NUMS;
+  return ALL;
+}
+function randChars(n){
+  const set = getCharSet();
+  const r = [];
+  for(let i=0;i<n;i++) r.push(set[Math.floor(Math.random()*set.length)]);
+  return r;
+}
+function shuffle(a){ const b=[...a]; for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];} return b; }
+
+// Unit duration
+function unitMs(){ return 1200/cfg.wpm; }
+
+// Play morse with clean envelope
+function playMorse(chars, onDone, onProgress){
+  const ctx = getCtx();
+  if(ctx.state==='suspended') ctx.resume();
+  const unit = unitMs()/1000;
+  let t = ctx.currentTime + 0.05;
+  const startT = t;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.frequency.value = cfg.freq;
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  gain.gain.setValueAtTime(0, 0);
+  const ramp = 0.006;
+  const vol = cfg.vol * 0.8;
+
+  for(let ci=0;ci<chars.length;ci++){
+    const code = MORSE[chars[ci]];
+    if(!code) continue;
+    for(let ei=0;ei<code.length;ei++){
+      const isDah = code[ei]==='−';
+      const dur = isDah ? 3*unit : unit;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(vol, t+ramp);
+      gain.gain.setValueAtTime(vol, t+dur-ramp);
+      gain.gain.linearRampToValueAtTime(0, t+dur);
+      t += dur;
+      if(ei < code.length-1) t += unit; // intra-char
     }
+    if(ci < chars.length-1) t += 3*unit; // inter-char
+  }
 
-    // 按下时开始发声
-    function startTone() {
-        initAudio();
-        if (audioContext.state === 'suspended') {
-            audioContext.resume();
-        }
+  osc.start(startT);
+  osc.stop(t + 0.05);
 
-        // 创建振荡器和音量节点
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
+  const totalDur = t - startT;
+  let progInterval = null;
+  if(onProgress){
+    progInterval = setInterval(()=>{
+      const elapsed = ctx.currentTime - startT;
+      const pct = Math.min(100, elapsed/totalDur*100);
+      onProgress(pct);
+      if(pct>=100) clearInterval(progInterval);
+    },50);
+  }
+  osc.onended = ()=>{ if(progInterval)clearInterval(progInterval); if(onProgress)onProgress(100); if(onDone)onDone(); };
+  return { osc, gain, endTime: t };
+}
 
-        oscillator.type = 'sine';
-        oscillator.frequency.value = TONE_FREQUENCY;
-        gainNode.gain.value = TONE_VOLUME;
+// ===== RX MODE =====
+let currentAnswer = [];
+let userInput = [];
+let rxState = 'idle'; // idle, playing, input, judged
+let currentPlayback = null;
 
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
+function newRound(){
+  rxState = 'idle';
+  currentAnswer = randChars(cfg.len);
+  userInput = [];
+  renderRxDisplay();
+  renderAnswerGrid();
+  el('rxResult').textContent = '';
+  el('rxResult').className = 'result-msg';
+  el('playProgress').style.width = '0%';
+  enableAnswerBtns(false);
+}
 
-        oscillator.start();
-
-        activeOscillator = {
-            oscillator,
-            gainNode
-        };
+function renderRxDisplay(){
+  const box = el('rxDisplay');
+  box.innerHTML = '';
+  for(let i=0;i<currentAnswer.length;i++){
+    const span = document.createElement('span');
+    span.className = 'display-char';
+    if(i < userInput.length){
+      span.textContent = userInput[i];
+      if(rxState==='judged'){
+        span.classList.add(userInput[i]===currentAnswer[i]?'correct':'wrong');
+      } else {
+        span.classList.add('pending');
+      }
+    } else if(i === userInput.length && rxState==='input'){
+      span.classList.add('cursor');
+      span.textContent = '_';
+    } else {
+      span.textContent = '·';
+      span.style.color = 'var(--fg3)';
     }
+    box.appendChild(span);
+  }
+}
 
-    // 松开时停止发声
-    function stopTone() {
-        if (activeOscillator) {
-            activeOscillator.oscillator.stop();
-            activeOscillator = null;
-        }
+function renderAnswerGrid(){
+  const grid = el('answerGrid');
+  grid.innerHTML = '';
+  const needed = new Set(currentAnswer);
+  const set = getCharSet();
+  let extras = [];
+  let pool = set.filter(c=>!needed.has(c));
+  pool = shuffle(pool);
+  extras = pool.slice(0, cfg.extra);
+  let allBtns = shuffle([...needed, ...extras]);
+  // Ensure unique
+  allBtns = shuffle([...new Set(allBtns)]);
+  // If not enough, add more
+  while(allBtns.length < needed.size + cfg.extra){
+    const c = set[Math.floor(Math.random()*set.length)];
+    if(!allBtns.includes(c)) allBtns.push(c);
+  }
+  allBtns = shuffle(allBtns);
+
+  allBtns.forEach(c=>{
+    const btn = document.createElement('button');
+    btn.className = 'ans-btn';
+    btn.textContent = c;
+    btn.onclick = ()=> inputChar(c);
+    grid.appendChild(btn);
+  });
+  // Delete button
+  const del = document.createElement('button');
+  del.className = 'ans-btn del-btn';
+  del.textContent = '⌫';
+  del.onclick = ()=> delChar();
+  grid.appendChild(del);
+}
+
+function enableAnswerBtns(en){
+  el('answerGrid').querySelectorAll('.ans-btn').forEach(b=> b.disabled = !en);
+}
+
+function inputChar(c){
+  if(rxState !== 'input' || userInput.length >= currentAnswer.length) return;
+  userInput.push(c);
+  renderRxDisplay();
+  if(userInput.length === currentAnswer.length){
+    judgeRound();
+  }
+}
+function delChar(){
+  if(rxState !== 'input' || userInput.length === 0) return;
+  userInput.pop();
+  renderRxDisplay();
+}
+
+function judgeRound(){
+  rxState = 'judged';
+  let correctCount = 0;
+  for(let i=0;i<currentAnswer.length;i++){
+    if(userInput[i]===currentAnswer[i]) correctCount++;
+  }
+  stats.total++;
+  stats.chars += currentAnswer.length;
+  const allCorrect = correctCount === currentAnswer.length;
+  if(allCorrect){
+    stats.correct++;
+    stats.streak++;
+    el('rxResult').textContent = '✅ 全部正确！';
+    el('rxResult').className = 'result-msg ok';
+    setTimeout(()=>{ newRound(); autoPlay(); }, 800);
+  } else {
+    stats.streak = 0;
+    const pct = Math.round(correctCount/currentAnswer.length*100);
+    el('rxResult').textContent = `❌ ${correctCount}/${currentAnswer.length} 正确 (${pct}%) — 答案: ${currentAnswer.join(' ')}`;
+    el('rxResult').className = 'result-msg fail';
+    setTimeout(()=>{ newRound(); }, 2200);
+  }
+  updateStats();
+  renderRxDisplay();
+  enableAnswerBtns(false);
+}
+
+function autoPlay(){ el('btnPlay').click(); }
+
+el('btnPlay').onclick = ()=>{
+  if(rxState==='playing') return;
+  if(rxState==='idle'){
+    // new round already set, just play
+  }
+  if(rxState==='judged'){ newRound(); }
+  rxState='playing';
+  userInput=[];
+  renderRxDisplay();
+  enableAnswerBtns(false);
+  el('rxResult').textContent = '🔊 播放中...';
+  el('rxResult').className = 'result-msg';
+  if(currentPlayback){ try{currentPlayback.osc.stop();}catch(e){} }
+  currentPlayback = playMorse(currentAnswer, ()=>{
+    rxState='input';
+    enableAnswerBtns(true);
+    el('rxResult').textContent = '';
+    renderRxDisplay();
+  }, pct => el('playProgress').style.width = pct+'%');
+};
+
+el('btnReplay').onclick = ()=>{
+  if(currentAnswer.length===0) return;
+  rxState='idle';
+  el('btnPlay').click();
+};
+
+el('btnSkip').onclick = ()=>{
+  if(currentPlayback){ try{currentPlayback.osc.stop();}catch(e){} }
+  newRound();
+};
+
+el('btnShowAnswer').onclick = ()=>{
+  if(currentAnswer.length===0) return;
+  el('rxResult').textContent = '👁 答案: ' + currentAnswer.join(' ');
+  el('rxResult').className = 'result-msg';
+};
+
+// ===== TX MODE =====
+let txMode = 'straight'; // straight | paddle
+let txElements = []; // {type:'dit'|'dah', dur:ms, time:ms}
+let txGaps = []; // {dur:ms, time:ms}
+let txMorseStr = '';
+let txDecodedStr = '';
+let txCurrentChar = '';
+let txKeyDown = false;
+let txKeyDownTime = 0;
+let txLastUpTime = 0;
+let txToneOsc = null;
+let txToneGain = null;
+let txAdaptDit = 100;
+let txElementCount = 0;
+let txCharDecoded = 0;
+let txGapTimer = null;
+let txWordTimer = null;
+let txAllDurations = [];
+
+function txReset(){
+  txElements=[]; txGaps=[]; txMorseStr=''; txDecodedStr=''; txCurrentChar='';
+  txElementCount=0; txCharDecoded=0; txAdaptDit=100; txAllDurations=[];
+  txLastUpTime=0;
+  el('morseDisplay').textContent='';
+  el('decodedDisplay').textContent='';
+  el('txWpm').textContent='0';
+  el('txElements').textContent='0';
+  el('txCharsDecoded').textContent='0';
+  clearTimeout(txGapTimer); clearTimeout(txWordTimer);
+}
+
+function txStartTone(){
+  const ctx = getCtx();
+  if(ctx.state==='suspended') ctx.resume();
+  txToneOsc = ctx.createOscillator();
+  txToneGain = ctx.createGain();
+  txToneOsc.frequency.value = cfg.freq;
+  txToneGain.gain.setValueAtTime(0, ctx.currentTime);
+  txToneGain.gain.linearRampToValueAtTime(cfg.vol*0.8, ctx.currentTime+0.006);
+  txToneOsc.connect(txToneGain);
+  txToneGain.connect(ctx.destination);
+  txToneOsc.start();
+}
+function txStopTone(){
+  if(txToneGain && txToneOsc){
+    const ctx = getCtx();
+    txToneGain.gain.setValueAtTime(txToneGain.gain.value, ctx.currentTime);
+    txToneGain.gain.linearRampToValueAtTime(0, ctx.currentTime+0.006);
+    txToneOsc.stop(ctx.currentTime+0.01);
+    txToneOsc=null; txToneGain=null;
+  }
+}
+
+// Adaptive threshold
+function classifyElement(dur){
+  if(txAllDurations.length < 2) return dur < 200 ? 'dit' : 'dah';
+  // Simple: threshold = 2x avg dit
+  return dur < txAdaptDit * 2 ? 'dit' : 'dah';
+}
+function updateAdaptive(dur, type){
+  txAllDurations.push({dur, type});
+  const dits = txAllDurations.filter(e=>e.type==='dit').map(e=>e.dur);
+  if(dits.length > 0){
+    txAdaptDit = dits.slice(-20).reduce((a,b)=>a+b,0)/Math.min(dits.length,20);
+  }
+}
+
+function txAddElement(dur){
+  clearTimeout(txGapTimer);
+  clearTimeout(txWordTimer);
+  const now = Date.now();
+  const type = classifyElement(dur);
+  updateAdaptive(dur, type);
+  txElementCount++;
+
+  // Check gap from last element
+  if(txLastUpTime > 0){
+    const gap = txKeyDownTime - txLastUpTime;
+    const charGap = txAdaptDit * 2.5;
+    const wordGap = txAdaptDit * 5;
+    if(gap > wordGap && txCurrentChar.length > 0){
+      finishChar();
+      txMorseStr += ' / ';
+      txDecodedStr += ' ';
+    } else if(gap > charGap && txCurrentChar.length > 0){
+      finishChar();
+      txMorseStr += '  ';
     }
+  }
 
-    // 按钮按下事件：开始计时 + 开始发声
-    button.addEventListener('mousedown', (e) => {
-        pressStartTime = Date.now();
-        button.textContent = '输入中...';
-        startTone();  // 立即开始发声
-        e.preventDefault();
-    });
+  const sym = type==='dit' ? '·' : '−';
+  txCurrentChar += sym;
+  txMorseStr += sym;
+  el('morseDisplay').textContent = txMorseStr;
+  el('txElements').textContent = txElementCount;
 
-    button.addEventListener('touchstart', (e) => {
-        pressStartTime = Date.now();
-        button.textContent = '输入中...';
-        startTone();  // 支持触摸设备
-        e.preventDefault();
-    });
+  // Update WPM estimate
+  if(txAdaptDit > 0){
+    const wpm = Math.round(1200 / txAdaptDit);
+    el('txWpm').textContent = Math.min(99, wpm);
+  }
 
-    // 按钮释放事件
-    const handleRelease = () => {
-        if (pressStartTime === 0) return;
-
-        // 停止声音
-        stopTone();
-
-        const pressDuration = Date.now() - pressStartTime;
-        const symbol = pressDuration < SHORT_PRESS_THRESHOLD ? '·' : '—';
-
-        currentMorse += symbol;
-        updateMorseDisplay(symbol);
-        resetRecognitionTimer();
-
-        pressStartTime = 0;
-        button.textContent = '按住输入';
-    };
-
-    button.addEventListener('mouseup', handleRelease);
-    button.addEventListener('mouseleave', () => {
-        if (pressStartTime !== 0) {
-            stopTone();  // 即使意外离开，也停止声音
-            pressStartTime = 0;
-            button.textContent = '按住输入';
-        }
-    });
-    button.addEventListener('touchend', handleRelease);
-    button.addEventListener('touchcancel', () => {
-        if (pressStartTime !== 0) {
-            stopTone();
-            pressStartTime = 0;
-            button.textContent = '按住输入';
-        }
-    });
-
-    // 更新摩尔斯码显示（保持不变）
-    function updateMorseDisplay(symbol) {
-        if (morseSequence.textContent === '开始输入摩尔斯码...' || 
-            morseSequence.textContent.trim() === '') {
-            morseSequence.textContent = symbol + ' ';
-        } else {
-            const text = morseSequence.textContent.trimEnd();
-            morseSequence.textContent = text + symbol + ' ';
-        }
+  // Set timers for auto char/word break
+  txGapTimer = setTimeout(()=>{
+    if(txCurrentChar.length>0){
+      finishChar();
+      txMorseStr += '  ';
+      el('morseDisplay').textContent = txMorseStr;
     }
+    txWordTimer = setTimeout(()=>{
+      txMorseStr += ' / ';
+      txDecodedStr += ' ';
+      el('morseDisplay').textContent = txMorseStr;
+      el('decodedDisplay').textContent = txDecodedStr;
+    }, txAdaptDit * 4);
+  }, txAdaptDit * 2.5);
+}
 
-    // 重置识别计时器（保持不变）
-    function resetRecognitionTimer() {
-        if (recognitionTimer) {
-            clearTimeout(recognitionTimer);
-        }
-        
-        recognitionTimer = setTimeout(() => {
-            if (currentMorse && currentMorse.trim() !== '') {
-                processCurrentMorse();
-            }
-        }, RECOGNITION_DELAY);
+function finishChar(){
+  if(txCurrentChar.length === 0) return;
+  const decoded = DECODE_MAP[txCurrentChar] || '?';
+  txDecodedStr += decoded;
+  txCharDecoded++;
+  el('decodedDisplay').textContent = txDecodedStr;
+  el('txCharsDecoded').textContent = txCharDecoded;
+  txCurrentChar = '';
+}
+
+// Straight key handlers
+function straightDown(){
+  if(txKeyDown) return;
+  txKeyDown = true;
+  txKeyDownTime = Date.now();
+  txStartTone();
+  el('straightKey').classList.add('pressing');
+}
+function straightUp(){
+  if(!txKeyDown) return;
+  txKeyDown = false;
+  const dur = Date.now() - txKeyDownTime;
+  txLastUpTime = Date.now();
+  txStopTone();
+  el('straightKey').classList.remove('pressing');
+  if(dur > 10) txAddElement(dur);
+}
+
+// Paddle mode
+let paddleDitDown = false, paddleDahDown = false;
+let paddleInterval = null;
+let paddlePlaying = false;
+let paddleQueue = [];
+
+function paddleUnit(){ return 1200/cfg.wpm; }
+
+function paddleSendElement(type){
+  return new Promise(resolve=>{
+    const dur = type==='dit' ? paddleUnit() : paddleUnit()*3;
+    txKeyDownTime = Date.now();
+    txStartTone();
+    setTimeout(()=>{
+      txStopTone();
+      txLastUpTime = Date.now();
+      txAddElement(dur);
+      // inter-element gap
+      setTimeout(resolve, paddleUnit());
+    }, dur);
+  });
+}
+
+async function paddleLoop(){
+  if(paddlePlaying) return;
+  paddlePlaying = true;
+  while(paddleDitDown || paddleDahDown || paddleQueue.length > 0){
+    let type;
+    if(paddleQueue.length > 0){
+      type = paddleQueue.shift();
+    } else if(paddleDitDown && paddleDahDown){
+      // Iambic: alternate, but start with whichever was pressed
+      type = paddleQueue.length > 0 ? paddleQueue.shift() : 'dit';
+    } else if(paddleDitDown){
+      type = 'dit';
+    } else if(paddleDahDown){
+      type = 'dah';
+    } else break;
+    await paddleSendElement(type);
+    // Check for iambic
+    if(paddleDitDown && paddleDahDown){
+      paddleQueue.push(type==='dit'?'dah':'dit');
     }
+  }
+  paddlePlaying = false;
+}
 
-    // 处理当前摩尔斯码（保持不变）
-    function processCurrentMorse() {
-        const cleanedMorse = currentMorse.trim();
-        let recognizedChar = '?';
-        
-        for (const [morse, char] of Object.entries(morseCode)) {
-            if (morse === cleanedMorse) {
-                recognizedChar = char;
-                break;
-            }
-        }
-        
-        fullMorseSequence.push({
-            morse: cleanedMorse,
-            char: recognizedChar
-        });
-        
-        const lines = morseSequence.textContent.trim().split('  ');
-        const lastLine = lines.length > 0 ? lines[lines.length - 1] : '';
-        
-        if (lastLine !== '' && lastLine !== '开始输入摩尔斯码...') {
-            morseSequence.textContent = morseSequence.textContent.trim() + '  ';
-        }
-        
-        fullDecodedText += recognizedChar;
-        decodedText.textContent = fullDecodedText;
-        
-        currentMorse = '';
-        recognitionTimer = null;
+function padDitDown(){
+  if(paddleDitDown) return;
+  paddleDitDown = true;
+  el('ditPad').classList.add('pressing');
+  paddleLoop();
+}
+function padDitUp(){
+  paddleDitDown = false;
+  el('ditPad').classList.remove('pressing');
+}
+function padDahDown(){
+  if(paddleDahDown) return;
+  paddleDahDown = true;
+  el('dahPad').classList.add('pressing');
+  paddleLoop();
+}
+function padDahUp(){
+  paddleDahDown = false;
+  el('dahPad').classList.remove('pressing');
+}
+
+// Touch events for straight key
+const sk = el('straightKey');
+sk.addEventListener('mousedown', e=>{e.preventDefault();straightDown();});
+sk.addEventListener('mouseup', e=>{e.preventDefault();straightUp();});
+sk.addEventListener('mouseleave', e=>{straightUp();});
+sk.addEventListener('touchstart', e=>{e.preventDefault();straightDown();},{passive:false});
+sk.addEventListener('touchend', e=>{e.preventDefault();straightUp();},{passive:false});
+sk.addEventListener('touchcancel', e=>{straightUp();});
+
+// Touch for paddles
+function addPadEvents(elem, downFn, upFn){
+  elem.addEventListener('mousedown',e=>{e.preventDefault();downFn();});
+  elem.addEventListener('mouseup',e=>{e.preventDefault();upFn();});
+  elem.addEventListener('mouseleave',e=>{upFn();});
+  elem.addEventListener('touchstart',e=>{e.preventDefault();downFn();},{passive:false});
+  elem.addEventListener('touchend',e=>{e.preventDefault();upFn();},{passive:false});
+  elem.addEventListener('touchcancel',e=>{upFn();});
+}
+addPadEvents(el('ditPad'), padDitDown, padDitUp);
+addPadEvents(el('dahPad'), padDahDown, padDahUp);
+
+// Mouse zone for paddle
+const mz = el('mouseZone');
+mz.addEventListener('mousedown', e=>{
+  e.preventDefault();
+  mz.classList.add('active');
+  if(e.button===0) padDitDown();
+  if(e.button===2) padDahDown();
+});
+mz.addEventListener('mouseup', e=>{
+  e.preventDefault();
+  mz.classList.remove('active');
+  if(e.button===0) padDitUp();
+  if(e.button===2) padDahUp();
+});
+mz.addEventListener('mouseleave', ()=>{
+  mz.classList.remove('active');
+  padDitUp(); padDahUp();
+});
+mz.addEventListener('contextmenu', e=>e.preventDefault());
+
+// Keyboard
+document.addEventListener('keydown', e=>{
+  if(e.repeat) return;
+  const mode = document.querySelector('.mode-tab.active').dataset.mode;
+  if(mode!=='tx') return;
+  if(txMode==='straight'){
+    if(e.code==='Space'||e.code==='KeyF'||e.code==='KeyJ'){
+      e.preventDefault();
+      straightDown();
     }
+  } else {
+    if(e.code==='KeyA'||e.code==='Digit1'||e.code==='BracketLeft'){
+      e.preventDefault(); padDitDown();
+    }
+    if(e.code==='KeyD'||e.code==='Digit2'||e.code==='BracketRight'){
+      e.preventDefault(); padDahDown();
+    }
+  }
+});
+document.addEventListener('keyup', e=>{
+  const mode = document.querySelector('.mode-tab.active').dataset.mode;
+  if(mode!=='tx') return;
+  if(txMode==='straight'){
+    if(e.code==='Space'||e.code==='KeyF'||e.code==='KeyJ'){
+      e.preventDefault();
+      straightUp();
+    }
+  } else {
+    if(e.code==='KeyA'||e.code==='Digit1'||e.code==='BracketLeft'){
+      e.preventDefault(); padDitUp();
+    }
+    if(e.code==='KeyD'||e.code==='Digit2'||e.code==='BracketRight'){
+      e.preventDefault(); padDahUp();
+    }
+  }
+});
 
-    // 空格键分隔字母（保持不变）
-    document.addEventListener('keydown', (e) => {
-        if (e.key === ' ') {
-            e.preventDefault();
-            if (currentMorse) {
-                processCurrentMorse();
-            } else {
-                fullDecodedText += ' ';
-                decodedText.textContent = fullDecodedText;
-            }
-        }
-    });
+// TX Buttons
+el('btnTxClear').onclick = ()=> txReset();
+el('btnTxTest').onclick = ()=>{
+  playMorse(['V','V','V'], null, null); // VVV test
+};
 
-    // 右键删除（保持不变）
-    morseSequence.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        if (fullMorseSequence.length > 0) {
-            fullMorseSequence.pop();
-            fullDecodedText = fullDecodedText.slice(0, -1);
-            decodedText.textContent = fullDecodedText || '解码结果将实时显示在这里';
-            
-            let displayText = '';
-            fullMorseSequence.forEach((item, index) => {
-                for (let char of item.morse) {
-                    displayText += char + ' ';
-                }
-                if (index < fullMorseSequence.length - 1) {
-                    displayText += '  ';
-                }
-            });
-            
-            morseSequence.textContent = displayText || '开始输入摩尔斯码...';
-            
-            currentMorse = '';
-            if (recognitionTimer) {
-                clearTimeout(recognitionTimer);
-                recognitionTimer = null;
-            }
-        }
-    });
+// Mode tabs
+document.querySelectorAll('.mode-tab').forEach(tab=>{
+  tab.onclick = ()=>{
+    document.querySelectorAll('.mode-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const m = tab.dataset.mode;
+    el('rxArea').classList.toggle('show', m==='rx');
+    el('txArea').classList.toggle('show', m==='tx');
+    if(m==='rx' && currentAnswer.length===0) newRound();
+  };
+});
 
-    // 清空功能（保持不变）
-    clearBtn.addEventListener('click', () => {
-        morseSequence.textContent = '开始输入摩尔斯码...';
-        decodedText.textContent = '解码结果将实时显示在这里';
-        currentMorse = '';
-        fullMorseSequence = [];
-        fullDecodedText = '';
-        if (recognitionTimer) {
-            clearTimeout(recognitionTimer);
-            recognitionTimer = null;
-        }
-    });
+// TX sub tabs
+document.querySelectorAll('.tx-sub-tab').forEach(tab=>{
+  tab.onclick = ()=>{
+    document.querySelectorAll('.tx-sub-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    txMode = tab.dataset.sub;
+    el('straightKeyArea').style.display = txMode==='straight'?'block':'none';
+    el('paddleKeyArea').style.display = txMode==='paddle'?'block':'none';
+    txReset();
+  };
+});
 
-    // 禁止文本选择
-    document.addEventListener('selectstart', (e) => {
-        e.preventDefault();
-    });
+// Settings
+el('btnSettings').onclick = ()=> el('settingsOverlay').classList.add('show');
+el('closeSettings').onclick = ()=>{ el('settingsOverlay').classList.remove('show'); newRound(); };
+el('settingsOverlay').onclick = e=>{ if(e.target===el('settingsOverlay')) el('settingsOverlay').classList.remove('show'); };
 
-    // 快捷键：Esc 清空
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            clearBtn.click();
-        }
-    });
+el('setLen').oninput = function(){ cfg.len=+this.value; el('valLen').textContent=this.value; };
+el('setWpm').oninput = function(){ cfg.wpm=+this.value; el('valWpm').textContent=this.value; };
+el('setFreq').oninput = function(){ cfg.freq=+this.value; el('valFreq').textContent=this.value; };
+el('setVol').oninput = function(){ cfg.vol=+this.value/100; el('valVol').textContent=this.value; };
+el('setExtra').oninput = function(){ cfg.extra=+this.value; el('valExtra').textContent=this.value; };
+
+document.querySelectorAll('.char-set-btn').forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll('.char-set-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    cfg.charSet = btn.dataset.set;
+  };
+});
+
+// Help
+el('btnHelp').onclick = ()=> el('helpOverlay').classList.add('show');
+el('closeHelp').onclick = ()=> el('helpOverlay').classList.remove('show');
+el('helpOverlay').onclick = e=>{ if(e.target===el('helpOverlay')) el('helpOverlay').classList.remove('show'); };
+
+// Init
+newRound();
+updateStats();
 </script>
 </body>
 </html>

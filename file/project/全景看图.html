@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>LHY全景查看</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#0d0d0f;--surface:#16171b;--surface2:#1e1f25;--surface3:#282a33;
+    --border:#2a2c36;--text:#e4e4e8;--text2:#9395a0;--accent:#6c8aff;
+    --accent2:#4ecdc4;--danger:#ff6b6b;--shadow:0 8px 32px rgba(0,0,0,.4);
+  }
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+  #canvas-container{position:fixed;inset:0;z-index:0}
+
+  #loading-overlay{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);transition:opacity .5s,visibility .5s}
+  #loading-overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
+  .loader{width:48px;height:48px;border:3px solid var(--surface3);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #loading-overlay .msg{margin-top:20px;font-size:15px;color:var(--text2);text-align:center}
+
+  #error-card{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px 36px;text-align:center;max-width:360px;width:88%;box-shadow:var(--shadow);display:none;backdrop-filter:blur(16px)}
+  #error-card.show{display:block}
+  #error-card .error-icon{font-size:52px;margin-bottom:12px;display:block}
+  #error-card .error-msg{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:20px}
+  #error-card .error-msg strong{color:var(--accent)}
+  #error-card .upload-hint{padding:11px 28px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;transition:transform .2s,box-shadow .2s}
+  #error-card .upload-hint:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(108,138,255,.35)}
+  #error-card .dismiss{margin-top:10px;padding:8px 20px;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:8px;font-size:12px;cursor:pointer;transition:all .2s}
+  #error-card .dismiss:hover{color:var(--text);border-color:var(--text2)}
+
+  #topbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:linear-gradient(180deg,rgba(13,13,15,.92) 0%,transparent 100%);pointer-events:none}
+  #topbar>*{pointer-events:auto}
+  #topbar .title{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:50vw}
+  #topbar .actions{display:flex;gap:6px}
+
+  .btn{width:40px;height:40px;border:none;border-radius:10px;background:var(--surface2);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;backdrop-filter:blur(12px);position:relative}
+  .btn:hover{background:var(--surface3);transform:translateY(-1px)}
+  .btn:active{transform:scale(.95)}
+  .btn.active{background:var(--accent);color:#fff}
+  .btn svg{width:20px;height:20px;fill:currentColor}
+  .btn-label{position:absolute;bottom:-20px;font-size:10px;white-space:nowrap;color:var(--text2);opacity:0;transition:opacity .2s;pointer-events:none}
+  .btn:hover .btn-label{opacity:1}
+
+  #controls{position:fixed;bottom:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;gap:8px;background:linear-gradient(0deg,rgba(13,13,15,.92) 0%,transparent 100%);pointer-events:none;flex-wrap:wrap}
+  #controls>*{pointer-events:auto}
+
+  .quality-group{display:flex;background:var(--surface2);border-radius:10px;overflow:hidden;backdrop-filter:blur(12px)}
+  .quality-btn{padding:8px 14px;border:none;background:transparent;color:var(--text2);font-size:12px;cursor:pointer;transition:all .25s;white-space:nowrap}
+  .quality-btn.active{background:var(--accent);color:#fff}
+  .quality-btn:hover:not(.active){color:var(--text);background:var(--surface3)}
+
+  .zoom-group{display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:10px;padding:4px 12px;backdrop-filter:blur(12px)}
+  .zoom-group span{font-size:14px;color:var(--text2);user-select:none;cursor:pointer;width:20px;text-align:center;line-height:1}
+  .zoom-group span:hover{color:var(--text)}
+  input[type=range]{-webkit-appearance:none;width:110px;height:4px;background:var(--surface3);border-radius:2px;outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--accent);border-radius:50%;cursor:pointer;transition:transform .15s}
+  input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--accent);border-radius:50%;cursor:pointer;border:none}
+
+  .info-badge{position:fixed;top:64px;right:16px;z-index:50;background:var(--surface2);border-radius:8px;padding:8px 14px;font-size:11px;color:var(--text2);backdrop-filter:blur(12px);opacity:0;transition:opacity .4s;pointer-events:none;line-height:1.6}
+  .info-badge.show{opacity:1}
+
+  #gallery{position:fixed;right:0;top:0;bottom:0;width:280px;z-index:60;background:var(--surface);border-left:1px solid var(--border);transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+  #gallery.open{transform:translateX(0)}
+  #gallery .panel-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+  #gallery .panel-header h3{font-size:15px;font-weight:600}
+  #gallery .close-btn{width:32px;height:32px;border:none;background:var(--surface2);color:var(--text);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:background .2s}
+  #gallery .close-btn:hover{background:var(--surface3)}
+  #gallery .panel-body{flex:1;overflow-y:auto;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;scrollbar-width:thin;scrollbar-color:var(--surface3) transparent}
+  #gallery .panel-body::-webkit-scrollbar{width:4px}
+  #gallery .panel-body::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:2px}
+
+  .gallery-item{position:relative;aspect-ratio:16/10;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .25s}
+  .gallery-item:hover{border-color:var(--accent);transform:scale(1.03)}
+  .gallery-item.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+  .gallery-item img{width:100%;height:100%;object-fit:cover}
+  .gallery-item .name{position:absolute;bottom:0;left:0;right:0;padding:4px 6px;background:linear-gradient(transparent,rgba(0,0,0,.8));font-size:10px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gallery-item .del{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:6px;background:rgba(0,0,0,.6);border:none;color:#fff;font-size:12px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:background .2s}
+  .gallery-item:hover .del{display:flex}
+  .gallery-item .del:hover{background:var(--danger)}
+
+  .upload-area{grid-column:1/-1;border:2px dashed var(--border);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;cursor:pointer;transition:all .25s;min-height:100px}
+  .upload-area:hover{border-color:var(--accent);background:rgba(108,138,255,.06)}
+  .upload-area svg{width:28px;height:28px;fill:var(--text2);margin-bottom:8px}
+  .upload-area span{font-size:12px;color:var(--text2)}
+
+  #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);z-index:200;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 20px;font-size:13px;color:var(--text);backdrop-filter:blur(16px);opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;box-shadow:var(--shadow)}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  #progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:200;transition:width .3s;border-radius:0 2px 2px 0}
+
+  #crosshair{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:40;width:24px;height:24px;opacity:0;pointer-events:none;transition:opacity .3s}
+  #crosshair::before,#crosshair::after{content:'';position:absolute;background:rgba(255,255,255,.35);border-radius:1px}
+  #crosshair::before{width:2px;height:100%;left:50%;transform:translateX(-50%)}
+  #crosshair::after{height:2px;width:100%;top:50%;transform:translateY(-50%)}
+
+  #help-modal{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
+  #help-modal.open{display:flex}
+  .modal-content{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:400px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow)}
+  .modal-content h3{font-size:17px;margin-bottom:16px}
+  .modal-content table{width:100%;font-size:13px;line-height:2}
+  .modal-content td:first-child{color:var(--text2);padding-right:16px;white-space:nowrap}
+  .modal-content kbd{display:inline-block;padding:2px 7px;background:var(--surface3);border-radius:4px;font-size:11px;font-family:monospace;border:1px solid var(--border)}
+  .modal-close{margin-top:18px;width:100%;padding:10px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;transition:background .2s}
+  .modal-close:hover{background:var(--surface3)}
+
+  .gyro-active{animation:gyro-pulse 2s infinite}
+  @keyframes gyro-pulse{0%,100%{box-shadow:0 0 0 0 rgba(108,138,255,.4)}50%{box-shadow:0 0 0 8px rgba(108,138,255,0)}}
+
+  .zoom-pct{font-size:11px;color:var(--text2);min-width:36px;text-align:center;font-variant-numeric:tabular-nums}
+
+  @media(max-width:600px){
+    .btn{width:36px;height:36px;font-size:16px;border-radius:8px}
+    .btn svg{width:17px;height:17px}
+    #gallery{width:100%}
+    .quality-btn{padding:7px 10px;font-size:11px}
+    .zoom-group{padding:4px 8px}
+    input[type=range]{width:70px}
+    #topbar{padding:8px 10px}
+    #controls{padding:10px 8px;gap:6px}
+    .info-badge{top:54px;right:10px;font-size:10px}
+    #error-card{padding:24px 20px}
+  }
+</style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div id="loading-overlay">
+  <div class="loader"></div>
+  <div class="msg">正在加载全景图...</div>
+</div>
+
+<div id="error-card">
+  <span class="error-icon">😕</span>
+  <div class="error-msg" id="error-msg">无法加载图片</div>
+  <button class="upload-hint" onclick="document.getElementById('file-input').click()">📂 上传全景图</button>
+  <br>
+  <button class="dismiss" onclick="dismissError()">关闭提示</button>
+</div>
+
+<div id="progress" style="width:0%"></div>
+<div id="crosshair"></div>
+
+<div id="topbar">
+  <div class="title" id="img-title">LHY全景查看</div>
+  <div class="actions">
+    <button class="btn" id="btn-gyro" title="陀螺仪" style="display:none" onclick="toggleGyro()">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+      <span class="btn-label">陀螺仪</span>
+    </button>
+    <button class="btn" id="btn-crosshair" title="准心" onclick="toggleCrosshair()">
+      <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0013 3.06V1h-2v2.06A8.994 8.994 0 003.06 11H1v2h2.06A8.994 8.994 0 0011 20.94V23h2v-2.06A8.994 8.994 0 0020.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+      <span class="btn-label">准心</span>
+    </button>
+    <button class="btn" id="btn-gallery" title="图库" onclick="toggleGallery()">
+      <svg viewBox="0 0 24 24"><path d="M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z"/></svg>
+      <span class="btn-label">图库</span>
+    </button>
+    <button class="btn" title="帮助" onclick="toggleHelp()">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
+      <span class="btn-label">帮助</span>
+    </button>
+    <button class="btn" title="全屏" onclick="toggleFullscreen()">
+      <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+      <span class="btn-label">全屏</span>
+    </button>
+  </div>
+</div>
+
+<div class="info-badge" id="info-badge"></div>
+
+<div id="controls">
+  <div class="quality-group">
+    <button class="quality-btn" data-quality="low" onclick="setQuality('low')">低</button>
+    <button class="quality-btn active" data-quality="medium" onclick="setQuality('medium')">中</button>
+    <button class="quality-btn" data-quality="high" onclick="setQuality('high')">高</button>
+  </div>
+  <div class="zoom-group">
+    <span onclick="zoomIn()">+</span>
+    <input type="range" id="zoom-slider" min="0" max="100" value="50" oninput="setFovFromSlider(this.value)">
+    <span onclick="zoomOut()">−</span>
+    <span class="zoom-pct" id="zoom-pct">100%</span>
+  </div>
+  <button class="btn" id="btn-autorotate" title="自动旋转" onclick="toggleAutoRotate()">
+    <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+  </button>
+  <button class="btn" title="截图" onclick="takeScreenshot()">
+    <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.65 0-3 1.35-3 3s1.35 3 3 3 3-1.35 3-3-1.35-3-3-3z"/></svg>
+  </button>
+  <button class="btn" title="重置视角" onclick="resetView()">
+    <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+  </button>
+</div>
+
+<div id="gallery">
+  <div class="panel-header">
+    <h3>📸 图库 (<span id="gallery-count">0</span>)</h3>
+    <button class="close-btn" onclick="toggleGallery()">✕</button>
+  </div>
+  <div class="panel-body" id="gallery-body">
+    <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+      <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      <span>点击或拖拽添加全景图</span>
+    </div>
+  </div>
+</div>
+<input type="file" id="file-input" accept="image/*" multiple style="display:none" onchange="handleFiles(this.files)">
+
+<div id="toast"></div>
+
+<div id="help-modal" onclick="if(event.target===this)toggleHelp()">
+  <div class="modal-content">
+    <h3>⌨️ 快捷键 & 操作说明</h3>
+    <table>
+      <tr><td>鼠标拖动 / 触屏滑动</td><td>旋转视角</td></tr>
+      <tr><td>滚轮 / 双指捏合</td><td>向光标处缩放</td></tr>
+      <tr><td><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></td><td>方向控制</td></tr>
+      <tr><td><kbd>+</kbd> <kbd>-</kbd></td><td>缩放</td></tr>
+      <tr><td><kbd>R</kbd></td><td>自动旋转</td></tr>
+      <tr><td><kbd>F</kbd></td><td>全屏</td></tr>
+      <tr><td><kbd>S</kbd></td><td>截图</td></tr>
+      <tr><td><kbd>Space</kbd></td><td>重置视角</td></tr>
+      <tr><td><kbd>G</kbd></td><td>打开图库</td></tr>
+      <tr><td>双击</td><td>全屏切换</td></tr>
+    </table>
+    <p style="margin-top:14px;font-size:12px;color:var(--text2);line-height:1.6">
+      💡 支持等距矩形投影 (2:1) 全景图。<br>
+      大图自动按画质档位优化纹理尺寸。<br>
+      画质切换影响渲染分辨率和纹理精度。
+    </p>
+    <button class="modal-close" onclick="toggleHelp()">我知道了</button>
+  </div>
+</div>
+
+<script>
+const FOV_MIN = 5, FOV_MAX = 150, FOV_DEFAULT = 75;
+const LOG_MIN = Math.log(FOV_MIN), LOG_MAX = Math.log(FOV_MAX);
+
+function fovToSlider(fov) { return (1 - (Math.log(fov) - LOG_MIN) / (LOG_MAX - LOG_MIN)) * 100; }
+function sliderToFov(v) { return Math.exp(LOG_MIN + (1 - v / 100) * (LOG_MAX - LOG_MIN)); }
+
+const state = {
+  images: [], currentIndex: -1,
+  quality: 'medium',
+  autoRotate: false, autoRotateSpeed: 0.3,
+  gyroEnabled: false, showCrosshair: false,
+  lon: 0, lat: 0, targetLon: 0, targetLat: 0,
+  fov: FOV_DEFAULT, targetFov: FOV_DEFAULT,
+  isUserInteracting: false,
+  onPointerDownLon: 0, onPointerDownLat: 0,
+  onPointerDownX: 0, onPointerDownY: 0,
+  pinchStartDist: 0, pinchStartFov: FOV_DEFAULT,
+  pinchCenterX: 0, pinchCenterY: 0,
+  momentum: { x: 0, y: 0 },
+  lastMove: { x: 0, y: 0, t: 0 },
+  dirty: true, imgWidth: 0, imgHeight: 0
+};
+
+const qualityPresets = {
+  low:    { ratio: 1,   segs:[80,50],   minF:'LinearMipmapLinearFilter', magF:'LinearFilter', mip:true,  aniso:1,     maxTex:4096  },
+  medium: { ratio: Math.min(window.devicePixelRatio,2), segs:[160,100], minF:'LinearFilter', magF:'LinearFilter', mip:false, aniso:8, maxTex:8192 },
+  high:   { ratio: window.devicePixelRatio,             segs:[256,160], minF:'LinearFilter', magF:'LinearFilter', mip:false, aniso:'max', maxTex:16384 }
+};
+
+let camera, scene, renderer, sphere, material, texture, maxAniso, glMaxTex;
+const container = document.getElementById('canvas-container');
+
+// =====================================================
+// ★ 标准全景球体：scale(-1,1,1) + FrontSide
+//   这是 Three.js 全景查看器的标准做法
+//   scale(-1,1,1) 翻转几何体X轴 → 法线朝内 → 从内部可见
+//   UV 水平方向同步翻转 → 纹理映射方向正确
+//   不使用 BackSide（会导致纹理镜像）
+// =====================================================
+function createSphereGeo(segs) {
+  const geo = new THREE.SphereGeometry(500, segs[0], segs[1]);
+  geo.scale(-1, 1, 1);
+  return geo;
+}
+
+function initThree() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(FOV_DEFAULT, window.innerWidth / window.innerHeight, 0.1, 1100);
+  camera.target = new THREE.Vector3(0, 0, 0);
+
+  const p = qualityPresets[state.quality];
+  material = new THREE.MeshBasicMaterial({ color: 0x222222 });
+  sphere = new THREE.Mesh(createSphereGeo(p.segs), material);
+  scene.add(sphere);
+
+  renderer = new THREE.WebGLRenderer({
+    antialias: false,
+    preserveDrawingBuffer: true,
+    powerPreference: 'high-performance'
+  });
+  renderer.setPixelRatio(p.ratio);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  container.appendChild(renderer.domElement);
+
+  maxAniso = renderer.capabilities.getMaxAnisotropy();
+  glMaxTex = renderer.capabilities.maxTextureSize || 8192;
+}
+
+function rebuildSphere() {
+  const p = qualityPresets[state.quality];
+  scene.remove(sphere);
+  sphere.geometry.dispose();
+  sphere = new THREE.Mesh(createSphereGeo(p.segs), material);
+  scene.add(sphere);
+  markDirty();
+}
+
+function applyTexQuality(tex) {
+  if (!tex) return;
+  const p = qualityPresets[state.quality];
+  tex.generateMipmaps = p.mip;
+  tex.minFilter = THREE[p.minF];
+  tex.magFilter = THREE[p.magF];
+  tex.anisotropy = p.aniso === 'max' ? maxAniso : p.aniso;
+  tex.needsUpdate = true;
+}
+
+// =====================================================
+// 大图降采样（纯 canvas，无 createImageBitmap 翻转歧义）
+// =====================================================
+function nearestPOT(v) { let p = 1; while (p * 2 <= v) p *= 2; return p; }
+
+function downsampleIfNeeded(img) {
+  const p = qualityPresets[state.quality];
+  const limit = Math.min(p.maxTex, glMaxTex);
+  const w = img.width, h = img.height;
+
+  if (w <= limit && h <= limit) return { source: img, tw: w, th: h, resized: false };
+
+  const s = limit / Math.max(w, h);
+  const tw = nearestPOT(Math.round(w * s));
+  const th = nearestPOT(Math.round(h * s));
+
+  const c = document.createElement('canvas');
+  c.width = tw; c.height = th;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, 0, 0, tw, th);
+
+  return { source: c, tw, th, resized: true };
+}
+
+// =====================================================
+// 渲染循环：按需渲染
+// =====================================================
+function markDirty() { state.dirty = true; }
+
+function needsRender() {
+  return state.dirty ||
+    Math.abs(state.targetLon - state.lon) > 0.002 ||
+    Math.abs(state.targetLat - state.lat) > 0.002 ||
+    Math.abs(state.targetFov - state.fov) > 0.005 ||
+    state.autoRotate || state.isUserInteracting || state.gyroEnabled ||
+    Math.abs(state.momentum.x) > 0.003 || Math.abs(state.momentum.y) > 0.003;
+}
+
+const LERP = 0.4;
+
+function updateCamera() {
+  state.lon += (state.targetLon - state.lon) * LERP;
+  state.lat += (state.targetLat - state.lat) * LERP;
+  state.fov += (state.targetFov - state.fov) * LERP;
+  camera.fov = state.fov;
+  camera.updateProjectionMatrix();
+  const phi = THREE.MathUtils.degToRad(90 - state.lat);
+  const theta = THREE.MathUtils.degToRad(state.lon);
+  camera.target.set(
+    500 * Math.sin(phi) * Math.cos(theta),
+    500 * Math.cos(phi),
+    500 * Math.sin(phi) * Math.sin(theta)
+  );
+  camera.lookAt(camera.target);
+}
+
+function updateZoomUI() {
+  document.getElementById('zoom-pct').textContent = Math.round(FOV_DEFAULT / state.targetFov * 100) + '%';
+  document.getElementById('zoom-slider').value = fovToSlider(state.targetFov);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  if (state.autoRotate && !state.isUserInteracting) state.targetLon += state.autoRotateSpeed;
+  if (!state.isUserInteracting && (Math.abs(state.momentum.x) > 0.003 || Math.abs(state.momentum.y) > 0.003)) {
+    state.targetLon += state.momentum.x;
+    state.targetLat += state.momentum.y;
+    state.momentum.x *= 0.88;
+    state.momentum.y *= 0.88;
+  }
+  state.targetLat = THREE.MathUtils.clamp(state.targetLat, -85, 85);
+  if (needsRender()) { updateCamera(); renderer.render(scene, camera); state.dirty = false; }
+}
+
+// =====================================================
+// 向光标处缩放
+// =====================================================
+function zoomTowardPoint(oldFov, newFov, sx, sy) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  const nx = ((sx - rect.left) / rect.width) * 2 - 1;
+  const ny = -(((sy - rect.top) / rect.height) * 2 - 1);
+  const d = oldFov - newFov;
+  state.targetLon += nx * d * camera.aspect * 0.5;
+  state.targetLat += ny * d * 0.5;
+}
+
+// =====================================================
+// 图片加载：img.decode() 异步解码，无翻转问题
+// =====================================================
+function loadPanorama(url, name, isUserUpload) {
+  const loadingOverlay = document.getElementById('loading-overlay');
+  const errorCard = document.getElementById('error-card');
+  const progress = document.getElementById('progress');
+
+  errorCard.classList.remove('show');
+  loadingOverlay.classList.remove('hidden');
+  progress.style.width = '0%';
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+
+  let prog = 0;
+  const progTimer = setInterval(() => { prog += (92 - prog) * 0.06; progress.style.width = prog + '%'; }, 80);
+
+  img.onload = function() {
+    clearInterval(progTimer);
+    progress.style.width = '96%';
+
+    state.imgWidth = img.width;
+    state.imgHeight = img.height;
+
+    // 异步解码（不阻塞主线程），然后处理纹理
+    const finalize = () => {
+      const { source, tw, th, resized } = downsampleIfNeeded(img);
+
+      if (resized) showToast('📐 纹理优化: ' + img.width + '×' + img.height + ' → ' + tw + '×' + th);
+
+      progress.style.width = '100%';
+      setTimeout(() => { progress.style.width = '0%'; }, 400);
+
+      if (texture) texture.dispose();
+      texture = new THREE.Texture(source);
+      texture.encoding = THREE.sRGBEncoding;
+      applyTexQuality(texture);
+      texture.needsUpdate = true;
+
+      material.map = texture;
+      material.color.set(0xffffff);
+      material.needsUpdate = true;
+      markDirty();
+
+      loadingOverlay.classList.add('hidden');
+      document.getElementById('img-title').textContent = name || '全景查看器';
+
+      const ratio = (state.imgWidth / state.imgHeight).toFixed(2);
+      let info = state.imgWidth + '×' + state.imgHeight + '  ·  ' + ratio + ':1  ·  ' +
+                 (state.imgWidth * state.imgHeight / 1e6).toFixed(1) + 'MP';
+      if (resized) info += '  ·  纹理' + tw + '×' + th;
+      info += '  ·  GPU上限' + glMaxTex;
+      showInfo(info);
+    };
+
+    // img.decode() 异步解码：在后台线程解压图片，不卡UI
+    if (img.decode) {
+      img.decode().then(finalize).catch(finalize);
+    } else {
+      finalize();
+    }
+  };
+
+  img.onerror = function() {
+    clearInterval(progTimer);
+    progress.style.width = '0%';
+    loadingOverlay.classList.add('hidden');
+    document.getElementById('error-msg').innerHTML = isUserUpload
+      ? '图片加载失败<br><span style="font-size:12px">请检查图片格式是否正确</span>'
+      : '无法加载 <strong>' + url + '</strong><br><span style="font-size:12px">文件不存在或网络错误</span>';
+    errorCard.classList.add('show');
+  };
+
+  img.src = url;
+}
+
+function dismissError() { document.getElementById('error-card').classList.remove('show'); }
+
+// =====================================================
+// 画质切换
+// =====================================================
+function setQuality(level) {
+  state.quality = level;
+  const p = qualityPresets[level];
+  renderer.setPixelRatio(p.ratio);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  rebuildSphere();
+  if (state.currentIndex >= 0 && state.images[state.currentIndex]) {
+    loadPanorama(state.images[state.currentIndex].url, state.images[state.currentIndex].name, true);
+  }
+  document.querySelectorAll('.quality-btn').forEach(b => b.classList.toggle('active', b.dataset.quality === level));
+  showToast('🎮 ' + {low:'低画质',medium:'中画质 (均衡)',high:'高画质 (原生)'}[level]);
+}
+
+// =====================================================
+// 缩放：匀速
+// =====================================================
+function setFovFromSlider(val) {
+  state.targetFov = THREE.MathUtils.clamp(sliderToFov(parseFloat(val)), FOV_MIN, FOV_MAX);
+  updateZoomUI(); markDirty();
+}
+function zoomIn() { state.targetFov = Math.max(FOV_MIN, state.targetFov / 1.15); updateZoomUI(); markDirty(); }
+function zoomOut() { state.targetFov = Math.min(FOV_MAX, state.targetFov * 1.15); updateZoomUI(); markDirty(); }
+
+function onWheel(e) {
+  e.preventDefault();
+  let delta = e.deltaY;
+  if (e.deltaMode === 1) delta *= 16;
+  if (e.deltaMode === 2) delta *= 100;
+  const step = THREE.MathUtils.clamp(delta / 100, -1.5, 1.5);
+  const oldFov = state.targetFov;
+  const newFov = THREE.MathUtils.clamp(oldFov * Math.pow(1.08, step), FOV_MIN, FOV_MAX);
+  state.targetFov = newFov;
+  zoomTowardPoint(oldFov, newFov, e.clientX, e.clientY);
+  updateZoomUI(); markDirty();
+}
+
+// =====================================================
+// 文件处理
+// =====================================================
+function handleFiles(files) {
+  if (!files.length) return;
+  Array.from(files).forEach(file => {
+    if (!file.type.startsWith('image/')) { showToast('⚠️ 请选择图片文件'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const item = { url: e.target.result, name: file.name, size: file.size };
+      state.images.push(item);
+      addGalleryItem(item, state.images.length - 1);
+      loadImage(state.images.length - 1);
+      showToast('✅ 已添加: ' + file.name);
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('file-input').value = '';
+}
+
+function loadImage(index) {
+  if (index < 0 || index >= state.images.length) return;
+  state.currentIndex = index;
+  loadPanorama(state.images[index].url, state.images[index].name, true);
+  updateGalleryActive();
+}
+
+function removeImage(index, e) {
+  e.stopPropagation();
+  state.images.splice(index, 1);
+  rebuildGallery();
+  if (state.images.length === 0) {
+    state.currentIndex = -1;
+    material.map = null; material.color.set(0x222222); material.needsUpdate = true; markDirty();
+    document.getElementById('error-msg').innerHTML = '图库为空，请添加全景图';
+    document.getElementById('error-card').classList.add('show');
+  } else {
+    loadImage(Math.min(state.currentIndex, state.images.length - 1));
+  }
+  showToast('🗑️ 已删除');
+}
+
+function addGalleryItem(item, index) {
+  const body = document.getElementById('gallery-body');
+  const upload = document.getElementById('upload-area');
+  const div = document.createElement('div');
+  div.className = 'gallery-item'; div.dataset.index = index;
+  div.onclick = () => loadImage(parseInt(div.dataset.index));
+  div.innerHTML = '<img src="'+item.url+'" alt="'+item.name+'" loading="lazy"><div class="name">'+item.name+'</div><button class="del" title="删除">✕</button>';
+  div.querySelector('.del').onclick = e => removeImage(parseInt(div.dataset.index), e);
+  body.insertBefore(div, upload);
+  document.getElementById('gallery-count').textContent = state.images.length;
+}
+
+function rebuildGallery() {
+  const body = document.getElementById('gallery-body');
+  const upload = document.getElementById('upload-area');
+  body.innerHTML = ''; body.appendChild(upload);
+  state.images.forEach((item, i) => addGalleryItem(item, i));
+  updateGalleryActive();
+}
+
+function updateGalleryActive() {
+  document.querySelectorAll('.gallery-item').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.index) === state.currentIndex);
+  });
+}
+
+// =====================================================
+// UI 控件
+// =====================================================
+function toggleAutoRotate() { state.autoRotate = !state.autoRotate; document.getElementById('btn-autorotate').classList.toggle('active', state.autoRotate); showToast(state.autoRotate ? '🔄 自动旋转已开启' : '⏸ 自动旋转已关闭'); }
+function toggleFullscreen() { if (!document.fullscreenElement) (document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen).call(document.documentElement); else (document.exitFullscreen||document.webkitExitFullscreen).call(document); }
+function toggleGallery() { document.getElementById('gallery').classList.toggle('open'); document.getElementById('btn-gallery').classList.toggle('active'); }
+function toggleHelp() { document.getElementById('help-modal').classList.toggle('open'); }
+function toggleCrosshair() { state.showCrosshair = !state.showCrosshair; document.getElementById('crosshair').style.opacity = state.showCrosshair ? '1' : '0'; document.getElementById('btn-crosshair').classList.toggle('active', state.showCrosshair); }
+function toggleGyro() { state.gyroEnabled = !state.gyroEnabled; const b = document.getElementById('btn-gyro'); b.classList.toggle('active', state.gyroEnabled); b.classList.toggle('gyro-active', state.gyroEnabled); showToast(state.gyroEnabled ? '📱 陀螺仪已开启' : '📱 陀螺仪已关闭'); }
+function resetView() { state.targetLon=0; state.targetLat=0; state.targetFov=FOV_DEFAULT; state.momentum={x:0,y:0}; updateZoomUI(); markDirty(); showToast('🔄 视角已重置'); }
+function takeScreenshot() { state.dirty=true; updateCamera(); renderer.render(scene,camera); const a=document.createElement('a'); a.download='panorama_'+Date.now()+'.png'; a.href=renderer.domElement.toDataURL('image/png'); a.click(); showToast('📸 截图已保存'); }
+
+// =====================================================
+// 指针事件
+// =====================================================
+function onPointerDown(e) {
+  if (e.target.closest('#controls,#topbar,#gallery,#help-modal,#error-card,.btn')) return;
+  state.isUserInteracting = true; state.momentum = {x:0,y:0};
+  const cx = e.touches?e.touches[0].clientX:e.clientX, cy = e.touches?e.touches[0].clientY:e.clientY;
+  state.onPointerDownX=cx; state.onPointerDownY=cy; state.onPointerDownLon=state.targetLon; state.onPointerDownLat=state.targetLat;
+  state.lastMove = {x:cx,y:cy,t:Date.now()};
+  if (e.touches && e.touches.length===2) {
+    const dx=e.touches[0].clientX-e.touches[1].clientX, dy=e.touches[0].clientY-e.touches[1].clientY;
+    state.pinchStartDist=Math.sqrt(dx*dx+dy*dy); state.pinchStartFov=state.targetFov;
+    state.pinchCenterX=(e.touches[0].clientX+e.touches[1].clientX)/2; state.pinchCenterY=(e.touches[0].clientY+e.touches[1].clientY)/2;
+  }
+}
+function onPointerMove(e) {
+  if (!state.isUserInteracting) return; e.preventDefault();
+  if (e.touches && e.touches.length===2) {
+    const dx=e.touches[0].clientX-e.touches[1].clientX, dy=e.touches[0].clientY-e.touches[1].clientY;
+    const dist=Math.sqrt(dx*dx+dy*dy), oldF=state.targetFov;
+    const nf=THREE.MathUtils.clamp(state.pinchStartFov*(state.pinchStartDist/dist),FOV_MIN,FOV_MAX);
+    state.targetFov=nf;
+    const cx=(e.touches[0].clientX+e.touches[1].clientX)/2, cy=(e.touches[0].clientY+e.touches[1].clientY)/2;
+    zoomTowardPoint(oldF,nf,state.pinchCenterX,state.pinchCenterY);
+    state.pinchStartFov=nf; state.pinchStartDist=dist; state.pinchCenterX=cx; state.pinchCenterY=cy;
+    updateZoomUI(); markDirty(); return;
+  }
+  const cx=e.touches?e.touches[0].clientX:e.clientX, cy=e.touches?e.touches[0].clientY:e.clientY;
+  const sens=state.fov/350;
+  state.targetLon=state.onPointerDownLon-(cx-state.onPointerDownX)*sens;
+  state.targetLat=state.onPointerDownLat+(cy-state.onPointerDownY)*sens;
+  const now=Date.now(), dt=now-state.lastMove.t;
+  if (dt>0&&dt<100) { state.momentum.x=-(cx-state.lastMove.x)*sens*0.4; state.momentum.y=(cy-state.lastMove.y)*sens*0.4; }
+  state.lastMove={x:cx,y:cy,t:now}; markDirty();
+}
+function onPointerUp() { state.isUserInteracting=false; state.momentum.x=THREE.MathUtils.clamp(state.momentum.x,-2,2); state.momentum.y=THREE.MathUtils.clamp(state.momentum.y,-1.5,1.5); }
+
+function onKeyDown(e) {
+  if (e.target.tagName==='INPUT') return;
+  switch(e.key){
+    case 'ArrowLeft': state.targetLon-=4; markDirty(); break; case 'ArrowRight': state.targetLon+=4; markDirty(); break;
+    case 'ArrowUp': state.targetLat+=4; markDirty(); break; case 'ArrowDown': state.targetLat-=4; markDirty(); break;
+    case '+': case '=': zoomIn(); break; case '-': case '_': zoomOut(); break;
+    case 'r': case 'R': toggleAutoRotate(); break; case 'f': case 'F': toggleFullscreen(); break;
+    case 's': case 'S': takeScreenshot(); break; case 'g': case 'G': toggleGallery(); break;
+    case ' ': e.preventDefault(); resetView(); break;
+  }
+}
+
+function onDeviceOrientation(e) { if (!state.gyroEnabled||e.alpha===null) return; state.targetLon=e.alpha; state.targetLat=e.beta-90; markDirty(); }
+function checkGyro() {
+  if (typeof DeviceOrientationEvent==='undefined') return;
+  if (typeof DeviceOrientationEvent.requestPermission==='function') {
+    document.getElementById('btn-gyro').style.display='flex';
+    document.getElementById('btn-gyro').onclick=async()=>{ try { if (await DeviceOrientationEvent.requestPermission()==='granted'){window.addEventListener('deviceorientation',onDeviceOrientation);toggleGyro();}} catch(e){showToast('⚠️ 陀螺仪权限被拒绝');} };
+  } else if ('ontouchstart' in window) { document.getElementById('btn-gyro').style.display='flex'; window.addEventListener('deviceorientation',onDeviceOrientation); }
+}
+
+function initDragDrop() {
+  const area=document.getElementById('upload-area');
+  ['dragenter','dragover'].forEach(ev=>{area.addEventListener(ev,e=>{e.preventDefault();area.style.borderColor='var(--accent)';area.style.background='rgba(108,138,255,.1)';});document.body.addEventListener(ev,e=>e.preventDefault());});
+  ['dragleave','drop'].forEach(ev=>area.addEventListener(ev,()=>{area.style.borderColor='';area.style.background='';}));
+  area.addEventListener('drop',e=>{e.preventDefault();handleFiles(e.dataTransfer.files);});
+  document.body.addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer.files.length)handleFiles(e.dataTransfer.files);});
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
+function showInfo(text){const b=document.getElementById('info-badge');b.textContent=text;b.classList.add('show');clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('show'),5000);}
+function onResize(){camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(qualityPresets[state.quality].ratio);renderer.setSize(window.innerWidth,window.innerHeight);markDirty();}
+let lastTap=0;
+function onDoubleAction(e){if(e.target.closest('#controls,#topbar,#gallery,#help-modal,#error-card'))return;const now=Date.now();if(e.type==='dblclick')toggleFullscreen();else if(e.type==='touchend'&&now-lastTap<300)toggleFullscreen();lastTap=now;}
+
+function init() {
+  initThree();
+  const c=renderer.domElement;
+  c.addEventListener('mousedown',onPointerDown);c.addEventListener('mousemove',onPointerMove);
+  c.addEventListener('mouseup',onPointerUp);c.addEventListener('mouseleave',onPointerUp);
+  c.addEventListener('touchstart',onPointerDown,{passive:false});c.addEventListener('touchmove',onPointerMove,{passive:false});
+  c.addEventListener('touchend',onPointerUp);c.addEventListener('wheel',onWheel,{passive:false});
+  c.addEventListener('dblclick',onDoubleAction);c.addEventListener('touchend',onDoubleAction);
+  window.addEventListener('keydown',onKeyDown);window.addEventListener('resize',onResize);
+  initDragDrop(); checkGyro(); updateZoomUI(); animate();
+
+  const defaultImg={url:'./example/1.jpg',name:'1.jpg'};
+  state.images.push(defaultImg); addGalleryItem(defaultImg,0);
+  state.currentIndex=0; updateGalleryActive();
+  loadPanorama(defaultImg.url,defaultImg.name,false);
+}
+
+init();
+</script>
+</body>
+</html>
