@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0">
+<title>LHY数据工具箱</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#08080a;--bg1:#141418;--bg2:#1a1a1f;--bg3:#1e1e24;--bg4:#25252b;--border:#25252b;--border2:#3a3a42;--text:#f0f0f2;--text2:#98989d;--text3:#6a6a70;--accent:#f0a060;--accent2:#f4b87a;--accent3:#f8d0a0;--accent-bg:rgba(240,160,96,.15);--green:#22c55e;--green-bg:rgba(34,197,94,.12);--red:#ef4444;--blue:#3b82f6;--orange:#f59e0b;--pink:#ec4899;--radius:16px;--radius2:10px;--radius3:8px;--shadow:0 2px 12px rgba(0,0,0,.4),0 0 1px rgba(255,255,255,.04);--shadow-lg:0 8px 32px rgba(0,0,0,.6),0 0 1px rgba(255,255,255,.06);--font:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;--mono:'SF Mono','Fira Code','Cascadia Code','Consolas',monospace;--transition:.2s cubic-bezier(.4,0,.2,1);--input-bg:#0c0c10}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100dvh;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;line-height:1.5;-webkit-tap-highlight-color:transparent;background-image:radial-gradient(ellipse at 50% 0%,#1a1a24 0%,var(--bg) 60%)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:9px}
+input,textarea,button,select{font-family:inherit}
+
+.app{max-width:620px;margin:0 auto;padding:16px 16px 60px;display:flex;flex-direction:column;gap:16px}
+@media(min-width:768px){.app{padding:20px 24px 60px;max-width:680px}}
+@media(min-width:1200px){.app{max-width:720px}}
+
+/* Header */
+.header{text-align:center;padding:8px 0 4px}
+.header-icon{font-size:36px;margin-bottom:4px;display:block}
+.header h1{font-size:26px;font-weight:700;letter-spacing:-.4px;color:var(--text);line-height:1.2}
+.header p{font-size:13px;color:var(--text3);font-weight:400;letter-spacing:.2px;margin-top:2px}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;background:var(--bg1);border-radius:var(--radius2);padding:3px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.tab-btn{flex:1;padding:10px 12px;border:none;background:transparent;color:var(--text2);font-size:14px;font-weight:500;border-radius:var(--radius3);cursor:pointer;transition:var(--transition);white-space:nowrap;letter-spacing:-.1px}
+.tab-btn:hover{color:var(--text);background:var(--bg3)}
+.tab-btn.active{background:var(--accent-bg);color:var(--accent);font-weight:600;box-shadow:none;border:1px solid rgba(240,160,96,.3)}
+.tab-content{display:none}
+.tab-content.active{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Search */
+.search-wrap{position:relative;margin-bottom:10px}
+.search-wrap input{width:100%;padding:12px 14px 12px 38px;background:var(--input-bg);border:1px solid var(--border);border-radius:var(--radius2);color:var(--text);font-size:14px;outline:none;transition:var(--transition);box-shadow:inset 0 1px 3px rgba(0,0,0,.3);letter-spacing:-.1px}
+.search-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg),inset 0 1px 3px rgba(0,0,0,.3);background:#0e0e14}
+.search-wrap input::placeholder{color:var(--text3)}
+.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text3);pointer-events:none}
+
+/* Category chips */
+.cats{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.chip{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;font-size:10px;color:var(--text2);cursor:pointer;transition:var(--transition);white-space:nowrap;user-select:none;-webkit-user-select:none;display:flex;align-items:center;gap:3px;letter-spacing:.1px}
+.chip:hover{border-color:#4a4a52;color:var(--text);background:var(--bg3)}
+.chip.active{background:var(--accent-bg);border-color:var(--accent);color:var(--accent);font-weight:600;box-shadow:none}
+.chip .ci{font-size:.8rem}
+
+/* Converter Card */
+.conv-card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--radius);overflow:visible;box-shadow:var(--shadow-lg);transition:all var(--transition)}
+.conv-body{display:flex;flex-direction:column;gap:0}
+@media(min-width:700px){.conv-body{flex-direction:row;align-items:stretch}}
+.conv-side{flex:1;padding:16px;min-width:0}
+.conv-side label{display:block;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:600;margin-bottom:8px;padding-left:4px}
+.conv-row{display:flex;gap:6px}
+.conv-input{flex:1;min-width:0;padding:14px 16px;background:var(--input-bg);border:1px solid var(--border);border-radius:var(--radius2);color:var(--text);font-size:20px;font-weight:500;font-family:var(--font);outline:none;transition:all var(--transition);letter-spacing:-.3px;box-shadow:inset 0 1px 3px rgba(0,0,0,.3)}
+.conv-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg),inset 0 1px 3px rgba(0,0,0,.3);background:#0e0e14}
+.conv-input::placeholder{color:#44444a;font-weight:400;font-size:14px;font-family:var(--font)}
+.unit-btn{width:130px;min-width:90px;flex-shrink:0;padding:13px 28px 13px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);color:var(--accent);font-size:13px;font-weight:500;cursor:pointer;text-align:center;transition:all var(--transition);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;position:relative;letter-spacing:-.2px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236a6a70'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.unit-btn:hover{border-color:#4a4a52;background:var(--bg3)}
+.unit-btn::after{display:none}
+.conv-info{font-size:.7rem;color:var(--text3);margin-top:6px;min-height:1em}
+.auto-tag{display:inline-flex;align-items:center;gap:3px;padding:3px 10px;background:var(--accent-bg);color:var(--accent);border-radius:20px;font-size:11px;font-weight:500;letter-spacing:.1px}
+
+/* Swap */
+.swap-col{display:flex;align-items:center;justify-content:center;padding:8px;position:relative}
+@media(min-width:700px){.swap-col{padding:0 4px}}
+.swap-col::before{content:'';position:absolute;background:var(--border);opacity:.6}
+@media(max-width:699px){.swap-col::before{left:20px;right:20px;height:1px;top:50%}}
+@media(min-width:700px){.swap-col::before{top:20px;bottom:20px;width:1px;left:50%}}
+.swap-btn{position:relative;z-index:1;width:40px;height:40px;border-radius:50%;background:var(--bg2);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition);color:var(--text2);flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.3);user-select:none;-webkit-user-select:none}
+.swap-btn:hover{background:var(--bg3);border-color:#4a4a52;color:var(--text);transform:scale(1.05)}
+.swap-btn:active{transform:scale(.93);transition:.08s}
+.swap-btn svg{width:16px;height:16px;transition:transform .3s ease}
+
+/* Formula bar */
+.formula-bar{padding:10px 16px;background:transparent;border-top:1px solid var(--border);font-size:11px;color:var(--text3);text-align:center;font-family:var(--mono);border-radius:0 0 var(--radius) var(--radius);letter-spacing:.2px}
+
+/* Copy hint */
+.copy-hint{text-align:center;margin-top:8px;font-size:.68rem;color:var(--text3);cursor:pointer;transition:var(--transition)}
+.copy-hint:hover{color:var(--accent2)}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:9999;display:none;align-items:flex-end;justify-content:center;animation:fadeIn .2s ease}
+.modal-overlay.show{display:flex}
+@media(min-width:700px){.modal-overlay{align-items:center}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-card{width:100%;max-width:480px;max-height:70dvh;background:var(--bg1);border:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;display:flex;flex-direction:column;animation:slideUp .25s ease;box-shadow:0 -8px 40px rgba(0,0,0,.6),0 0 1px rgba(255,255,255,.06)}
+@media(min-width:700px){.modal-card{border-radius:var(--radius);max-height:60vh}}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.modal-header h3{font-size:.9rem;font-weight:700;flex:1}
+.modal-close{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:var(--transition)}
+.modal-close:hover{background:var(--accent-bg);color:var(--accent);border-color:rgba(240,160,96,.3)}
+.modal-search{padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-search input{width:100%;padding:10px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:var(--radius3);color:var(--text);font-size:14px;outline:none;transition:var(--transition);box-shadow:inset 0 1px 3px rgba(0,0,0,.3)}
+.modal-search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg),inset 0 1px 3px rgba(0,0,0,.3)}
+.modal-search input::placeholder{color:var(--text3)}
+.modal-list{flex:1;overflow-y:auto;padding:6px}
+.modal-opt{padding:10px 14px;border-radius:var(--radius3);cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:var(--transition);gap:8px}
+.modal-opt:hover{background:var(--bg3)}
+.modal-opt.active{background:var(--accent-bg);border:1px solid rgba(240,160,96,.2)}
+.modal-opt .mo-left{display:flex;flex-direction:column;gap:1px;min-width:0}
+.modal-opt .mo-name{font-size:.84rem;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.modal-opt.active .mo-name{color:var(--accent2)}
+.modal-opt .mo-en{font-size:.68rem;color:var(--text3)}
+.modal-opt .mo-sym{font-size:.78rem;color:var(--text3);font-weight:600;font-family:var(--mono);flex-shrink:0}
+.modal-opt.active .mo-sym{color:var(--accent2)}
+.modal-empty{padding:24px;text-align:center;color:var(--text3);font-size:.82rem}
+
+/* ===== DATA ANALYSIS ===== */
+.da-section{margin-bottom:16px}
+.da-card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.da-label{font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px}
+.da-textarea{width:100%;min-height:80px;max-height:200px;padding:14px 16px;background:var(--input-bg);border:1px solid var(--border);border-radius:var(--radius2);color:var(--text);font-size:14px;font-family:var(--mono);outline:none;resize:vertical;transition:all var(--transition);line-height:1.6;box-shadow:inset 0 1px 3px rgba(0,0,0,.3);letter-spacing:-.2px}
+.da-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg),inset 0 1px 3px rgba(0,0,0,.3);background:#0e0e14}
+.da-textarea::placeholder{color:var(--text3);font-family:var(--font);font-size:.8rem}
+.da-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.da-btn{padding:7px 16px;border:1px solid var(--border);border-radius:var(--radius3);background:var(--bg3);color:var(--text2);font-size:.78rem;font-weight:600;cursor:pointer;transition:var(--transition)}
+.da-btn:hover{border-color:var(--accent);color:var(--accent2);background:var(--accent-bg)}
+.da-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.da-btn.primary:hover{background:#6a4ee8}
+
+/* Stats Grid */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px}
+@media(min-width:500px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:800px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
+.stat-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius3);padding:12px 14px;transition:all var(--transition)}
+.stat-item:hover{border-color:#4a4a52;background:var(--bg3)}
+.stat-item .st-label{font-size:.64rem;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:3px}
+.stat-item .st-val{font-size:15px;font-weight:600;font-family:var(--mono);color:var(--text);word-break:break-all;letter-spacing:-.3px}
+
+/* Charts */
+.charts-row{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+@media(min-width:700px){.charts-row{flex-direction:row}}
+.chart-wrap{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:16px;min-width:0;transition:all var(--transition)}
+.chart-wrap:hover{border-color:#3a3a42}
+.chart-wrap h4{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:10px}
+.chart-wrap canvas{width:100%;height:auto;display:block;border-radius:6px}
+
+/* Freq table */
+.freq-table{width:100%;border-collapse:collapse;font-size:.76rem;margin-top:10px}
+.freq-table th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text3);font-weight:600;font-size:.66rem;text-transform:uppercase;letter-spacing:.5px}
+.freq-table td{padding:5px 8px;border-bottom:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:.76rem}
+.freq-table tr:hover td{color:var(--text);background:var(--bg3)}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg1);color:var(--text);padding:10px 22px;border-radius:var(--radius2);font-size:13px;box-shadow:var(--shadow-lg);border:1px solid var(--border);transition:all .3s ease;opacity:0;z-index:99999;pointer-events:none;white-space:nowrap;letter-spacing:-.1px}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* Utility */
+.hidden{display:none!important}
+.mt-12{margin-top:12px}
+.mt-8{margin-top:8px}
+
+@media(max-width:480px){
+.app{gap:12px;padding-top:4px}
+.header h1{font-size:22px}
+.conv-input{font-size:18px;padding:12px 14px}
+.unit-btn{width:110px;font-size:12px;padding:11px 24px 11px 6px;background-position:right 7px center}
+.conv-card{padding:16px 12px;border-radius:var(--radius2)}
+.conv-row{gap:6px}
+.swap-btn{width:36px;height:36px}
+.chip{font-size:10px;padding:4px 8px}
+.da-card{padding:16px 12px}
+}
+@media(max-width:360px){
+.unit-btn{width:95px;font-size:11px;padding:10px 20px 10px 4px;background-position:right 5px center}
+.conv-input{font-size:16px;padding:10px 12px}
+.conv-card{padding:12px 8px}
+.conv-row{gap:4px}
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header">
+<span class="header-icon">⚡</span>
+<h1>LHY数据工具箱</h1>
+<p>单位换算 · 数据分析 · 智能识别</p>
+</div>
+
+<div class="tabs">
+<button class="tab-btn active" data-tab="converter">⚡ 单位换算</button>
+<button class="tab-btn" data-tab="analysis">📊 数据分析</button>
+</div>
+
+<!-- ===== CONVERTER TAB ===== -->
+<div class="tab-content active" id="tab-converter">
+<div class="search-wrap">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+<input type="text" id="catSearch" placeholder="搜索类别，或直接输入如 5kg、10 miles、100℃ …" autocomplete="off">
+</div>
+<div class="cats" id="catGrid"></div>
+<div class="conv-card">
+<div class="conv-body">
+<div class="conv-side">
+<label>原始值 / From</label>
+<div class="conv-row">
+<input class="conv-input" id="fromVal" placeholder="输入数值或带单位" autocomplete="off" inputmode="decimal">
+<button class="unit-btn" id="fromUnitBtn" title="选择单位"><span id="fromUnitLabel">—</span></button>
+</div>
+<div class="conv-info" id="fromInfo"></div>
+</div>
+<div class="swap-col">
+<button class="swap-btn" id="swapBtn" title="交换"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4"/></svg></button>
+</div>
+<div class="conv-side">
+<label>目标值 / To</label>
+<div class="conv-row">
+<input class="conv-input" id="toVal" placeholder="输入数值可反向换算" autocomplete="off" inputmode="decimal">
+<button class="unit-btn" id="toUnitBtn" title="选择单位"><span id="toUnitLabel">—</span></button>
+</div>
+<div class="conv-info" id="toInfo"></div>
+</div>
+</div>
+<div class="formula-bar" id="formulaBar">选择类别开始换算</div>
+</div>
+<p class="copy-hint hidden" id="copyHint">💡 点击此处复制结果</p>
+</div>
+
+<!-- ===== ANALYSIS TAB ===== -->
+<div class="tab-content" id="tab-analysis">
+<div class="da-card da-section">
+<div class="da-label">数据输入</div>
+<textarea class="da-textarea" id="daInput" placeholder="输入数字，用逗号、空格、换行分隔&#10;示例：12, 15, 18, 22, 25, 28, 30, 33, 35, 40"></textarea>
+<div class="da-actions">
+<button class="da-btn primary" id="daCalcBtn">▶ 分析</button>
+<button class="da-btn" id="daClearBtn">清空</button>
+<button class="da-btn" id="daSampleBtn">示例数据</button>
+<button class="da-btn" id="daCopyBtn">复制结果</button>
+</div>
+</div>
+<div id="daResults" class="hidden">
+<div class="da-card da-section">
+<div class="da-label">统计指标</div>
+<div class="stats-grid" id="statsGrid"></div>
+</div>
+<div class="da-card da-section">
+<div class="da-label">可视化</div>
+<div class="charts-row">
+<div class="chart-wrap"><h4>直方图 Histogram</h4><canvas id="histCanvas"></canvas></div>
+<div class="chart-wrap"><h4>箱线图 Box Plot</h4><canvas id="boxCanvas"></canvas></div>
+</div>
+</div>
+<div class="da-card da-section">
+<div class="da-label">频率分布表</div>
+<div style="overflow-x:auto"><table class="freq-table" id="freqTable"></table></div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- UNIT MODAL -->
+<div class="modal-overlay" id="unitModal">
+<div class="modal-card">
+<div class="modal-header">
+<h3 id="modalTitle">选择单位</h3>
+<button class="modal-close" id="modalClose">✕</button>
+</div>
+<div class="modal-search"><input type="text" id="modalSearch" placeholder="搜索单位名称、符号…" autocomplete="off"></div>
+<div class="modal-list" id="modalList"></div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== UNIT DATA ====================
+const C=[
+{id:'length',n:'长度',e:'Length',i:'📏',d:['m','km'],u:[
+{i:'km',n:'千米',e:'Kilometer',s:'km',a:['公里','kilometers','kilometres','kilo'],v:1000},
+{i:'m',n:'米',e:'Meter',s:'m',a:['公尺','meter','meters','metre','metres'],v:1},
+{i:'dm',n:'分米',e:'Decimeter',s:'dm',a:['decimeters','decimetres'],v:.1},
+{i:'cm',n:'厘米',e:'Centimeter',s:'cm',a:['centimeters','centimetres','公分'],v:.01},
+{i:'mm',n:'毫米',e:'Millimeter',s:'mm',a:['millimeters','millimetres'],v:.001},
+{i:'um',n:'微米',e:'Micrometer',s:'μm',a:['micron','micrometer','micrometers','microns'],v:1e-6},
+{i:'nm2',n:'纳米',e:'Nanometer',s:'nm',a:['nanometers','nanometres'],v:1e-9},
+{i:'pm',n:'皮米',e:'Picometer',s:'pm',a:['picometers','picometres'],v:1e-12},
+{i:'angstrom',n:'埃',e:'Angstrom',s:'Å',a:['angstroms','埃格斯特朗'],v:1e-10},
+{i:'mi',n:'英里',e:'Mile',s:'mi',a:['mile','miles'],v:1609.344},
+{i:'yd',n:'码',e:'Yard',s:'yd',a:['yard','yards'],v:.9144},
+{i:'ft',n:'英尺',e:'Foot',s:'ft',a:['foot','feet','英呎'],v:.3048},
+{i:'in',n:'英寸',e:'Inch',s:'in',a:['inch','inches','英吋','″'],v:.0254},
+{i:'nmi',n:'海里',e:'Nautical Mile',s:'nmi',a:['nautical mile','nautical miles','海浬'],v:1852},
+{i:'ly',n:'光年',e:'Light Year',s:'ly',a:['light year','lightyear','light-year'],v:9.461e15},
+{i:'au',n:'天文单位',e:'Astronomical Unit',s:'AU',a:['astronomical unit','au'],v:1.496e11},
+{i:'pc',n:'秒差距',e:'Parsec',s:'pc',a:['parsec','parsecs'],v:3.086e16},
+{i:'chi',n:'尺',e:'Chi',s:'尺',a:['chinese foot','市尺'],v:1/3},
+{i:'cun',n:'寸',e:'Cun',s:'寸',a:['chinese inch','市寸'],v:1/30},
+{i:'zhang',n:'丈',e:'Zhang',s:'丈',a:[],v:10/3},
+{i:'li2',n:'里',e:'Li',s:'里',a:['市里','华里'],v:500},
+{i:'mil',n:'密耳',e:'Mil',s:'mil',a:['thou'],v:2.54e-5},
+{i:'fathom',n:'英寻',e:'Fathom',s:'fathom',a:['fathoms'],v:1.8288},
+{i:'furlong',n:'弗隆',e:'Furlong',s:'fur',a:['furlongs'],v:201.168},
+{i:'chain',n:'链',e:'Chain',s:'chain',a:['chains'],v:20.1168},
+{i:'rod',n:'杆',e:'Rod',s:'rod',a:['rods','perch','pole'],v:5.0292},
+]},
+{id:'mass',n:'质量',e:'Mass',i:'⚖️',d:['kg','g'],u:[
+{i:'kg',n:'千克',e:'Kilogram',s:'kg',a:['公斤','kilogram','kilograms','kilo'],v:1},
+{i:'g',n:'克',e:'Gram',s:'g',a:['gram','grams','公克'],v:1e-3},
+{i:'mg',n:'毫克',e:'Milligram',s:'mg',a:['milligram','milligrams'],v:1e-6},
+{i:'ug',n:'微克',e:'Microgram',s:'μg',a:['microgram','micrograms','mcg'],v:1e-9},
+{i:'ng',n:'纳克',e:'Nanogram',s:'ng',a:['nanogram','nanograms'],v:1e-12},
+{i:'t',n:'吨',e:'Tonne',s:'t',a:['ton','tonne','tonnes','metric ton','公吨'],v:1000},
+{i:'lb',n:'磅',e:'Pound',s:'lb',a:['pound','pounds','lbs'],v:.45359237},
+{i:'oz',n:'盎司',e:'Ounce',s:'oz',a:['ounce','ounces'],v:.028349523},
+{i:'ct',n:'克拉',e:'Carat',s:'ct',a:['carat','carats'],v:2e-4},
+{i:'gr',n:'格令',e:'Grain',s:'gr',a:['grain','grains'],v:6.47989e-5},
+{i:'st',n:'英石',e:'Stone',s:'st',a:['stone','stones'],v:6.35029},
+{i:'cwt',n:'英担',e:'Hundredweight',s:'cwt',a:['hundredweight'],v:50.8023},
+{i:'lt',n:'长吨',e:'Long Ton',s:'long ton',a:['long ton','imperial ton'],v:1016.047},
+{i:'st2',n:'短吨',e:'Short Ton',s:'short ton',a:['short ton','us ton','美吨'],v:907.185},
+{i:'jin',n:'斤',e:'Jin',s:'斤',a:['市斤','catty'],v:.5},
+{i:'liang',n:'两',e:'Liang',s:'两',a:['市两','tael'],v:.05},
+{i:'qian',n:'钱',e:'Qian',s:'钱',a:['市钱','mace'],v:.005},
+{i:'dan',n:'担',e:'Dan',s:'担',a:['市担','picul'],v:50},
+{i:'troy_oz',n:'金衡盎司',e:'Troy Ounce',s:'oz t',a:['troy ounce','troy oz'],v:.0311035},
+{i:'troy_lb',n:'金衡磅',e:'Troy Pound',s:'lb t',a:['troy pound'],v:.373242},
+{i:'slug',n:'斯勒格',e:'Slug',s:'slug',a:['slugs'],v:14.5939},
+{i:'dalton',n:'道尔顿',e:'Dalton',s:'Da',a:['dalton','amu','u','atomic mass unit','原子质量单位'],v:1.66054e-27},
+]},
+{id:'area',n:'面积',e:'Area',i:'⬜',d:['m2','km2'],u:[
+{i:'km2',n:'平方千米',e:'Square Kilometer',s:'km²',a:['sq km','square kilometer','平方公里'],v:1e6},
+{i:'m2',n:'平方米',e:'Square Meter',s:'m²',a:['sq m','square meter','平米','㎡'],v:1},
+{i:'dm2',n:'平方分米',e:'Square Decimeter',s:'dm²',a:['sq dm'],v:.01},
+{i:'cm2',n:'平方厘米',e:'Square Centimeter',s:'cm²',a:['sq cm','square centimeter'],v:1e-4},
+{i:'mm2',n:'平方毫米',e:'Square Millimeter',s:'mm²',a:['sq mm','square millimeter'],v:1e-6},
+{i:'ha',n:'公顷',e:'Hectare',s:'ha',a:['hectare','hectares'],v:1e4},
+{i:'acre',n:'英亩',e:'Acre',s:'acre',a:['acres'],v:4046.856},
+{i:'sqmi',n:'平方英里',e:'Square Mile',s:'mi²',a:['sq mi','square mile','square miles'],v:2589988},
+{i:'sqft',n:'平方英尺',e:'Square Foot',s:'ft²',a:['sq ft','square foot','square feet'],v:.092903},
+{i:'sqyd',n:'平方码',e:'Square Yard',s:'yd²',a:['sq yd','square yard'],v:.836127},
+{i:'sqin',n:'平方英寸',e:'Square Inch',s:'in²',a:['sq in','square inch'],v:6.4516e-4},
+{i:'mu',n:'亩',e:'Mu',s:'亩',a:['市亩','chinese acre'],v:666.667},
+{i:'qing',n:'顷',e:'Qing',s:'顷',a:['市顷'],v:66666.7},
+{i:'fen2',n:'分(面积)',e:'Fen',s:'分',a:['市分'],v:66.6667},
+{i:'are',n:'公亩',e:'Are',s:'a',a:['ares'],v:100},
+{i:'barn',n:'靶恩',e:'Barn',s:'b',a:['barn','barns'],v:1e-28},
+]},
+{id:'volume',n:'体积',e:'Volume',i:'🧊',d:['L','mL'],u:[
+{i:'m3',n:'立方米',e:'Cubic Meter',s:'m³',a:['cubic meter','cbm'],v:1000},
+{i:'L',n:'升',e:'Liter',s:'L',a:['liter','litre','liters','litres','公升','l'],v:1},
+{i:'mL',n:'毫升',e:'Milliliter',s:'mL',a:['ml','milliliter','millilitre','cc'],v:.001},
+{i:'uL',n:'微升',e:'Microliter',s:'μL',a:['microliter','microlitre'],v:1e-6},
+{i:'dL',n:'分升',e:'Deciliter',s:'dL',a:['dl','deciliter','decilitre'],v:.1},
+{i:'hL',n:'百升',e:'Hectoliter',s:'hL',a:['hectoliter','hectolitre'],v:100},
+{i:'cm3',n:'立方厘米',e:'Cubic Centimeter',s:'cm³',a:['cubic centimeter','cc'],v:.001},
+{i:'mm3',n:'立方毫米',e:'Cubic Millimeter',s:'mm³',a:['cubic millimeter'],v:1e-6},
+{i:'gal',n:'加仑(美)',e:'US Gallon',s:'gal',a:['gallon','gallons','美制加仑','us gallon'],v:3.78541},
+{i:'qt',n:'夸脱(美)',e:'US Quart',s:'qt',a:['quart','quarts','us quart'],v:.946353},
+{i:'pt2',n:'品脱(美)',e:'US Pint',s:'pt',a:['pint','pints','us pint'],v:.473176},
+{i:'cup',n:'杯(美)',e:'US Cup',s:'cup',a:['cups','us cup'],v:.236588},
+{i:'floz',n:'液量盎司(美)',e:'US Fluid Ounce',s:'fl oz',a:['fluid ounce','fl oz','us fl oz'],v:.0295735},
+{i:'tbsp',n:'汤匙',e:'Tablespoon',s:'tbsp',a:['tablespoon','tablespoons'],v:.0147868},
+{i:'tsp',n:'茶匙',e:'Teaspoon',s:'tsp',a:['teaspoon','teaspoons'],v:.00492892},
+{i:'igal',n:'加仑(英)',e:'Imperial Gallon',s:'imp gal',a:['imperial gallon','英制加仑','uk gallon'],v:4.54609},
+{i:'ipt',n:'品脱(英)',e:'Imperial Pint',s:'imp pt',a:['imperial pint','英制品脱','uk pint'],v:.568261},
+{i:'ifloz',n:'液量盎司(英)',e:'Imperial Fluid Ounce',s:'imp fl oz',a:['imperial fluid ounce','英制液量盎司'],v:.0284131},
+{i:'bbl',n:'桶(石油)',e:'Barrel',s:'bbl',a:['barrel','barrels','oil barrel','石油桶'],v:158.987},
+{i:'ft3',n:'立方英尺',e:'Cubic Foot',s:'ft³',a:['cubic foot','cubic feet','cu ft'],v:28.3168},
+{i:'in3',n:'立方英寸',e:'Cubic Inch',s:'in³',a:['cubic inch','cubic inches','cu in'],v:.0163871},
+{i:'yd3',n:'立方码',e:'Cubic Yard',s:'yd³',a:['cubic yard','cu yd'],v:764.555},
+{i:'dou',n:'斗',e:'Dou',s:'斗',a:['市斗'],v:10},
+{i:'sheng',n:'升(市)',e:'Sheng',s:'市升',a:['市升'],v:1},
+]},
+{id:'data',n:'数据存储',e:'Data',i:'💾',d:['MB','GB'],u:[
+{i:'bit',n:'比特',e:'Bit',s:'bit',a:['bits','位'],v:1},
+{i:'nibble',n:'半字节',e:'Nibble',s:'nibble',a:['nybble'],v:4},
+{i:'B2',n:'字节',e:'Byte',s:'B',a:['byte','bytes'],v:8},
+{i:'KB',n:'千字节',e:'Kilobyte',s:'KB',a:['kilobyte','kilobytes'],v:8e3},
+{i:'MB',n:'兆字节',e:'Megabyte',s:'MB',a:['megabyte','megabytes','兆'],v:8e6},
+{i:'GB',n:'吉字节',e:'Gigabyte',s:'GB',a:['gigabyte','gigabytes'],v:8e9},
+{i:'TB',n:'太字节',e:'Terabyte',s:'TB',a:['terabyte','terabytes'],v:8e12},
+{i:'PB',n:'拍字节',e:'Petabyte',s:'PB',a:['petabyte','petabytes'],v:8e15},
+{i:'EB',n:'艾字节',e:'Exabyte',s:'EB',a:['exabyte'],v:8e18},
+{i:'KiB',n:'KiB',e:'Kibibyte',s:'KiB',a:['kibibyte'],v:8*1024},
+{i:'MiB',n:'MiB',e:'Mebibyte',s:'MiB',a:['mebibyte'],v:8*1048576},
+{i:'GiB',n:'GiB',e:'Gibibyte',s:'GiB',a:['gibibyte'],v:8*1073741824},
+{i:'TiB',n:'TiB',e:'Tebibyte',s:'TiB',a:['tebibyte'],v:8*1099511627776},
+{i:'Kbit',n:'千比特',e:'Kilobit',s:'Kbit',a:['kilobit','kilobits','Kb'],v:1e3},
+{i:'Mbit',n:'兆比特',e:'Megabit',s:'Mbit',a:['megabit','megabits','Mb'],v:1e6},
+{i:'Gbit',n:'吉比特',e:'Gigabit',s:'Gbit',a:['gigabit','gigabits','Gb'],v:1e9},
+]},
+{id:'time',n:'时间',e:'Time',i:'⏱️',d:['s','min'],u:[
+{i:'ns',n:'纳秒',e:'Nanosecond',s:'ns',a:['nanosecond','nanoseconds'],v:1e-9},
+{i:'us2',n:'微秒',e:'Microsecond',s:'μs',a:['microsecond','microseconds'],v:1e-6},
+{i:'ms2',n:'毫秒',e:'Millisecond',s:'ms',a:['millisecond','milliseconds'],v:1e-3},
+{i:'s',n:'秒',e:'Second',s:'s',a:['second','seconds','sec'],v:1},
+{i:'min',n:'分钟',e:'Minute',s:'min',a:['minute','minutes','分'],v:60},
+{i:'h',n:'小时',e:'Hour',s:'h',a:['hour','hours','hr','hrs','小时','时'],v:3600},
+{i:'day',n:'天',e:'Day',s:'d',a:['day','days','日'],v:86400},
+{i:'week',n:'周',e:'Week',s:'wk',a:['week','weeks','星期'],v:604800},
+{i:'fortnight',n:'两周',e:'Fortnight',s:'fortnight',a:['fortnights'],v:1209600},
+{i:'month',n:'月(30天)',e:'Month',s:'mo',a:['month','months','月'],v:2592000},
+{i:'year',n:'年(365天)',e:'Year',s:'yr',a:['year','years','年'],v:31536000},
+{i:'decade',n:'十年',e:'Decade',s:'decade',a:['decades'],v:315360000},
+{i:'century',n:'世纪',e:'Century',s:'century',a:['centuries','百年'],v:3153600000},
+{i:'millennium',n:'千年',e:'Millennium',s:'millennium',a:['millennia','千年'],v:3.1536e10},
+]},
+{id:'temperature',n:'温度',e:'Temperature',i:'🌡️',d:['C','F'],u:[
+{i:'C',n:'摄氏度',e:'Celsius',s:'°C',a:['celsius','centigrade','℃','摄氏'],v:null},
+{i:'F',n:'华氏度',e:'Fahrenheit',s:'°F',a:['fahrenheit','℉','华氏'],v:null},
+{i:'K',n:'开尔文',e:'Kelvin',s:'K',a:['kelvin','开氏','开'],v:null},
+{i:'Ra',n:'兰金度',e:'Rankine',s:'°Ra',a:['rankine','兰金','°R'],v:null},
+{i:'Re',n:'列氏度',e:'Réaumur',s:'°Ré',a:['reaumur','列氏'],v:null},
+]},
+{id:'speed',n:'速度',e:'Speed',i:'💨',d:['ms3','kmh'],u:[
+{i:'ms3',n:'米/秒',e:'m/s',s:'m/s',a:['meters per second','m/sec','米每秒'],v:1},
+{i:'kmh',n:'千米/时',e:'km/h',s:'km/h',a:['kph','公里/小时','kilometers per hour','km/hr','公里每小时'],v:1/3.6},
+{i:'mph',n:'英里/时',e:'mph',s:'mph',a:['miles per hour','mi/h'],v:.44704},
+{i:'kn',n:'节',e:'Knot',s:'kn',a:['knot','knots','kt','海里/时'],v:.514444},
+{i:'fts',n:'英尺/秒',e:'ft/s',s:'ft/s',a:['feet per second','fps'],v:.3048},
+{i:'cms',n:'厘米/秒',e:'cm/s',s:'cm/s',a:['centimeters per second'],v:.01},
+{i:'mach',n:'马赫',e:'Mach',s:'Ma',a:['马赫数','mach number'],v:340.29},
+{i:'c',n:'光速',e:'Speed of Light',s:'c',a:['light speed','speed of light'],v:299792458},
+{i:'kmmin',n:'千米/分',e:'km/min',s:'km/min',a:['kilometers per minute'],v:1000/60},
+{i:'mmin',n:'米/分',e:'m/min',s:'m/min',a:['meters per minute','米每分'],v:1/60},
+]},
+{id:'acceleration',n:'加速度',e:'Acceleration',i:'🚀',d:['ms22','g0'],u:[
+{i:'ms22',n:'米/秒²',e:'m/s²',s:'m/s²',a:['meters per second squared','m/s^2'],v:1},
+{i:'g0',n:'标准重力',e:'Standard Gravity',s:'g',a:['g-force','gee','重力加速度'],v:9.80665},
+{i:'cms2',n:'厘米/秒²',e:'cm/s²',s:'cm/s²',a:['gal','伽'],v:.01},
+{i:'fts2',n:'英尺/秒²',e:'ft/s²',s:'ft/s²',a:['feet per second squared'],v:.3048},
+{i:'ins2',n:'英寸/秒²',e:'in/s²',s:'in/s²',a:['inches per second squared'],v:.0254},
+{i:'mGal',n:'毫伽',e:'Milligal',s:'mGal',a:['milligal'],v:1e-5},
+{i:'kms2',n:'千米/秒²',e:'km/s²',s:'km/s²',a:['kilometers per second squared'],v:1000},
+]},
+{id:'pressure',n:'压强',e:'Pressure',i:'🔴',d:['Pa','atm'],u:[
+{i:'Pa',n:'帕斯卡',e:'Pascal',s:'Pa',a:['pascal','pascals','帕'],v:1},
+{i:'hPa',n:'百帕',e:'Hectopascal',s:'hPa',a:['hectopascal'],v:100},
+{i:'kPa',n:'千帕',e:'Kilopascal',s:'kPa',a:['kilopascal'],v:1000},
+{i:'MPa',n:'兆帕',e:'Megapascal',s:'MPa',a:['megapascal'],v:1e6},
+{i:'GPa',n:'吉帕',e:'Gigapascal',s:'GPa',a:['gigapascal'],v:1e9},
+{i:'bar',n:'巴',e:'Bar',s:'bar',a:['bars'],v:1e5},
+{i:'mbar',n:'毫巴',e:'Millibar',s:'mbar',a:['millibar'],v:100},
+{i:'atm',n:'标准大气压',e:'Atmosphere',s:'atm',a:['atmosphere','atmospheres','大气压'],v:101325},
+{i:'psi',n:'磅/平方英寸',e:'PSI',s:'psi',a:['pounds per square inch','lbf/in²'],v:6894.76},
+{i:'mmHg',n:'毫米汞柱',e:'mmHg',s:'mmHg',a:['millimeters of mercury','毫米水银柱'],v:133.322},
+{i:'torr',n:'托',e:'Torr',s:'Torr',a:['torr'],v:133.322},
+{i:'inHg',n:'英寸汞柱',e:'inHg',s:'inHg',a:['inches of mercury'],v:3386.39},
+{i:'cmH2O',n:'厘米水柱',e:'cmH₂O',s:'cmH₂O',a:['centimeters of water'],v:98.0665},
+{i:'kgcm2',n:'千克力/cm²',e:'kgf/cm²',s:'kgf/cm²',a:['kilogram-force per square centimeter','工程大气压','at'],v:98066.5},
+{i:'inH2O',n:'英寸水柱',e:'inH₂O',s:'inH₂O',a:['inches of water','iwg'],v:249.089},
+]},
+{id:'angle',n:'角度',e:'Angle',i:'📐',d:['deg','rad'],u:[
+{i:'deg',n:'度',e:'Degree',s:'°',a:['degree','degrees','度','deg'],v:1},
+{i:'rad',n:'弧度',e:'Radian',s:'rad',a:['radian','radians','弧度'],v:180/Math.PI},
+{i:'grad',n:'百分度',e:'Gradian',s:'gon',a:['gradian','gradians','gon','梯度'],v:.9},
+{i:'arcmin',n:'角分',e:'Arcminute',s:'′',a:['arcminute','arcminutes','角分'],v:1/60},
+{i:'arcsec',n:'角秒',e:'Arcsecond',s:'″',a:['arcsecond','arcseconds','角秒'],v:1/3600},
+{i:'rev',n:'转/圈',e:'Revolution',s:'rev',a:['revolution','turn','turns','圈','转'],v:360},
+{i:'mrad',n:'毫弧度',e:'Milliradian',s:'mrad',a:['milliradian'],v:180/(Math.PI*1000)},
+{i:'quadrant',n:'象限',e:'Quadrant',s:'quadrant',a:['quadrants'],v:90},
+{i:'sextant',n:'六分圆',e:'Sextant',s:'sextant',a:['sextants'],v:60},
+]},
+{id:'energy',n:'能量/热量',e:'Energy',i:'⚡',d:['J','kJ'],u:[
+{i:'J',n:'焦耳',e:'Joule',s:'J',a:['joule','joules','焦'],v:1},
+{i:'kJ',n:'千焦',e:'Kilojoule',s:'kJ',a:['kilojoule','kilojoules'],v:1e3},
+{i:'MJ',n:'兆焦',e:'Megajoule',s:'MJ',a:['megajoule'],v:1e6},
+{i:'GJ',n:'吉焦',e:'Gigajoule',s:'GJ',a:['gigajoule'],v:1e9},
+{i:'cal',n:'卡路里',e:'Calorie',s:'cal',a:['calorie','calories','卡','小卡'],v:4.184},
+{i:'kcal',n:'千卡',e:'Kilocalorie',s:'kcal',a:['kilocalorie','大卡','Cal','食物卡路里'],v:4184},
+{i:'Wh',n:'瓦时',e:'Watt Hour',s:'Wh',a:['watt hour','watt-hour'],v:3600},
+{i:'kWh',n:'千瓦时',e:'Kilowatt Hour',s:'kWh',a:['kilowatt hour','度','度电'],v:3.6e6},
+{i:'MWh',n:'兆瓦时',e:'Megawatt Hour',s:'MWh',a:['megawatt hour'],v:3.6e9},
+{i:'eV',n:'电子伏特',e:'Electron Volt',s:'eV',a:['electron volt','electronvolt'],v:1.602e-19},
+{i:'keV',n:'千电子伏',e:'keV',s:'keV',a:['kiloelectronvolt'],v:1.602e-16},
+{i:'MeV',n:'兆电子伏',e:'MeV',s:'MeV',a:['megaelectronvolt'],v:1.602e-13},
+{i:'BTU',n:'英热单位',e:'BTU',s:'BTU',a:['british thermal unit','btu'],v:1055.06},
+{i:'therm',n:'撒姆',e:'Therm',s:'therm',a:['therms'],v:1.055e8},
+{i:'ftlb',n:'英尺·磅力',e:'Foot-Pound',s:'ft·lbf',a:['foot-pound','ft-lb','ft·lb'],v:1.35582},
+{i:'erg',n:'尔格',e:'Erg',s:'erg',a:['ergs'],v:1e-7},
+{i:'tTNT',n:'吨TNT',e:'Ton of TNT',s:'t TNT',a:['ton of tnt'],v:4.184e9},
+{i:'tce',n:'吨标准煤',e:'Tonne of Coal Equivalent',s:'tce',a:['tonne of coal equivalent','标准煤'],v:2.93076e10},
+{i:'toe',n:'吨油当量',e:'Tonne of Oil Equivalent',s:'toe',a:['tonne of oil equivalent'],v:4.1868e10},
+]},
+{id:'power',n:'功率',e:'Power',i:'🔌',d:['W','kW'],u:[
+{i:'W',n:'瓦特',e:'Watt',s:'W',a:['watt','watts','瓦'],v:1},
+{i:'mW2',n:'毫瓦',e:'Milliwatt',s:'mW',a:['milliwatt'],v:1e-3},
+{i:'kW',n:'千瓦',e:'Kilowatt',s:'kW',a:['kilowatt','千瓦'],v:1000},
+{i:'MW',n:'兆瓦',e:'Megawatt',s:'MW',a:['megawatt'],v:1e6},
+{i:'GW',n:'吉瓦',e:'Gigawatt',s:'GW',a:['gigawatt'],v:1e9},
+{i:'hp',n:'马力(英)',e:'Horsepower',s:'hp',a:['horsepower','匹','马力'],v:745.7},
+{i:'PS',n:'公制马力',e:'Metric HP',s:'PS',a:['ps','pferdestärke','metric horsepower','公制马力'],v:735.499},
+{i:'BTUh',n:'BTU/时',e:'BTU/h',s:'BTU/h',a:['btu per hour','btu/hr'],v:.293071},
+{i:'kcalh',n:'千卡/时',e:'kcal/h',s:'kcal/h',a:['kilocalories per hour'],v:1.163},
+{i:'TR',n:'冷吨',e:'Ton of Refrigeration',s:'TR',a:['ton of refrigeration','冷冻吨'],v:3516.85},
+{i:'dBm',n:'dBm',e:'dBm',s:'dBm',a:['dbm'],v:null},
+{i:'ftlbs',n:'英尺·磅力/秒',e:'ft·lbf/s',s:'ft·lbf/s',a:['foot-pounds per second'],v:1.35582},
+]},
+{id:'apparent_power',n:'视在功率',e:'Apparent Power',i:'🔋',d:['VA','kVA'],u:[
+{i:'VA',n:'伏安',e:'Volt-Ampere',s:'VA',a:['volt-ampere'],v:1},
+{i:'mVA',n:'毫伏安',e:'mVA',s:'mVA',a:['millivolt-ampere'],v:1e-3},
+{i:'kVA',n:'千伏安',e:'kVA',s:'kVA',a:['kilovolt-ampere'],v:1e3},
+{i:'MVA',n:'兆伏安',e:'MVA',s:'MVA',a:['megavolt-ampere'],v:1e6},
+{i:'GVA',n:'吉伏安',e:'GVA',s:'GVA',a:['gigavolt-ampere'],v:1e9},
+]},
+{id:'charge',n:'电量',e:'Electric Charge',i:'🔵',d:['C3','Ah'],u:[
+{i:'C3',n:'库仑',e:'Coulomb',s:'C',a:['coulomb','coulombs','库'],v:1},
+{i:'mC',n:'毫库仑',e:'mC',s:'mC',a:['millicoulomb'],v:1e-3},
+{i:'uC',n:'微库仑',e:'μC',s:'μC',a:['microcoulomb'],v:1e-6},
+{i:'nC',n:'纳库仑',e:'nC',s:'nC',a:['nanocoulomb'],v:1e-9},
+{i:'pC',n:'皮库仑',e:'pC',s:'pC',a:['picocoulomb'],v:1e-12},
+{i:'Ah',n:'安时',e:'Ampere Hour',s:'Ah',a:['ampere hour','ampere-hour','安培时'],v:3600},
+{i:'mAh',n:'毫安时',e:'mAh',s:'mAh',a:['milliampere hour','毫安培时'],v:3.6},
+{i:'e2',n:'元电荷',e:'Elementary Charge',s:'e',a:['elementary charge','基本电荷'],v:1.602e-19},
+]},
+{id:'current',n:'电流',e:'Electric Current',i:'〰️',d:['A2','mA2'],u:[
+{i:'A2',n:'安培',e:'Ampere',s:'A',a:['ampere','amperes','amp','amps','安'],v:1},
+{i:'mA2',n:'毫安',e:'Milliampere',s:'mA',a:['milliampere','milliamp','毫安培'],v:1e-3},
+{i:'uA',n:'微安',e:'Microampere',s:'μA',a:['microampere'],v:1e-6},
+{i:'nA',n:'纳安',e:'Nanoampere',s:'nA',a:['nanoampere'],v:1e-9},
+{i:'kA',n:'千安',e:'Kiloampere',s:'kA',a:['kiloampere'],v:1000},
+{i:'abA',n:'绝对安培',e:'Abampere',s:'abA',a:['abampere','biot'],v:10},
+]},
+{id:'voltage',n:'电压',e:'Voltage',i:'🔸',d:['V2','mV2'],u:[
+{i:'V2',n:'伏特',e:'Volt',s:'V',a:['volt','volts','伏'],v:1},
+{i:'uV',n:'微伏',e:'Microvolt',s:'μV',a:['microvolt'],v:1e-6},
+{i:'mV2',n:'毫伏',e:'Millivolt',s:'mV',a:['millivolt'],v:1e-3},
+{i:'kV',n:'千伏',e:'Kilovolt',s:'kV',a:['kilovolt'],v:1000},
+{i:'MV',n:'兆伏',e:'Megavolt',s:'MV',a:['megavolt'],v:1e6},
+{i:'abV',n:'绝对伏特',e:'Abvolt',s:'abV',a:['abvolt'],v:1e-8},
+{i:'stV',n:'静伏特',e:'Statvolt',s:'stV',a:['statvolt'],v:299.792},
+]},
+{id:'capacitance',n:'电容',e:'Capacitance',i:'🟡',d:['F3','uF'],u:[
+{i:'F3',n:'法拉',e:'Farad',s:'F',a:['farad','farads','法'],v:1},
+{i:'mF',n:'毫法',e:'Millifarad',s:'mF',a:['millifarad'],v:1e-3},
+{i:'uF',n:'微法',e:'Microfarad',s:'μF',a:['microfarad'],v:1e-6},
+{i:'nF',n:'纳法',e:'Nanofarad',s:'nF',a:['nanofarad'],v:1e-9},
+{i:'pF',n:'皮法',e:'Picofarad',s:'pF',a:['picofarad'],v:1e-12},
+]},
+{id:'frequency',n:'频率',e:'Frequency',i:'🔊',d:['Hz','kHz'],u:[
+{i:'Hz',n:'赫兹',e:'Hertz',s:'Hz',a:['hertz','赫'],v:1},
+{i:'mHz',n:'毫赫',e:'Millihertz',s:'mHz',a:['millihertz'],v:1e-3},
+{i:'kHz',n:'千赫',e:'Kilohertz',s:'kHz',a:['kilohertz'],v:1e3},
+{i:'MHz',n:'兆赫',e:'Megahertz',s:'MHz',a:['megahertz'],v:1e6},
+{i:'GHz',n:'吉赫',e:'Gigahertz',s:'GHz',a:['gigahertz'],v:1e9},
+{i:'THz',n:'太赫',e:'Terahertz',s:'THz',a:['terahertz'],v:1e12},
+{i:'rpm',n:'转/分',e:'RPM',s:'rpm',a:['revolutions per minute','转每分','r/min'],v:1/60},
+{i:'rps',n:'转/秒',e:'RPS',s:'rps',a:['revolutions per second','r/s'],v:1},
+{i:'BPM',n:'拍/分',e:'BPM',s:'BPM',a:['beats per minute','bpm'],v:1/60},
+{i:'radps',n:'弧度/秒',e:'rad/s',s:'rad/s',a:['radians per second'],v:1/(2*Math.PI)},
+]},
+{id:'force',n:'力',e:'Force',i:'💪',d:['N','kgf'],u:[
+{i:'N',n:'牛顿',e:'Newton',s:'N',a:['newton','newtons','牛'],v:1},
+{i:'mN2',n:'毫牛',e:'Millinewton',s:'mN',a:['millinewton'],v:1e-3},
+{i:'kN',n:'千牛',e:'Kilonewton',s:'kN',a:['kilonewton'],v:1e3},
+{i:'MN',n:'兆牛',e:'Meganewton',s:'MN',a:['meganewton'],v:1e6},
+{i:'dyn',n:'达因',e:'Dyne',s:'dyn',a:['dyne','dynes'],v:1e-5},
+{i:'kgf',n:'千克力',e:'kgf',s:'kgf',a:['kilogram-force','千克重','kp'],v:9.80665},
+{i:'gf',n:'克力',e:'gf',s:'gf',a:['gram-force','克重'],v:9.80665e-3},
+{i:'lbf',n:'磅力',e:'lbf',s:'lbf',a:['pound-force','磅力'],v:4.44822},
+{i:'ozf',n:'盎司力',e:'ozf',s:'ozf',a:['ounce-force'],v:.278014},
+{i:'pdl',n:'磅达',e:'Poundal',s:'pdl',a:['poundal'],v:.138255},
+{i:'kip',n:'千磅力',e:'Kip',s:'kip',a:['kip','kilopound-force'],v:4448.22},
+]},
+{id:'density',n:'密度',e:'Density',i:'🧱',d:['kgm3','gcm3'],u:[
+{i:'kgm3',n:'千克/m³',e:'kg/m³',s:'kg/m³',a:['kilogram per cubic meter'],v:1},
+{i:'gcm3',n:'克/cm³',e:'g/cm³',s:'g/cm³',a:['gram per cubic centimeter','g/cc'],v:1000},
+{i:'gml',n:'克/mL',e:'g/mL',s:'g/mL',a:['gram per milliliter'],v:1000},
+{i:'kgL',n:'千克/L',e:'kg/L',s:'kg/L',a:['kilogram per liter'],v:1000},
+{i:'lbft3',n:'磅/ft³',e:'lb/ft³',s:'lb/ft³',a:['pound per cubic foot'],v:16.0185},
+{i:'lbin3',n:'磅/in³',e:'lb/in³',s:'lb/in³',a:['pound per cubic inch'],v:27679.9},
+{i:'lbgal',n:'磅/gal',e:'lb/gal',s:'lb/gal',a:['pound per gallon'],v:119.826},
+{i:'tm3',n:'吨/m³',e:'t/m³',s:'t/m³',a:['tonne per cubic meter'],v:1000},
+{i:'mgcm3',n:'毫克/cm³',e:'mg/cm³',s:'mg/cm³',a:['milligram per cubic centimeter'],v:1},
+]},
+{id:'flowrate',n:'流量(体积)',e:'Volume Flow',i:'🌊',d:['m3s','Ls'],u:[
+{i:'m3s',n:'m³/s',e:'m³/s',s:'m³/s',a:['cubic meter per second'],v:1},
+{i:'m3h',n:'m³/h',e:'m³/h',s:'m³/h',a:['cubic meter per hour','CMH'],v:1/3600},
+{i:'Ls',n:'L/s',e:'L/s',s:'L/s',a:['liter per second'],v:1e-3},
+{i:'Lmin',n:'L/min',e:'L/min',s:'L/min',a:['liter per minute','LPM'],v:1/60e3},
+{i:'Lh',n:'L/h',e:'L/h',s:'L/h',a:['liter per hour','LPH'],v:1/3.6e6},
+{i:'gpm',n:'加仑/分(美)',e:'US GPM',s:'GPM',a:['gallon per minute','gal/min'],v:6.309e-5},
+{i:'cfm',n:'立方英尺/分',e:'CFM',s:'CFM',a:['cubic feet per minute'],v:4.719e-4},
+{i:'cfs',n:'立方英尺/秒',e:'CFS',s:'CFS',a:['cubic feet per second'],v:.0283168},
+]},
+{id:'massflow',n:'流量(质量)',e:'Mass Flow',i:'🔄',d:['kgs','kgh'],u:[
+{i:'kgs',n:'kg/s',e:'kg/s',s:'kg/s',a:['kilogram per second'],v:1},
+{i:'kgh',n:'kg/h',e:'kg/h',s:'kg/h',a:['kilogram per hour'],v:1/3600},
+{i:'kgmin',n:'kg/min',e:'kg/min',s:'kg/min',a:['kilogram per minute'],v:1/60},
+{i:'gs',n:'g/s',e:'g/s',s:'g/s',a:['gram per second'],v:1e-3},
+{i:'th',n:'t/h',e:'t/h',s:'t/h',a:['tonne per hour'],v:1/3.6},
+{i:'lbs2',n:'lb/s',e:'lb/s',s:'lb/s',a:['pound per second'],v:.453592},
+{i:'lbh',n:'lb/h',e:'lb/h',s:'lb/h',a:['pound per hour'],v:1.26e-4},
+]},
+{id:'conc_mass',n:'浓度(质量)',e:'Concentration',i:'🧪',d:['gL','mgL'],u:[
+{i:'kgm3c',n:'kg/m³',e:'kg/m³',s:'kg/m³',a:['kilogram per cubic meter'],v:1},
+{i:'gL',n:'g/L',e:'g/L',s:'g/L',a:['gram per liter'],v:1},
+{i:'mgL',n:'mg/L',e:'mg/L',s:'mg/L',a:['milligram per liter'],v:1e-3},
+{i:'ugL',n:'μg/L',e:'μg/L',s:'μg/L',a:['microgram per liter'],v:1e-6},
+{i:'gmL2',n:'g/mL',e:'g/mL',s:'g/mL',a:['gram per milliliter'],v:1000},
+{i:'mgmL',n:'mg/mL',e:'mg/mL',s:'mg/mL',a:['milligram per milliliter'],v:1},
+{i:'ppm',n:'PPM',e:'PPM',s:'ppm',a:['parts per million'],v:1e-3},
+{i:'ppb',n:'PPB',e:'PPB',s:'ppb',a:['parts per billion'],v:1e-6},
+{i:'pct',n:'% (w/v)',e:'% w/v',s:'%',a:['percent','百分比浓度'],v:10},
+]},
+{id:'conc_molar',n:'浓度(摩尔)',e:'Molar Conc.',i:'⚗️',d:['molL','mmolL'],u:[
+{i:'molm3',n:'mol/m³',e:'mol/m³',s:'mol/m³',a:['mole per cubic meter'],v:1},
+{i:'molL',n:'mol/L',e:'mol/L',s:'mol/L',a:['molar','M','摩尔浓度'],v:1e3},
+{i:'mmolL',n:'mmol/L',e:'mmol/L',s:'mmol/L',a:['millimolar','mM'],v:1},
+{i:'umolL',n:'μmol/L',e:'μmol/L',s:'μmol/L',a:['micromolar','μM'],v:1e-3},
+{i:'nmolL',n:'nmol/L',e:'nmol/L',s:'nmol/L',a:['nanomolar','nM'],v:1e-6},
+]},
+{id:'inductance',n:'电感',e:'Inductance',i:'🧲',d:['H2','mH2'],u:[
+{i:'H2',n:'亨利',e:'Henry',s:'H',a:['henry','亨'],v:1},
+{i:'mH2',n:'毫亨',e:'Millihenry',s:'mH',a:['millihenry'],v:1e-3},
+{i:'uH',n:'微亨',e:'Microhenry',s:'μH',a:['microhenry'],v:1e-6},
+{i:'nH',n:'纳亨',e:'Nanohenry',s:'nH',a:['nanohenry'],v:1e-9},
+{i:'pH',n:'皮亨',e:'Picohenry',s:'pH',a:['picohenry'],v:1e-12},
+]},
+{id:'resistance',n:'电阻',e:'Resistance',i:'Ω',d:['ohm','kohm'],u:[
+{i:'ohm',n:'欧姆',e:'Ohm',s:'Ω',a:['ohm','ohms','欧'],v:1},
+{i:'uohm',n:'微欧',e:'Microhm',s:'μΩ',a:['microhm'],v:1e-6},
+{i:'mohm',n:'毫欧',e:'Milliohm',s:'mΩ',a:['milliohm'],v:1e-3},
+{i:'kohm',n:'千欧',e:'Kilohm',s:'kΩ',a:['kilohm'],v:1e3},
+{i:'Mohm',n:'兆欧',e:'Megohm',s:'MΩ',a:['megohm','megaohm'],v:1e6},
+{i:'Gohm',n:'吉欧',e:'Gigohm',s:'GΩ',a:['gigohm'],v:1e9},
+]},
+{id:'conductance',n:'电导',e:'Conductance',i:'🟢',d:['S2','mS2'],u:[
+{i:'S2',n:'西门子',e:'Siemens',s:'S',a:['siemens','mho'],v:1},
+{i:'mS2',n:'毫西',e:'Millisiemens',s:'mS',a:['millisiemens'],v:1e-3},
+{i:'uS2',n:'微西',e:'Microsiemens',s:'μS',a:['microsiemens'],v:1e-6},
+{i:'kS',n:'千西',e:'Kilosiemens',s:'kS',a:['kilosiemens'],v:1e3},
+]},
+{id:'bandwidth',n:'带宽',e:'Bandwidth',i:'📶',d:['Mbps','Gbps'],u:[
+{i:'bps',n:'bit/s',e:'bps',s:'bps',a:['bits per second'],v:1},
+{i:'Kbps',n:'Kbit/s',e:'Kbps',s:'Kbps',a:['kilobits per second'],v:1e3},
+{i:'Mbps',n:'Mbit/s',e:'Mbps',s:'Mbps',a:['megabits per second'],v:1e6},
+{i:'Gbps',n:'Gbit/s',e:'Gbps',s:'Gbps',a:['gigabits per second'],v:1e9},
+{i:'Tbps',n:'Tbit/s',e:'Tbps',s:'Tbps',a:['terabits per second'],v:1e12},
+{i:'Bps2',n:'B/s',e:'B/s',s:'B/s',a:['bytes per second'],v:8},
+{i:'KBps',n:'KB/s',e:'KB/s',s:'KB/s',a:['kilobytes per second'],v:8e3},
+{i:'MBps',n:'MB/s',e:'MB/s',s:'MB/s',a:['megabytes per second'],v:8e6},
+{i:'GBps2',n:'GB/s',e:'GB/s',s:'GB/s',a:['gigabytes per second'],v:8e9},
+]},
+{id:'luminance',n:'亮度',e:'Luminance',i:'☀️',d:['cdm2','fL'],u:[
+{i:'cdm2',n:'坎德拉/m²',e:'cd/m²',s:'cd/m²',a:['candela per square meter','nit','nits'],v:1},
+{i:'sb',n:'斯提尔布',e:'Stilb',s:'sb',a:['stilb'],v:1e4},
+{i:'Lb',n:'朗伯',e:'Lambert',s:'L',a:['lambert'],v:3183.1},
+{i:'mLb',n:'毫朗伯',e:'Millilambert',s:'mL',a:['millilambert'],v:3.1831},
+{i:'fL',n:'英尺朗伯',e:'Foot-Lambert',s:'fL',a:['foot-lambert'],v:3.42626},
+{i:'asb',n:'阿斯提尔布',e:'Apostilb',s:'asb',a:['apostilb'],v:1/Math.PI},
+]},
+{id:'lum_flux',n:'光通量',e:'Luminous Flux',i:'💡',d:['lm','cd_sr'],u:[
+{i:'lm',n:'流明',e:'Lumen',s:'lm',a:['lumen','lumens'],v:1},
+{i:'cd_sr',n:'坎德拉·sr',e:'cd·sr',s:'cd·sr',a:['candela steradian'],v:1},
+]},
+{id:'lum_int',n:'光强',e:'Luminous Intensity',i:'🌟',d:['cd','mcd'],u:[
+{i:'cd',n:'坎德拉',e:'Candela',s:'cd',a:['candela','坎'],v:1},
+{i:'mcd',n:'毫坎德拉',e:'mcd',s:'mcd',a:['millicandela'],v:1e-3},
+{i:'kcd',n:'千坎德拉',e:'kcd',s:'kcd',a:['kilocandela'],v:1e3},
+{i:'cp',n:'烛光',e:'Candlepower',s:'cp',a:['candlepower'],v:1},
+]},
+{id:'illuminance',n:'照度',e:'Illuminance',i:'🔆',d:['lx','fc'],u:[
+{i:'lx',n:'勒克斯',e:'Lux',s:'lx',a:['lux'],v:1},
+{i:'fc',n:'英尺烛光',e:'Foot-Candle',s:'fc',a:['foot-candle','footcandle'],v:10.7639},
+{i:'ph',n:'辐透',e:'Phot',s:'ph',a:['phot'],v:1e4},
+{i:'nox',n:'诺克斯',e:'Nox',s:'nox',a:['nox'],v:1e-3},
+{i:'mlx',n:'毫勒克斯',e:'Millilux',s:'mlx',a:['millilux'],v:1e-3},
+{i:'klx',n:'千勒克斯',e:'Kilolux',s:'klx',a:['kilolux'],v:1e3},
+]},
+{id:'kin_visc',n:'运动黏度',e:'Kinematic Visc.',i:'🫗',d:['m2s2','cSt'],u:[
+{i:'m2s2',n:'m²/s',e:'m²/s',s:'m²/s',a:['square meter per second'],v:1},
+{i:'St',n:'斯托克斯',e:'Stokes',s:'St',a:['stokes','stoke'],v:1e-4},
+{i:'cSt',n:'厘斯',e:'Centistokes',s:'cSt',a:['centistokes','centistoke'],v:1e-6},
+{i:'mm2s',n:'mm²/s',e:'mm²/s',s:'mm²/s',a:['square millimeter per second'],v:1e-6},
+{i:'ft2s',n:'ft²/s',e:'ft²/s',s:'ft²/s',a:['square foot per second'],v:.0929},
+]},
+{id:'dyn_visc',n:'动力黏度',e:'Dynamic Visc.',i:'🍯',d:['Pas','cP'],u:[
+{i:'Pas',n:'Pa·s',e:'Pascal Second',s:'Pa·s',a:['pascal second'],v:1},
+{i:'mPas',n:'mPa·s',e:'mPa·s',s:'mPa·s',a:['millipascal second'],v:1e-3},
+{i:'P2',n:'泊',e:'Poise',s:'P',a:['poise'],v:.1},
+{i:'cP',n:'厘泊',e:'Centipoise',s:'cP',a:['centipoise'],v:1e-3},
+{i:'lbfts',n:'lb/(ft·s)',e:'lb/(ft·s)',s:'lb/(ft·s)',a:['pound per foot second'],v:1.48816},
+]},
+{id:'torque',n:'扭矩',e:'Torque',i:'🔧',d:['Nm','kgfm'],u:[
+{i:'Nm',n:'牛·米',e:'N·m',s:'N·m',a:['newton meter','Nm'],v:1},
+{i:'kNm',n:'千牛·米',e:'kN·m',s:'kN·m',a:['kilonewton meter'],v:1e3},
+{i:'kgfm',n:'kgf·m',e:'kgf·m',s:'kgf·m',a:['kilogram force meter'],v:9.80665},
+{i:'kgfcm',n:'kgf·cm',e:'kgf·cm',s:'kgf·cm',a:['kilogram force centimeter'],v:.0980665},
+{i:'lbft2',n:'lbf·ft',e:'lbf·ft',s:'lbf·ft',a:['pound-force foot','ft-lb','lb-ft'],v:1.35582},
+{i:'lbin',n:'lbf·in',e:'lbf·in',s:'lbf·in',a:['pound-force inch','lb-in'],v:.112985},
+{i:'dyncm',n:'dyn·cm',e:'dyn·cm',s:'dyn·cm',a:['dyne centimeter'],v:1e-7},
+]},
+{id:'mag_flux',n:'磁通量',e:'Magnetic Flux',i:'🧭',d:['Wb','mWb'],u:[
+{i:'Wb',n:'韦伯',e:'Weber',s:'Wb',a:['weber'],v:1},
+{i:'mWb',n:'毫韦伯',e:'mWb',s:'mWb',a:['milliweber'],v:1e-3},
+{i:'uWb',n:'微韦伯',e:'μWb',s:'μWb',a:['microweber'],v:1e-6},
+{i:'Mx',n:'麦克斯韦',e:'Maxwell',s:'Mx',a:['maxwell'],v:1e-8},
+]},
+{id:'mag_field',n:'磁感应强度',e:'Magnetic Field',i:'🧲',d:['T2','G2'],u:[
+{i:'T2',n:'特斯拉',e:'Tesla',s:'T',a:['tesla'],v:1},
+{i:'mT2',n:'毫特斯拉',e:'mT',s:'mT',a:['millitesla'],v:1e-3},
+{i:'uT',n:'微特斯拉',e:'μT',s:'μT',a:['microtesla'],v:1e-6},
+{i:'G2',n:'高斯',e:'Gauss',s:'G',a:['gauss'],v:1e-4},
+]},
+{id:'counting',n:'计数',e:'Counting',i:'🔢',d:['unit','dozen'],u:[
+{i:'unit',n:'个',e:'Unit',s:'个',a:['unit','units','piece','pieces','只','枚','ea'],v:1},
+{i:'pair',n:'双/对',e:'Pair',s:'pair',a:['pairs','对','双'],v:2},
+{i:'dozen',n:'打',e:'Dozen',s:'doz',a:['dozen','dozens'],v:12},
+{i:'score',n:'廿(20)',e:'Score',s:'score',a:['scores'],v:20},
+{i:'gross',n:'罗(144)',e:'Gross',s:'gross',a:['grosses'],v:144},
+{i:'great_gross',n:'大罗(1728)',e:'Great Gross',s:'gr.gross',a:[],v:1728},
+{i:'ream',n:'令(500)',e:'Ream',s:'ream',a:['reams','令'],v:500},
+{i:'myriad',n:'万',e:'Myriad',s:'万',a:['myriad','ten thousand'],v:1e4},
+{i:'yi',n:'亿',e:'Yi',s:'亿',a:['hundred million'],v:1e8},
+{i:'million',n:'百万',e:'Million',s:'M',a:['百万'],v:1e6},
+{i:'billion',n:'十亿',e:'Billion',s:'B',a:['十亿','billion'],v:1e9},
+{i:'trillion',n:'万亿',e:'Trillion',s:'T',a:['万亿','trillion'],v:1e12},
+]},
+{id:'currency',n:'货币',e:'Currency',i:'💱',d:['USD','CNY'],u:[
+{i:'USD',n:'美元',e:'US Dollar',s:'$',a:['usd','dollar','美金'],v:1},
+{i:'CNY',n:'人民币',e:'Chinese Yuan',s:'¥',a:['cny','rmb','yuan','元','人民币'],v:7.25},
+{i:'EUR',n:'欧元',e:'Euro',s:'€',a:['eur','euro'],v:.92},
+{i:'GBP',n:'英镑',e:'British Pound',s:'£',a:['gbp','pound sterling'],v:.79},
+{i:'JPY',n:'日元',e:'Japanese Yen',s:'¥',a:['jpy','yen','日元','円'],v:154.5},
+{i:'KRW',n:'韩元',e:'Korean Won',s:'₩',a:['krw','won','韩元'],v:1380},
+{i:'HKD',n:'港币',e:'HK Dollar',s:'HK$',a:['hkd','港币','港元'],v:7.82},
+{i:'TWD',n:'新台币',e:'Taiwan Dollar',s:'NT$',a:['twd','台币'],v:32.5},
+{i:'SGD',n:'新加坡元',e:'Singapore Dollar',s:'S$',a:['sgd','新币'],v:1.34},
+{i:'AUD',n:'澳元',e:'Australian Dollar',s:'A$',a:['aud','澳币'],v:1.55},
+{i:'CAD',n:'加元',e:'Canadian Dollar',s:'C$',a:['cad','加币'],v:1.38},
+{i:'CHF',n:'瑞郎',e:'Swiss Franc',s:'CHF',a:['chf','瑞士法郎'],v:.88},
+{i:'INR',n:'印度卢比',e:'Indian Rupee',s:'₹',a:['inr','rupee','卢比'],v:84},
+{i:'RUB',n:'俄罗斯卢布',e:'Russian Ruble',s:'₽',a:['rub','ruble','卢布'],v:97},
+{i:'BRL',n:'巴西雷亚尔',e:'Brazilian Real',s:'R$',a:['brl','雷亚尔'],v:5.7},
+{i:'MXN',n:'墨西哥比索',e:'Mexican Peso',s:'MX$',a:['mxn','比索'],v:17.5},
+{i:'THB',n:'泰铢',e:'Thai Baht',s:'฿',a:['thb','baht','泰铢'],v:35.8},
+{i:'MYR',n:'林吉特',e:'Ringgit',s:'RM',a:['myr','ringgit','马币'],v:4.72},
+{i:'VND',n:'越南盾',e:'VN Dong',s:'₫',a:['vnd','dong'],v:25400},
+{i:'PHP',n:'菲律宾比索',e:'Philippine Peso',s:'₱',a:['php'],v:58},
+{i:'IDR',n:'印尼盾',e:'Rupiah',s:'Rp',a:['idr','rupiah'],v:15800},
+{i:'AED',n:'迪拉姆',e:'UAE Dirham',s:'AED',a:['aed','dirham'],v:3.67},
+{i:'SAR',n:'里亚尔',e:'Saudi Riyal',s:'SAR',a:['sar','riyal'],v:3.75},
+{i:'TRY',n:'土耳其里拉',e:'Turkish Lira',s:'₺',a:['try','lira'],v:34},
+{i:'ZAR',n:'南非兰特',e:'SA Rand',s:'R',a:['zar','rand'],v:18.5},
+{i:'SEK',n:'瑞典克朗',e:'SEK',s:'kr',a:['sek','krona'],v:10.8},
+{i:'NZD',n:'新西兰元',e:'NZD',s:'NZ$',a:['nzd','纽币'],v:1.72},
+{i:'PLN',n:'兹罗提',e:'Polish Zloty',s:'zł',a:['pln','zloty'],v:4.05},
+{i:'BTC',n:'比特币',e:'Bitcoin',s:'₿',a:['btc','bitcoin'],v:1/97000},
+{i:'ETH',n:'以太坊',e:'Ethereum',s:'ETH',a:['eth','ether'],v:1/3500},
+]},
+{id:'sound',n:'声音强度',e:'Sound Level',i:'🔉',d:['dBSPL','Wm2s'],u:[
+{i:'Wm2s',n:'瓦/m²',e:'W/m²',s:'W/m²',a:['watt per square meter'],v:1},
+{i:'dBSPL',n:'分贝(SPL)',e:'dB SPL',s:'dB SPL',a:['decibel','分贝','dB'],v:null},
+{i:'dBSIL',n:'分贝(SIL)',e:'dB SIL',s:'dB SIL',a:['decibel sil'],v:null},
+{i:'bel',n:'贝尔',e:'Bel',s:'B',a:['bel'],v:null},
+{i:'neper',n:'奈培',e:'Neper',s:'Np',a:['neper'],v:null},
+]},
+];
+
+// ==================== GLOBAL STATE ====================
+let activeCat=null,fromUnit=null,toUnit=null,lastDir='from';
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
+
+// ==================== ALIAS MAP ====================
+const aliasMap={};
+C.forEach(cat=>{
+cat.u.forEach(u=>{
+const keys=[u.i.toLowerCase(),u.n.toLowerCase(),u.e.toLowerCase(),u.s.toLowerCase(),...u.a.map(x=>x.toLowerCase())];
+keys.forEach(k=>{if(k&&!aliasMap[k])aliasMap[k]={c:cat.id,u:u.i}});
+});
+});
+
+// ==================== HELPERS ====================
+function getCat(id){return C.find(c=>c.id===id)}
+function getUnit(cid,uid){const c=getCat(cid);return c?c.u.find(u=>u.i===uid):null}
+
+function tempToC(v,f){switch(f){case'C':return v;case'F':return(v-32)*5/9;case'K':return v-273.15;case'Ra':return(v-491.67)*5/9;case'Re':return v*5/4}return v}
+function cToTemp(v,t){switch(t){case'C':return v;case'F':return v*9/5+32;case'K':return v+273.15;case'Ra':return(v+273.15)*9/5;case'Re':return v*4/5}return v}
+
+function soundToW(v,f){switch(f){case'Wm2s':return v;case'dBSPL':return Math.pow(10,(v-94)/10)*1e-12;case'dBSIL':return Math.pow(10,v/10)*1e-12;case'bel':return Math.pow(10,v)*1e-12;case'neper':return Math.pow(Math.E,2*v)*1e-12}return v}
+function wToSound(v,t){if(v<=0)v=1e-30;switch(t){case'Wm2s':return v;case'dBSPL':return 10*Math.log10(v/1e-12);case'dBSIL':return 10*Math.log10(v/1e-12);case'bel':return Math.log10(v/1e-12);case'neper':return Math.log(v/1e-12)/2}return v}
+
+function convert(val,cid,from,to){
+if(from===to)return val;
+if(cid==='temperature')return cToTemp(tempToC(val,from),to);
+if(cid==='sound')return wToSound(soundToW(val,from),to);
+if(cid==='currency'){const fu=getUnit(cid,from),tu=getUnit(cid,to);return val*tu.v/fu.v}
+if(cid==='power'&&(from==='dBm'||to==='dBm')){
+if(from==='dBm'&&to==='dBm')return val;
+if(from==='dBm'){const w=Math.pow(10,(val-30)/10);const tu=getUnit(cid,to);return w/tu.v}
+if(to==='dBm'){const fu=getUnit(cid,from);const w=val*fu.v;return 10*Math.log10(w)+30}
+}
+const fu=getUnit(cid,from),tu=getUnit(cid,to);
+if(!fu||!tu||fu.v===null||tu.v===null)return NaN;
+return val*fu.v/tu.v;
+}
+
+function fmt(n){
+if(n==null||isNaN(n)||!isFinite(n))return'—';
+const a=Math.abs(n);
+if(a===0)return'0';
+if(a>=1e15||a<1e-10)return n.toExponential(8);
+return parseFloat(n.toPrecision(12)).toString();
+}
+
+function showToast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2e3)}
+
+// ==================== RENDER CATEGORIES ====================
+function renderCats(filter=''){
+const g=$('#catGrid');g.innerHTML='';
+const fl=filter.toLowerCase();
+C.forEach(cat=>{
+if(fl&&!cat.n.includes(fl)&&!cat.e.toLowerCase().includes(fl)&&!cat.id.includes(fl))return;
+const d=document.createElement('div');
+d.className='chip'+(activeCat===cat.id?' active':'');
+d.innerHTML=`<span class="ci">${cat.i}</span>${cat.n}`;
+d.onclick=()=>selectCat(cat.id);
+g.appendChild(d);
+});
+}
+
+function selectCat(id){
+activeCat=id;
+const cat=getCat(id);
+fromUnit=cat.d[0];toUnit=cat.d[1];
+renderCats($('#catSearch').value);
+renderUnitBtns();
+$('#fromVal').value='';$('#toVal').value='';
+$('#fromInfo').innerHTML='';$('#toInfo').innerHTML='';
+updateFormula();$('#copyHint').classList.add('hidden');
+$('#fromVal').focus();
+}
+
+function renderUnitBtns(){
+if(!activeCat)return;
+const fu=getUnit(activeCat,fromUnit),tu=getUnit(activeCat,toUnit);
+$('#fromUnitLabel').textContent=fu?`${fu.s}`:'—';
+$('#toUnitLabel').textContent=tu?`${tu.s}`:'—';
+$('#fromUnitBtn').title=fu?`${fu.n} (${fu.e})`:'';
+$('#toUnitBtn').title=tu?`${tu.n} (${tu.e})`:'';
+}
+
+function updateFormula(){
+if(!activeCat||!fromUnit||!toUnit){$('#formulaBar').textContent='选择类别开始换算';return}
+const fu=getUnit(activeCat,fromUnit),tu=getUnit(activeCat,toUnit);
+if(!fu||!tu)return;
+const r=convert(1,activeCat,fromUnit,toUnit);
+$('#formulaBar').textContent=`1 ${fu.s} = ${fmt(r)} ${tu.s}`;
+}
+
+function doConvert(dir){
+lastDir=dir;
+if(!activeCat||!fromUnit||!toUnit)return;
+if(dir==='from'){
+const val=parseFloat($('#fromVal').value);
+if(isNaN(val)){$('#toVal').value='';$('#copyHint').classList.add('hidden');return}
+$('#toVal').value=fmt(convert(val,activeCat,fromUnit,toUnit));
+$('#copyHint').classList.remove('hidden');
+}else{
+const val=parseFloat($('#toVal').value);
+if(isNaN(val)){$('#fromVal').value='';$('#copyHint').classList.add('hidden');return}
+$('#fromVal').value=fmt(convert(val,activeCat,toUnit,fromUnit));
+$('#copyHint').classList.remove('hidden');
+}
+updateFormula();
+}
+
+
+// ==================== AUTO DETECT ====================
+function tryDetect(input, dir) {
+  const raw = input.trim();
+  if (!raw) return false;
+  const m = raw.match(/^([+-]?\d*\.?\d+(?:[eE][+-]?\d+)?)\s*(.+)$/);
+  if (!m) return false;
+  const num = parseFloat(m[1]), us = m[2].trim().toLowerCase();
+  if (isNaN(num) || !us) return false;
+  let found = aliasMap[us];
+  if (!found) {
+    const usn = us.replace(/[\s²³·°]/g, '');
+    for (const [k, v] of Object.entries(aliasMap)) {
+      if (k.replace(/[\s²³·°]/g, '') === usn) { found = v; break; }
+    }
+  }
+  if (!found && activeCat) {
+    const cat = getCat(activeCat);
+    for (const u of cat.u) {
+      const strs = [u.i.toLowerCase(), u.n.toLowerCase(), u.e.toLowerCase(), u.s.toLowerCase(), ...u.a.map(x => x.toLowerCase())];
+      if (strs.some(s => s === us || s.replace(/[\s²³·°]/g, '') === us.replace(/[\s²³·°]/g, ''))) {
+        found = { c: activeCat, u: u.i }; break;
+      }
+    }
+  }
+  if (!found) {
+    for (const cat of C) {
+      for (const u of cat.u) {
+        const strs = [u.i.toLowerCase(), u.n.toLowerCase(), u.e.toLowerCase(), u.s.toLowerCase(), ...u.a.map(x => x.toLowerCase())];
+        if (strs.some(s => s === us)) { found = { c: cat.id, u: u.i }; break; }
+      }
+      if (found) break;
+    }
+  }
+  if (!found) return false;
+
+  if (activeCat !== found.c) {
+    activeCat = found.c;
+    const cat = getCat(activeCat);
+    if (dir === 'from') {
+      fromUnit = found.u;
+      toUnit = cat.d[1] === found.u ? cat.d[0] : cat.d[1];
+    } else {
+      toUnit = found.u;
+      fromUnit = cat.d[0] === found.u ? cat.d[1] : cat.d[0];
+    }
+    renderCats($('#catSearch').value);
+  } else {
+    if (dir === 'from') fromUnit = found.u;
+    else toUnit = found.u;
+  }
+  renderUnitBtns();
+
+  const det = getUnit(activeCat, found.u);
+  if (dir === 'from') {
+    $('#fromVal').value = num;
+    $('#toVal').value = fmt(convert(num, activeCat, fromUnit, toUnit));
+    $('#fromInfo').innerHTML = `<span class="auto-tag">✓ ${det.n} (${det.s})</span>`;
+    $('#toInfo').innerHTML = '';
+  } else {
+    $('#toVal').value = num;
+    $('#fromVal').value = fmt(convert(num, activeCat, toUnit, fromUnit));
+    $('#toInfo').innerHTML = `<span class="auto-tag">✓ ${det.n} (${det.s})</span>`;
+    $('#fromInfo').innerHTML = '';
+  }
+  $('#copyHint').classList.remove('hidden');
+  updateFormula();
+  return true;
+}
+
+// ==================== UNIT MODAL ====================
+let modalDir = 'from';
+
+function openModal(dir) {
+  if (!activeCat) { showToast('请先选择一个类别'); return; }
+  modalDir = dir;
+  const overlay = $('#unitModal');
+  overlay.classList.add('show');
+  $('#modalTitle').textContent = dir === 'from' ? '选择原单位' : '选择目标单位';
+  $('#modalSearch').value = '';
+  renderModalList('');
+  setTimeout(() => $('#modalSearch').focus(), 100);
+}
+
+function closeModal() {
+  $('#unitModal').classList.remove('show');
+}
+
+function renderModalList(filter) {
+  const list = $('#modalList');
+  list.innerHTML = '';
+  const cat = getCat(activeCat);
+  if (!cat) return;
+  const fl = filter.toLowerCase();
+  const current = modalDir === 'from' ? fromUnit : toUnit;
+  let count = 0;
+  cat.u.forEach(u => {
+    const txt = `${u.n} ${u.e} ${u.s} ${u.a.join(' ')}`.toLowerCase();
+    if (fl && !txt.includes(fl)) return;
+    count++;
+    const opt = document.createElement('div');
+    opt.className = 'modal-opt' + (u.i === current ? ' active' : '');
+    opt.innerHTML = `<div class="mo-left"><span class="mo-name">${u.n}</span><span class="mo-en">${u.e}</span></div><span class="mo-sym">${u.s}</span>`;
+    opt.onclick = () => {
+      if (modalDir === 'from') fromUnit = u.i;
+      else toUnit = u.i;
+      renderUnitBtns();
+      closeModal();
+      doConvert(lastDir);
+    };
+    list.appendChild(opt);
+  });
+  if (count === 0) {
+    list.innerHTML = '<div class="modal-empty">没有匹配的单位</div>';
+  }
+}
+
+$('#fromUnitBtn').addEventListener('click', () => openModal('from'));
+$('#toUnitBtn').addEventListener('click', () => openModal('to'));
+$('#modalClose').addEventListener('click', closeModal);
+$('#unitModal').addEventListener('click', function (e) {
+  if (e.target === this) closeModal();
+});
+$('#modalSearch').addEventListener('input', function () {
+  renderModalList(this.value);
+});
+
+// ==================== EVENTS ====================
+$('#catSearch').addEventListener('input', function () {
+  const v = this.value.trim();
+  if (v && tryDetect(v, 'from')) return;
+  renderCats(v);
+});
+
+$('#fromVal').addEventListener('input', function () {
+  $('#fromInfo').innerHTML = '';
+  const v = this.value.trim();
+  if (v && /[a-zA-Z\u4e00-\u9fff°℃℉Ωμ²³]/.test(v)) {
+    if (tryDetect(v, 'from')) return;
+  }
+  doConvert('from');
+});
+
+$('#toVal').addEventListener('input', function () {
+  $('#toInfo').innerHTML = '';
+  const v = this.value.trim();
+  if (v && /[a-zA-Z\u4e00-\u9fff°℃℉Ωμ²³]/.test(v)) {
+    if (tryDetect(v, 'to')) return;
+  }
+  doConvert('to');
+});
+
+$('#swapBtn').addEventListener('click', function () {
+  if (!activeCat) return;
+  [fromUnit, toUnit] = [toUnit, fromUnit];
+  const fv = $('#fromVal').value, tv = $('#toVal').value;
+  $('#fromVal').value = tv;
+  $('#toVal').value = fv;
+  const fi = $('#fromInfo').innerHTML, ti = $('#toInfo').innerHTML;
+  $('#fromInfo').innerHTML = ti;
+  $('#toInfo').innerHTML = fi;
+  renderUnitBtns();
+  updateFormula();
+});
+
+$('#copyHint').addEventListener('click', function () {
+  const val = lastDir === 'from' ? $('#toVal').value : $('#fromVal').value;
+  if (val) navigator.clipboard.writeText(val).then(() => showToast('已复制: ' + val)).catch(() => { });
+});
+
+// ==================== TABS ====================
+$$('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    $$('.tab-btn').forEach(b => b.classList.remove('active'));
+    $$('.tab-content').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+    $('#tab-' + this.dataset.tab).classList.add('active');
+  });
+});
+
+// ==================== DATA ANALYSIS ====================
+$('#daSampleBtn').addEventListener('click', function () {
+  const samples = [
+    '12, 15, 18, 22, 25, 28, 30, 33, 35, 40, 42, 45, 48, 50, 52, 55, 58, 60, 63, 65, 68, 70, 72, 75, 78, 80, 22, 35, 48, 55',
+    '3.2, 4.5, 2.8, 5.1, 3.9, 4.2, 6.0, 3.5, 4.8, 5.5, 2.1, 4.0, 3.7, 5.8, 4.3, 3.1, 6.2, 4.9, 5.3, 3.6',
+    '95, 87, 73, 91, 82, 68, 79, 88, 94, 76, 85, 90, 71, 83, 77, 92, 86, 74, 89, 81, 66, 93, 78, 84, 69, 97, 72, 88, 80, 75',
+    '150, 230, 180, 310, 270, 195, 340, 210, 160, 285, 245, 175, 320, 200, 260, 190, 300, 225, 170, 290'
+  ];
+  $('#daInput').value = samples[Math.floor(Math.random() * samples.length)];
+});
+$('#daClearBtn').addEventListener('click', function () {
+  $('#daInput').value = '';
+  $('#daResults').classList.add('hidden');
+});
+$('#daCopyBtn').addEventListener('click', function () {
+  const grid = $('#statsGrid');
+  if (!grid.children.length) { showToast('请先分析数据'); return; }
+  let text = '=== 数据分析结果 ===\n';
+  $$('.stat-item').forEach(item => {
+    text += item.querySelector('.st-label').textContent + ': ' + item.querySelector('.st-val').textContent + '\n';
+  });
+  navigator.clipboard.writeText(text).then(() => showToast('统计结果已复制')).catch(() => { });
+});
+
+$('#daCalcBtn').addEventListener('click', runAnalysis);
+
+function parseData(str) {
+  return str.replace(/\n/g, ',').split(/[,;\s\t|]+/).map(s => s.trim()).filter(s => s !== '').map(Number).filter(n => !isNaN(n) && isFinite(n));
+}
+
+function runAnalysis() {
+  const data = parseData($('#daInput').value);
+  if (data.length < 2) { showToast('请输入至少 2 个数字'); return; }
+  $('#daResults').classList.remove('hidden');
+
+  const sorted = [...data].sort((a, b) => a - b);
+  const n = data.length;
+  const sum = data.reduce((a, b) => a + b, 0);
+  const mean = sum / n;
+  const median = n % 2 === 0 ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2 : sorted[Math.floor(n / 2)];
+  const variance = data.reduce((a, b) => a + (b - mean) ** 2, 0) / n;
+  const sampleVar = data.reduce((a, b) => a + (b - mean) ** 2, 0) / (n - 1);
+  const stddev = Math.sqrt(variance);
+  const sampleStd = Math.sqrt(sampleVar);
+  const min = sorted[0], max = sorted[n - 1];
+  const range = max - min;
+  const q1 = percentile(sorted, 25);
+  const q3 = percentile(sorted, 75);
+  const iqr = q3 - q1;
+  const skewness = data.reduce((a, b) => a + ((b - mean) / stddev) ** 3, 0) / n;
+  const kurtosis = data.reduce((a, b) => a + ((b - mean) / stddev) ** 4, 0) / n - 3;
+  const geoMean = data.every(d => d > 0) ? Math.exp(data.reduce((a, b) => a + Math.log(b), 0) / n) : NaN;
+  const harmMean = data.every(d => d !== 0) ? n / data.reduce((a, b) => a + 1 / b, 0) : NaN;
+  const cv = (stddev / Math.abs(mean)) * 100;
+  const se = sampleStd / Math.sqrt(n);
+  const ci95lo = mean - 1.96 * se;
+  const ci95hi = mean + 1.96 * se;
+
+  // Mode
+  const freqMap = {};
+  data.forEach(d => { freqMap[d] = (freqMap[d] || 0) + 1 });
+  const maxFreq = Math.max(...Object.values(freqMap));
+  const modes = Object.keys(freqMap).filter(k => freqMap[k] === maxFreq).map(Number);
+  const modeStr = maxFreq === 1 ? '无' : modes.slice(0, 5).map(m => fmtS(m)).join(', ');
+
+  const stats = [
+    { l: '样本量 N', v: n },
+    { l: '求和 Sum', v: fmtS(sum) },
+    { l: '平均值 Mean', v: fmtS(mean) },
+    { l: '中位数 Median', v: fmtS(median) },
+    { l: '众数 Mode', v: modeStr },
+    { l: '最小值 Min', v: fmtS(min) },
+    { l: '最大值 Max', v: fmtS(max) },
+    { l: '极差 Range', v: fmtS(range) },
+    { l: '总体方差 σ²', v: fmtS(variance) },
+    { l: '样本方差 s²', v: fmtS(sampleVar) },
+    { l: '总体标准差 σ', v: fmtS(stddev) },
+    { l: '样本标准差 s', v: fmtS(sampleStd) },
+    { l: '标准误差 SE', v: fmtS(se) },
+    { l: '变异系数 CV', v: fmtS(cv) + '%' },
+    { l: 'Q1 (25%)', v: fmtS(q1) },
+    { l: 'Q3 (75%)', v: fmtS(q3) },
+    { l: '四分位距 IQR', v: fmtS(iqr) },
+    { l: '偏度 Skewness', v: fmtS(skewness) },
+    { l: '峰度 Kurtosis', v: fmtS(kurtosis) },
+    { l: '几何平均 Geo', v: isNaN(geoMean) ? 'N/A' : fmtS(geoMean) },
+    { l: '调和平均 Harm', v: isNaN(harmMean) ? 'N/A' : fmtS(harmMean) },
+    { l: '95% CI', v: `[${fmtS(ci95lo)}, ${fmtS(ci95hi)}]` },
+  ];
+
+  const grid = $('#statsGrid');
+  grid.innerHTML = '';
+  stats.forEach(s => {
+    const d = document.createElement('div');
+    d.className = 'stat-item';
+    d.innerHTML = `<div class="st-label">${s.l}</div><div class="st-val">${s.v}</div>`;
+    grid.appendChild(d);
+  });
+
+  drawHistogram(data, sorted, min, max);
+  drawBoxPlot(sorted, min, max, q1, median, q3, iqr, mean);
+  drawFreqTable(sorted, min, max);
+}
+
+function fmtS(n) {
+  if (n == null || isNaN(n)) return '—';
+  if (Number.isInteger(n) && Math.abs(n) < 1e12) return n.toLocaleString();
+  return parseFloat(n.toPrecision(8)).toString();
+}
+
+function percentile(sorted, p) {
+  const idx = (p / 100) * (sorted.length - 1);
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
+}
+
+// ==================== CHARTS ====================
+function drawHistogram(data, sorted, min, max) {
+  const canvas = $('#histCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.parentElement.clientWidth - 24;
+  const h = Math.min(220, w * 0.55);
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const pad = { t: 10, r: 12, b: 28, l: 42 };
+  const cw = w - pad.l - pad.r;
+  const ch = h - pad.t - pad.b;
+
+  // Bins
+  let binCount = Math.min(Math.max(Math.ceil(Math.sqrt(data.length)), 5), 30);
+  const binW = (max - min) / binCount || 1;
+  if (max === min) { binCount = 1; }
+  const bins = new Array(binCount).fill(0);
+  data.forEach(d => {
+    let idx = Math.floor((d - min) / binW);
+    if (idx >= binCount) idx = binCount - 1;
+    if (idx < 0) idx = 0;
+    bins[idx]++;
+  });
+  const maxBin = Math.max(...bins);
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Grid
+  ctx.strokeStyle = '#2e2e33';
+  ctx.lineWidth = .5;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + ch - (i / 4) * ch;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + cw, y); ctx.stroke();
+  }
+
+  // Bars
+  const barGap = 1;
+  const barW = (cw - barGap * (binCount - 1)) / binCount;
+  const gradient = ctx.createLinearGradient(0, pad.t, 0, pad.t + ch);
+  gradient.addColorStop(0, '#f0a060');
+  gradient.addColorStop(1, 'rgba(240,160,96,.15)');
+
+  bins.forEach((count, idx) => {
+    const bh = maxBin > 0 ? (count / maxBin) * ch : 0;
+    const x = pad.l + idx * (barW + barGap);
+    const y = pad.t + ch - bh;
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    roundRect(ctx, x, y, barW, bh, 3);
+    ctx.fill();
+  });
+
+  // Labels
+  ctx.fillStyle = '#63637a';
+  ctx.font = '10px sans-serif';
+  ctx.textAlign = 'center';
+  for (let i = 0; i <= binCount; i += Math.max(1, Math.floor(binCount / 6))) {
+    const val = min + i * binW;
+    const x = pad.l + i * (barW + barGap) - barGap / 2;
+    ctx.fillText(fmtAxis(val), x, h - 6);
+  }
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + ch - (i / 4) * ch;
+    ctx.fillText(Math.round(maxBin * i / 4), pad.l - 5, y + 3);
+  }
+}
+
+function drawBoxPlot(sorted, min, max, q1, median, q3, iqr, mean) {
+  const canvas = $('#boxCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.parentElement.clientWidth - 24;
+  const h = Math.min(160, w * 0.35);
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const pad = { t: 20, r: 16, b: 28, l: 16 };
+  const cw = w - pad.l - pad.r;
+  const ch = h - pad.t - pad.b;
+
+  const whiskerLo = Math.max(min, q1 - 1.5 * iqr);
+  const whiskerHi = Math.min(max, q3 + 1.5 * iqr);
+  const dataMin = Math.min(whiskerLo, min);
+  const dataMax = Math.max(whiskerHi, max);
+  const range = dataMax - dataMin || 1;
+  const x = v => pad.l + ((v - dataMin) / range) * cw;
+
+  const cy = pad.t + ch / 2;
+  const boxH = ch * 0.5;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Whisker lines
+  ctx.strokeStyle = '#63637a';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 3]);
+  ctx.beginPath();
+  ctx.moveTo(x(whiskerLo), cy);
+  ctx.lineTo(x(q1), cy);
+  ctx.moveTo(x(q3), cy);
+  ctx.lineTo(x(whiskerHi), cy);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Whisker caps
+  ctx.beginPath();
+  ctx.moveTo(x(whiskerLo), cy - boxH * 0.3);
+  ctx.lineTo(x(whiskerLo), cy + boxH * 0.3);
+  ctx.moveTo(x(whiskerHi), cy - boxH * 0.3);
+  ctx.lineTo(x(whiskerHi), cy + boxH * 0.3);
+  ctx.stroke();
+
+  // Box
+  const gradient = ctx.createLinearGradient(x(q1), 0, x(q3), 0);
+  gradient.addColorStop(0, 'rgba(240,160,96,.25)');
+  gradient.addColorStop(1, 'rgba(244,184,122,.25)');
+  ctx.fillStyle = gradient;
+  ctx.strokeStyle = '#f0a060';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  roundRect(ctx, x(q1), cy - boxH / 2, x(q3) - x(q1), boxH, 4);
+  ctx.fill();
+  ctx.stroke();
+
+  // Median line
+  ctx.strokeStyle = '#f0f0f5';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(x(median), cy - boxH / 2 + 2);
+  ctx.lineTo(x(median), cy + boxH / 2 - 2);
+  ctx.stroke();
+
+  // Mean dot
+  ctx.fillStyle = '#f59e0b';
+  ctx.beginPath();
+  ctx.arc(x(mean), cy, 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#0b0b0f';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Outliers
+  ctx.fillStyle = '#ef4444';
+  sorted.forEach(d => {
+    if (d < whiskerLo || d > whiskerHi) {
+      ctx.beginPath();
+      ctx.arc(x(d), cy, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  });
+
+  // Labels
+  ctx.fillStyle = '#63637a';
+  ctx.font = '9px sans-serif';
+  ctx.textAlign = 'center';
+  const labels = [
+    { v: whiskerLo, t: fmtAxis(whiskerLo) },
+    { v: q1, t: 'Q1:' + fmtAxis(q1) },
+    { v: median, t: 'Med:' + fmtAxis(median) },
+    { v: q3, t: 'Q3:' + fmtAxis(q3) },
+    { v: whiskerHi, t: fmtAxis(whiskerHi) },
+  ];
+  labels.forEach(lb => {
+    ctx.fillText(lb.t, x(lb.v), h - 6);
+  });
+
+  // Mean label
+  ctx.fillStyle = '#f59e0b';
+  ctx.font = '9px sans-serif';
+  ctx.fillText('μ=' + fmtAxis(mean), x(mean), cy - boxH / 2 - 6);
+}
+
+function drawFreqTable(sorted, min, max) {
+  const binCount = Math.min(Math.max(Math.ceil(Math.sqrt(sorted.length)), 5), 20);
+  const binW = (max - min) / binCount || 1;
+  const bins = [];
+  for (let i = 0; i < binCount; i++) {
+    const lo = min + i * binW;
+    const hi = lo + binW;
+    const count = sorted.filter(d => i === binCount - 1 ? (d >= lo && d <= hi) : (d >= lo && d < hi)).length;
+    bins.push({ lo, hi, count });
+  }
+  const n = sorted.length;
+  let cumul = 0;
+  const table = $('#freqTable');
+  let html = '<thead><tr><th>区间</th><th>频数</th><th>频率</th><th>累积频率</th><th>条形</th></tr></thead><tbody>';
+  bins.forEach(b => {
+    cumul += b.count;
+    const pct = ((b.count / n) * 100).toFixed(1);
+    const cpct = ((cumul / n) * 100).toFixed(1);
+    const barW = Math.max(1, (b.count / n) * 100);
+    html += `<tr>
+      <td>[${fmtAxis(b.lo)}, ${fmtAxis(b.hi)})</td>
+      <td>${b.count}</td>
+      <td>${pct}%</td>
+      <td>${cpct}%</td>
+      <td><div style="width:${barW}%;height:8px;background:linear-gradient(90deg,#f0a060,#f4b87a);border-radius:4px;min-width:2px"></div></td>
+    </tr>`;
+  });
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+function fmtAxis(v) {
+  if (Number.isInteger(v)) return v.toString();
+  if (Math.abs(v) >= 1000) return Math.round(v).toString();
+  return parseFloat(v.toPrecision(4)).toString();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  if (w < 0) { x += w; w = -w; }
+  if (h < 0) { y += h; h = -h; }
+  r = Math.min(r, w / 2, h / 2);
+  if (r < 0) r = 0;
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+// ==================== INIT ====================
+renderCats();
+
+// Handle window resize for charts
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (!$('#daResults').classList.contains('hidden')) {
+      $('#daCalcBtn').click();
+    }
+  }, 300);
+});
+</script>
+</body>
+</html>

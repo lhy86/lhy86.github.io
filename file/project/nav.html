@@ -1,423 +1,1634 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LHY导航</title>
     <style>
-        * {
+        /* ==================== CSS Variables ==================== */
+        :root[data-theme="dark"] {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #14141b;
+            --bg-card: rgba(255,255,255,0.04);
+            --bg-card-hover: rgba(255,255,255,0.08);
+            --bg-input: rgba(255,255,255,0.06);
+            --bg-link: rgba(255,255,255,0.06);
+            --bg-link-hover: rgba(99,132,255,0.2);
+            --border-color: rgba(255,255,255,0.08);
+            --border-focus: #6384ff;
+            --text-primary: #e8e8ed;
+            --text-secondary: #9a9ab0;
+            --text-muted: #5a5a72;
+            --accent: #6384ff;
+            --accent-hover: #7d9aff;
+            --accent-glow: rgba(99,132,255,0.15);
+            --shadow-card: 0 2px 20px rgba(0,0,0,0.3);
+            --glass-bg: rgba(20,20,27,0.85);
+            --glass-border: rgba(255,255,255,0.06);
+            --pill-active-bg: rgba(99,132,255,0.15);
+            --pill-active-border: rgba(99,132,255,0.4);
+            --pill-active-text: #8aa4ff;
+            --scrollbar-track: #14141b;
+            --scrollbar-thumb: #2a2a3a;
+            --tag-bg: rgba(99,132,255,0.1);
+            --tag-text: #8aa4ff;
+            --favorite-color: #fbbf24;
+        }
+
+        :root[data-theme="light"] {
+            --bg-primary: #f5f5f7;
+            --bg-secondary: #ffffff;
+            --bg-card: rgba(0,0,0,0.02);
+            --bg-card-hover: rgba(0,0,0,0.04);
+            --bg-input: rgba(0,0,0,0.04);
+            --bg-link: rgba(0,0,0,0.04);
+            --bg-link-hover: rgba(99,132,255,0.1);
+            --border-color: rgba(0,0,0,0.08);
+            --border-focus: #6384ff;
+            --text-primary: #1a1a2e;
+            --text-secondary: #6b6b80;
+            --text-muted: #9a9ab0;
+            --accent: #5570e8;
+            --accent-hover: #6380f0;
+            --accent-glow: rgba(99,132,255,0.1);
+            --shadow-card: 0 2px 16px rgba(0,0,0,0.06);
+            --glass-bg: rgba(255,255,255,0.9);
+            --glass-border: rgba(0,0,0,0.06);
+            --pill-active-bg: rgba(85,112,232,0.1);
+            --pill-active-border: rgba(85,112,232,0.3);
+            --pill-active-text: #5570e8;
+            --scrollbar-track: #f0f0f2;
+            --scrollbar-thumb: #d0d0d8;
+            --tag-bg: rgba(85,112,232,0.08);
+            --tag-text: #5570e8;
+            --favorite-color: #f59e0b;
+        }
+
+        /* ==================== Reset & Base ==================== */
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #151517;
-            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
-            padding: 10px;
+            min-height: 100dvh;
+            line-height: 1.5;
+            overflow-x: hidden;
+            transition: background 0.4s ease, color 0.4s ease;
         }
 
-        .container {
-            max-width: 1200px;
+        body::-webkit-scrollbar { width: 6px; }
+        body::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+        body::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
+        /* ==================== Layout ==================== */
+        .app {
+            max-width: 1280px;
             margin: 0 auto;
+            padding: 0 20px;
         }
 
-        .header {
+        /* ==================== Header / Hero ==================== */
+        .hero {
+            padding: 48px 0 8px;
             text-align: center;
-            margin: 16px;
+            position: relative;
         }
 
-        .header h1 {
-            font-size: 2rem;
+        .hero-glow {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            height: 260px;
+            background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-greeting {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        .hero h1 {
+            font-size: 3.2rem;
             font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 12px;
-            color: #f1f1f1;
+            letter-spacing: -0.5px;
+			line-height:1;
         }
 
-        .search-container {
+        /* ==================== Top Bar ==================== */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 0 20px;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .top-bar.visible {
+            transform: translateY(0);
+        }
+
+        .top-bar-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            height: 52px;
             display: flex;
-            max-width: 480px;
-            margin: 0 auto 12px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .top-bar-brand {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        .top-bar-actions {
+            display: flex;
+            align-items: center;
             gap: 8px;
         }
 
-        .search-select {
-            background: #2C2C2E;
-            border: 1px solid #38383A;
-            border-radius: 6px;
-            color: #e0e0e0;
-            padding: 10px 6px;
-            font-size: 14px;
-            outline: none;
-            cursor: pointer;
-            max-width: 70px;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 10px;
-            background: #2C2C2E;
-            border: 1px solid #38383A;
-            border-radius: 6px;
-            color: #e0e0e0;
-            font-size: 14px;
-            outline: none;
-            width: calc(90vw - 160px)
-        }
-
-        .search-input:focus {
-            border-color: #5686FE;
-        }
-
-        .search-btn {
-            background: #5686FE;
+        /* ==================== Icon Buttons ==================== */
+        .icon-btn {
+            width: 36px;
+            height: 36px;
             border: none;
-            border-radius: 6px;
-            color: white;
-            padding: 0 12px;
+            background: var(--bg-input);
+            border-radius: 10px;
+            color: var(--text-secondary);
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .icon-btn:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .icon-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* ==================== Controls Row ==================== */
+        .controls-row {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .datetime-display {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-right: auto;
+            font-variant-numeric: tabular-nums;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .datetime-display .date-text {
+            display: none;
+        }
+
+        /* ==================== Search Area ==================== */
+        .search-wrapper {
+            max-width: 680px;
+            margin: 0 auto 8px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: var(--bg-input);
+            border: 1.5px solid var(--border-color);
+            border-radius: 16px;
+            padding: 4px 4px 4px 16px;
+            transition: all 0.3s ease;
+            gap: 4px;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+            background: var(--bg-card-hover);
+        }
+
+        .search-box .search-icon {
+            color: var(--text-muted);
+            flex-shrink: 0;
+            font-size: 16px;
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            padding: 12px 8px;
+            outline: none;
+            min-width: 0;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-box .clear-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
             font-size: 14px;
-            transition: 0.2s;
-            width: 60px;
+            flex-shrink: 0;
+            transition: all 0.15s;
         }
 
-        .search-btn:hover {
-            background: #396dee;
+        .search-box .clear-btn:hover {
+            background: var(--bg-link);
+            color: var(--text-secondary);
         }
 
+        .search-box .clear-btn.show {
+            display: flex;
+        }
+
+        .search-box .submit-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+            font-size: 16px;
+        }
+
+        .search-box .submit-btn:hover {
+            background: var(--accent-hover);
+            transform: scale(1.04);
+        }
+
+        .search-box .submit-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* ==================== Engine Pills ==================== */
+        .engine-pills {
+            display: flex;
+            gap: 6px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .engine-pill {
+            padding: 5px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .engine-pill:hover {
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
+
+        .engine-pill.active {
+            background: var(--pill-active-bg);
+            border-color: var(--pill-active-border);
+            color: var(--pill-active-text);
+            font-weight: 500;
+        }
+
+        /* ==================== Favorites Section ==================== */
+        .favorites-section {
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .favorites-section.has-items {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .favorites-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .fav-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: var(--bg-link);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .fav-chip:hover {
+            background: var(--bg-link-hover);
+            color: var(--accent);
+            border-color: var(--pill-active-border);
+        }
+
+        .fav-chip .remove-fav {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 10px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .fav-chip .remove-fav:hover {
+            background: rgba(255,80,80,0.15);
+            color: #ff5050;
+        }
+
+        /* ==================== Category Filter Tabs ==================== */
+        .category-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .category-tabs::-webkit-scrollbar { display: none; }
+
+        .cat-tab {
+            padding: 6px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        .cat-tab:hover {
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
+
+        .cat-tab.active {
+            background: var(--pill-active-bg);
+            border-color: var(--pill-active-border);
+            color: var(--pill-active-text);
+            font-weight: 500;
+        }
+
+        /* ==================== Nav Grid ==================== */
         .nav-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 28px;
         }
 
         .nav-category {
-            background: #2C2C2E;
-            border-radius: 6px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
             padding: 8px;
-            border: 1px solid #38383A;
+            transition: all 0.3s ease;
+        }
+
+        .nav-category:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(99,132,255,0.15);
+            box-shadow: var(--shadow-card);
+        }
+
+        .nav-category.hidden {
+            display: none;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            cursor: pointer;
+            user-select: none;
         }
 
         .category-title {
-            font-size: 1rem;
+            font-size: 0.88rem;
             font-weight: 600;
-            color: #fff;
-            margin-bottom: 10px;
+            color: var(--text-primary);
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
+        }
+
+        .category-title .emoji {
+            font-size: 1.05rem;
+        }
+
+        .category-count {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            background: var(--tag-bg);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .collapse-icon {
+            color: var(--text-muted);
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+
+        .collapse-icon.collapsed {
+            transform: rotate(-90deg);
         }
 
         .category-links {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 6px;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+        }
+
+        .category-links.collapsed {
+            max-height: 0 !important;
+            opacity: 0;
+            margin: 0;
         }
 
         .nav-link {
-            display: block;
-            padding: 6px 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 2px; 
             text-decoration: none;
-            color: #b0b0b0;
-            background: #464647;
-            border-radius: 5px;
-            font-size: 14px;
+            color: var(--text-secondary);
+            background: var(--bg-link);
+            border: 1px solid transparent;
+            border-radius: 6px;
+            font-size: 0.8rem;
             text-align: center;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            position: relative;
+            cursor: pointer;
         }
 
         .nav-link:hover {
-            background: #679EFE;
-            color: white;
+            background: var(--bg-link-hover);
+            color: var(--accent);
+            border-color: var(--pill-active-border);
+            transform: translateY(-1px);
         }
 
+        .nav-link.hidden-link {
+            display: none;
+        }
+
+        .nav-link .fav-star {
+            position: absolute;
+            top: 3px;
+            right: 4px;
+            font-size: 9px;
+            color: var(--text-muted);
+            opacity: 0;
+            cursor: pointer;
+            transition: all 0.15s;
+            z-index: 2;
+        }
+
+        .nav-link:hover .fav-star {
+            opacity: 1;
+        }
+
+        .nav-link .fav-star.is-fav {
+            opacity: 1;
+            color: var(--favorite-color);
+        }
+
+        /* ==================== Empty State ==================== */
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            display: none;
+        }
+
+        .no-results.show {
+            display: block;
+        }
+
+        .no-results .nr-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .no-results .nr-text {
+            font-size: 0.95rem;
+        }
+
+        /* ==================== Footer ==================== */
         footer {
             text-align: center;
-            color: #888;
-            font-size: 13px;
-            padding-bottom: 12px;
+            padding: 20px 0 32px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.78rem;
         }
 
-        @media (max-width: 369px) {
+        footer .quote {
+            font-style: italic;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ==================== Back to Top ==================== */
+        .back-top {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 42px;
+            height: 42px;
+            border: none;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(16px);
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .back-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .back-top:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        /* ==================== Toast ==================== */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 0.82rem;
+            z-index: 200;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ==================== Keyboard Shortcut Hint ==================== */
+        .kbd {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1px 6px;
+            font-size: 0.68rem;
+            font-family: inherit;
+            color: var(--text-muted);
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-left: 6px;
+        }
+
+        /* ==================== Responsive ==================== */
+        @media (max-width: 480px) {
+            .app { padding: 0 12px; }
+
+            .hero { padding: 32px 0 4px; }
+            .hero h1 { font-size: 2.4rem; }
+            .hero-greeting { font-size: 0.78rem; }
+
+            .search-box { border-radius: 14px; }
+            .engine-pills { gap: 5px; }
+            .engine-pill { padding: 4px 11px; font-size: 0.74rem; }
+
             .nav-grid {
                 grid-template-columns: 1fr;
-                gap: 8px;
+                gap: 10px;
             }
+
             .category-links {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(3, 1fr);
             }
+
+            .nav-link { padding: 9px 4px; font-size: 0.78rem; }
+            .controls-row { flex-wrap: wrap; }
+            .back-top { bottom: 16px; right: 16px; width: 38px; height: 38px; }
+            .cat-tab { padding: 5px 12px; font-size: 0.78rem; }
         }
-        
-        @media (min-width: 370px) and (max-width: 575px) {
+
+        @media (min-width: 481px) and (max-width: 768px) {
             .nav-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
-            }
-            .category-links {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        @media (min-width: 576px) and (max-width: 739px) {
-            .nav-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
+                gap: 10px;
             }
             .category-links {
                 grid-template-columns: repeat(3, 1fr);
             }
         }
-        @media (min-width: 740px) and (max-width: 969px){
+
+        @media (min-width: 769px) and (max-width: 1024px) {
             .nav-grid {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(3, 1fr);
             }
             .category-links {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(3, 1fr);
             }
         }
-        @media (min-width: 970px){
+
+        @media (min-width: 1025px) {
             .nav-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
             .category-links {
                 grid-template-columns: repeat(3, 1fr);
             }
+            .datetime-display .date-text {
+                display: inline;
+            }
+        }
+
+        /* ==================== Animations ==================== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-category {
+            animation: fadeInUp 0.4s ease both;
+        }
+
+        .nav-category:nth-child(1) { animation-delay: 0.02s; }
+        .nav-category:nth-child(2) { animation-delay: 0.06s; }
+        .nav-category:nth-child(3) { animation-delay: 0.10s; }
+        .nav-category:nth-child(4) { animation-delay: 0.14s; }
+        .nav-category:nth-child(5) { animation-delay: 0.18s; }
+        .nav-category:nth-child(6) { animation-delay: 0.22s; }
+        .nav-category:nth-child(7) { animation-delay: 0.26s; }
+        .nav-category:nth-child(8) { animation-delay: 0.30s; }
+
+        /* ==================== Context Menu ==================== */
+        .ctx-menu {
+            position: fixed;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 6px;
+            min-width: 160px;
+            z-index: 300;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            display: none;
+        }
+
+        .ctx-menu.show { display: block; }
+
+        .ctx-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .ctx-item:hover {
+            background: var(--bg-link-hover);
+            color: var(--text-primary);
+        }
+
+        /* ==================== Shortcut Modal ==================== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 400;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 28px;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+        }
+
+        .modal h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+            color: var(--text-primary);
+        }
+
+        .shortcut-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .shortcut-keys {
+            display: flex;
+            gap: 4px;
+        }
+
+        .shortcut-keys .kbd {
+            margin: 0;
+            font-size: 0.72rem;
+            padding: 2px 8px;
+        }
+
+        .modal-close {
+            margin-top: 20px;
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-card-hover);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>LHY导航</h1>
-            <div class="search-container">
-                <select class="search-select" id="search-select">
-                    <option value="qwen">千问</option>
-                    <option value="bing">必应</option>
-                    <option value="baidu">百度</option>
-                    <option value="bili">B站</option>
-                    <option value="douyin">抖音</option>
-                    <option value="douban">豆瓣</option>
-                    <option value="music">音乐</option>
-                    <option value="btbtl">影视</option>
-                    <option value="seed">种子</option>
-                    <option value="ciba">单词</option>
-                </select>
-                <input type="text" class="search-input" id="search-input" placeholder="请输入">
-                <button class="search-btn" id="search-btn">搜索</button>
+
+    <!-- ===== Top Bar (sticky on scroll) ===== -->
+    <div class="top-bar" id="topBar">
+        <div class="top-bar-inner">
+            <span class="top-bar-brand">✦ LHY导航</span>
+            <div class="top-bar-actions">
+                <button class="icon-btn" id="topSearchBtn" title="聚焦搜索">🔍</button>
+                <button class="icon-btn" id="topThemeBtn2" title="切换主题">🌙</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app">
+
+        <!-- ===== Hero ===== -->
+        <div class="hero">
+            <div class="hero-glow"></div>
+            <div class="hero-content">
+                <p class="hero-greeting" id="greeting"></p>
+                <h1>✦ LHY导航</h1>
             </div>
         </div>
 
-        <div class="nav-grid">
-            <div class="nav-category">
-                <h3 class="category-title">🔍 资料查询</h3>
-                <div class="category-links">
-                    <a href="https://chat.qwen.ai" class="nav-link">Qwen</a>
-                    <a href="https://chat.deepseek.com" class="nav-link">Deepseek</a>
-                    <a href="https://www.doubao.com/chat/" class="nav-link">豆包</a>
-                    <a href="https://chat.openai.com" class="nav-link">ChatGPT</a>
-                    <a href="https://yiyan.baidu.com" class="nav-link">文心一言</a>
-                    <a href="https://www.coze.cn/" class="nav-link">扣子</a>
-                    <a href="https://www.kimi.com/" class="nav-link">Kimi</a>
-                    <a href="https://www.huggingface.co" class="nav-link">HuggingFace</a>
-                    <a href="https://hf-mirror.com/" class="nav-link">HF镜像</a>
-                </div>
+        <!-- ===== Search ===== -->
+        <div class="search-wrapper">
+            <div class="search-box" id="searchBox">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="搜索站点或输入关键词..." autocomplete="off">
+                <button class="clear-btn" id="clearBtn">✕</button>
+                <button class="submit-btn" id="submitBtn">➜</button>
             </div>
-
-            <div class="nav-category">
-                <h3 class="category-title">📧 社交通讯</h3>
-                <div class="category-links">
-                    <a href="https://www.douyin.com" class="nav-link">抖音</a>
-                    <a href="https://www.bilibili.com" class="nav-link">B站</a>
-                    <a href="https://cybermap.kaspersky.com/cn" class="nav-link">网络攻击</a>
-                    <a href="https://www.youtube.com" class="nav-link">Youtube</a>
-                </div>
-            </div>
-
-            <div class="nav-category">
-                <h3 class="category-title">💻 开发办公</h3>
-                <div class="category-links">
-                    <a href="https://leetcode.cn" class="nav-link">力扣</a>
-                    <a href="https://github.com" class="nav-link">GitHub</a>
-                    <a href="https://www.csdn.net/" class="nav-link">CSDN</a>
-                    <a href="https://bgithub.xyz" class="nav-link">GH镜像</a>
-                    <a href="https://www.zjzwfw.gov.cn/zjservice-fe/#/home" class="nav-link">浙江政务</a>
-                    <a href="https://wx.mail.qq.com/" class="nav-link">QQ邮箱</a>
-                    <a href="https://mail.163.com" class="nav-link">163邮箱</a>
-                    <a href="https://126.com" class="nav-link">126邮箱</a>
-                    <a href="https://www.zjzwfw.gov.cn/zjservice-fe/#/home" class="nav-link">浙江政务</a>
-                </div>
-            </div>
-
-            <div class="nav-category">
-                <h3 class="category-title">📚 知识管理</h3>
-                <div class="category-links">
-                    <a href="https://eyecannndy.com/" class="nav-link">视频转场</a>
-                    <a href="https://www.shipxy.com/" class="nav-link">船讯网</a>
-                    <a href="https://spaceaware.io/" class="nav-link">实时卫星</a>
-                    <a href="https://www.n2yo.com" class="nav-link">卫星追踪</a>
-                    <a href="https://zh.zlib1412.ru/" class="nav-link">ZLibrary</a>
-                    <a href="https://icon-icons.com/zh/" class="nav-link">免费图标</a>
-                    <a href="https://iconpark.oceanengine.com/official" class="nav-link">IconPark</a>
-                    <a href="https://icons8.com/icons/set/popular--animated" class="nav-link">动态图标</a>
-                    <a href="https://ptable.com/" class="nav-link">元素周期表</a>
-                    <a href="http://120.55.160.240:5678/" class="nav-link">临时小雅1</a>
-                    <a href="http://218.75.97.134:5678/" class="nav-link">临时小雅2</a>
-                    <a href="http://218.75.97.134:5678/" class="nav-link">临时小雅3</a>
-                </div>
-            </div>
-            
-            <div class="nav-category">
-                <h3 class="category-title">🛠️ 效率工具</h3>
-                <div class="category-links">
-                    <a href="https://www.processon.com" class="nav-link">流程图</a>
-                    <a href="https://cli.im/" class="nav-link">二维码</a>
-                    <a href="https://www.desmos.com/calculator?lang=zh-CN" class="nav-link">DESMOS</a>
-                    <a href="https://versus.com/cn" class="nav-link">对比</a>
-                    <a href="https://vocalremover.org/zh/" class="nav-link">音频编辑</a>
-                    <a href="https://ttsmaker.cn/" class="nav-link">AI配音</a>
-                    <a href="https://tugaigai.com/online_ps/" class="nav-link">在线PS</a>
-                    <a href="https://www.latexlive.com/home" class="nav-link">LaTeX编辑</a>
-                    <a href="https://convert.freelrc.com/" class="nav-link">云音乐转换</a>
-                    <a href="https://dlj.bz/" class="nav-link">短链接1</a>
-                    <a href="https://mke.cn/manage/" class="nav-link">短链接2</a>
-                    <a href="https://123apps.com/" class="nav-link">文件处理</a>
-                </div>
-            </div>
-            
-            <div class="nav-category">
-                <h3 class="category-title">☁️ 网络服务</h3>
-                <div class="category-links">
-                    <a href="https://www.aliyun.com" class="nav-link">阿里云</a>
-                    <a href="https://test.ustc.edu.cn/" class="nav-link">网络测速</a>
-                    <a href="https://www.itdog.cn/" class="nav-link">ITDOG</a>
-                    <a href="https://ipw.cn/" class="nav-link">IPW</a>
-                    <a href="https://www.zoomeye.org/" class="nav-link">ZOOMEYE</a>
-                    <a href="https://cowtransfer.com/" class="nav-link">奶牛快传</a>
-                    <a href="https://www.saobby.com/webcounter" class="nav-link">访问统计</a>
-                    <a href="https://kdown.moiu.cn/" class="nav-link">KDown</a>
-                    <a href="https://mf.dp.wpurl.cc/user/parse" class="nav-link">闪链</a>
-                    <a href="https://ping.pe/" class="nav-link">Ping</a>
-                </div>
-            </div>
-            <div class="nav-category">
-                <h3 class="category-title">🎨 影音浏览</h3>
-                <div class="category-links">
-                    <a href="https://www.douban.com" class="nav-link">豆瓣</a>
-                    <a href="https://www.themoviedb.org/" class="nav-link">TMDB</a>
-                    <a href="http://www.impawards.com/" class="nav-link">IMPA</a>
-                    <a href="https://www.yuhuage.blog/" class="nav-link">雨花阁</a>
-                    <a href="https://www.tedms.cn/" class="nav-link">TED下载</a>
-                    <a href="https://www.btbtla.com/" class="nav-link">BTBTL</a>
-                    <a href="https://www.seedhub.cc" class="nav-link">SeedHub</a>
-                    <a href="https://hunhepan.com/search" class="nav-link">混合盘</a>
-                    <a href="https://www.zhongchuangwl.com/" class="nav-link">资源搜</a>
-                    <a href="https://4kbt.org/" class="nav-link">4KBT</a>
-                    <a href="https://www.yydsok.com/v/" class="nav-link">视频解析</a>
-                    <a href="https://vidhub.tv/" class="nav-link">VIDHUB</a>
-                    <a href="https://zimuku.org/" class="nav-link">字幕库</a>
-                    <a href="http://45.150.164.153:12580/" class="nav-link">磁力狗</a>
-                    <a href="https://www.dgcol.com/" class="nav-link">动感酷音乐</a>
-                    <a href="https://xmwav.net/" class="nav-link">熊猫无损</a>
-                </div>
-            </div>
-            <div class="nav-category">
-                <h3 class="category-title">🎮 休闲娱乐</h3>
-                <div class="category-links">
-                    <a href="https://www.geo-fs.com/geofs.php?v=3.9" class="nav-link">GEOFS</a>
-                    <a href="https://www.autopiano.cn/" class="nav-link">自由钢琴</a>
-                    <a href="https://slowroads.io/" class="nav-link">Slowroads</a>
-                    <a href="https://iogames.space/" class="nav-link">IO游戏</a>
-                    <a href="https://www.arealme.com/zh" class="nav-link">ARealMe</a>
-                    <a href="https://type.method.ac/" class="nav-link">KernType</a>
-                    <a href="https://boolean.method.ac/" class="nav-link">布尔运算</a>
-                    <a href="https://win11.blueedge.me/" class="nav-link">模拟Win11</a>
-                    <a href="https://cdn.playnn.com/game/black8/" class="nav-link">在线台球</a>
-                    <a href="https://wuziqi.cn/" class="nav-link">在线五子棋</a>
-                    <a href="https://www.jingziqi.com/" class="nav-link">在线三子棋</a>
-                    <a href="https://dazi.kukuw.com/" class="nav-link">在线打字测试</a>
-                </div>
+            <div class="engine-pills" id="enginePills">
+                <span class="engine-pill active" data-engine="qwen">千问</span>
+                <span class="engine-pill" data-engine="bing">必应</span>
+                <span class="engine-pill" data-engine="baidu">百度</span>
+                <span class="engine-pill" data-engine="bili">B站</span>
+                <span class="engine-pill" data-engine="douyin">抖音</span>
+                <span class="engine-pill" data-engine="douban">豆瓣</span>
+                <span class="engine-pill" data-engine="music">音乐</span>
+                <span class="engine-pill" data-engine="btbtl">影视</span>
+                <span class="engine-pill" data-engine="seed">种子</span>
+                <span class="engine-pill" data-engine="ciba">单词</span>
+				<span class="engine-pill" data-engine="ping">Ping</span>
             </div>
         </div>
 
+        <!-- ===== Controls Row ===== -->
+        <div class="controls-row">
+            <div class="datetime-display" id="datetime">
+                <span class="time-text" id="timeText"></span>
+                <span class="date-text" id="dateText"></span>
+            </div>
+            <button class="icon-btn" id="themeBtn" title="切换主题">🌙</button>
+            <button class="icon-btn" id="shortcutBtn" title="快捷键">⌨</button>
+            <button class="icon-btn" id="collapseAllBtn" title="折叠/展开全部">📂</button>
+        </div>
+
+        <!-- ===== Favorites ===== -->
+        <div class="favorites-section" id="favSection">
+            <div class="section-header">
+                <span class="section-title">⭐ 收藏夹</span>
+                <div class="section-line"></div>
+            </div>
+            <div class="favorites-grid" id="favGrid"></div>
+        </div>
+
+        <!-- ===== Category Tabs ===== -->
+        <div class="category-tabs" id="categoryTabs">
+            <span class="cat-tab active" data-cat="all">全部</span>
+        </div>
+
+        <!-- ===== Nav Grid ===== -->
+        <div class="nav-grid" id="navGrid">
+
+            <div class="nav-category" data-category="资料查询">
+                <div class="category-header">
+                    <h3 class="category-title"><span class="emoji">🔍</span> 资料查询</h3>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span class="category-count"></span>
+                        <span class="collapse-icon">▾</span>
+                    </div>
+                </div>
+                <div class="category-links">
+                    <a href="https://chat.qwen.ai" class="nav-link" data-name="Qwen">Qwen<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://chat.deepseek.com" class="nav-link" data-name="Deepseek">Deepseek<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.doubao.com/chat/" class="nav-link" data-name="豆包">豆包<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://chat.openai.com" class="nav-link" data-name="ChatGPT">ChatGPT<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://yiyan.baidu.com" class="nav-link" data-name="文心一言">文心一言<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.coze.cn/" class="nav-link" data-name="扣子">扣子<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.kimi.com/" class="nav-link" data-name="Kimi">Kimi<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.huggingface.co" class="nav-link" data-name="HuggingFace">HuggingFace<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://hf-mirror.com/" class="nav-link" data-name="HF镜像">HF镜像<span class="fav-star" title="收藏">☆</span></a>
+					<a href="https://chatglm.cn/main/alltoolsdetail?lang=zh" class="nav-link" data-name="GLM">GLM<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://chat.z.ai/" class="nav-link" data-name="Z.ai">Z.ai<span class="fav-star" title="收藏">☆</span></a>
+					<a href="http://7lyopcotdc.site.llm99.com/" class="nav-link" data-name="EasyChat">EasyChat<span class="fav-star" title="收藏">☆</span></a>
+                </div>
+            </div>
+
+            <div class="nav-category" data-category="社交通讯">
+                <div class="category-header">
+                    <h3 class="category-title"><span class="emoji">📧</span> 社交通讯</h3>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span class="category-count"></span>
+                        <span class="collapse-icon">▾</span>
+                    </div>
+                </div>
+                <div class="category-links">
+                    <a href="https://www.douyin.com" class="nav-link" data-name="抖音">抖音<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.bilibili.com" class="nav-link" data-name="B站">B站<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://cybermap.kaspersky.com/cn" class="nav-link" data-name="网络攻击">网络攻击<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://makerworld.com.cn/zh" class="nav-link" data-name="Makerworld">Makerworld<span class="fav-star" title="收藏">☆</span></a>
+					<a href="https://www.youtube.com" class="nav-link" data-name="Youtube">Youtube<span class="fav-star" title="收藏">☆</span></a>
+                </div>
+            </div>
+
+            <div class="nav-category" data-category="开发办公">
+                <div class="category-header">
+                    <h3 class="category-title"><span class="emoji">💻</span> 开发办公</h3>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span class="category-count"></span>
+                        <span class="collapse-icon">▾</span>
+                    </div>
+                </div>
+                <div class="category-links">
+                    <a href="https://leetcode.cn" class="nav-link" data-name="力扣">力扣<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://github.com" class="nav-link" data-name="GitHub">GitHub<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.csdn.net/" class="nav-link" data-name="CSDN">CSDN<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://bgithub.xyz" class="nav-link" data-name="GH镜像">GH镜像<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.zjzwfw.gov.cn/zjservice-fe/#/home" class="nav-link" data-name="浙江政务">浙江政务<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://wx.mail.qq.com/" class="nav-link" data-name="QQ邮箱">QQ邮箱<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://mail.163.com" class="nav-link" data-name="163邮箱">163邮箱<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://126.com" class="nav-link" data-name="126邮箱">126邮箱<span class="fav-star" title="收藏">☆</span></a>
+                </div>
+            </div>
+
+            <div class="nav-category" data-category="知识管理">
+                <div class="category-header">
+                    <h3 class="category-title"><span class="emoji">📚</span> 知识管理</h3>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span class="category-count"></span>
+                        <span class="collapse-icon">▾</span>
+                    </div>
+                </div>
+                <div class="category-links">
+                    <a href="https://eyecannndy.com/" class="nav-link" data-name="视频转场">视频转场<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.shipxy.com/" class="nav-link" data-name="船讯网">船讯网<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://spaceaware.io/" class="nav-link" data-name="实时卫星">实时卫星<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.n2yo.com" class="nav-link" data-name="卫星追踪">卫星追踪<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://zh.zlib1412.ru/" class="nav-link" data-name="ZLibrary">ZLibrary<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://icon-icons.com/zh/" class="nav-link" data-name="免费图标">免费图标<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://iconpark.oceanengine.com/official" class="nav-link" data-name="IconPark">IconPark<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://icons8.com/icons/set/popular--animated" class="nav-link" data-name="动态图标">动态图标<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://ptable.com/" class="nav-link" data-name="元素周期表">元素周期表<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://zh.bra101.ru/" class="nav-link" data-name="Zlibrary">Zlibrary<span class="fav-star" title="收藏">☆</span></a>
+					<a href="https://ditu.zjzwfw.gov.cn/resources-server/rescenter/index.html" class="nav-link" data-name="浙江历史地图">浙江历史地图<span class="fav-star" title="收藏">☆</span></a>
+					<a href="https://newsnow.world/c/realtime" class="nav-link" data-name="Newsnow">Newsnow<span class="fav-star" title="收藏">☆</span></a>
+                </div>
+            </div>
+
+            <div class="nav-category" data-category="效率工具">
+                <div class="category-header">
+                    <h3 class="category-title"><span class="emoji">🛠️</span> 效率工具</h3>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span class="category-count"></span>
+                        <span class="collapse-icon">▾</span>
+                    </div>
+                </div>
+                <div class="category-links">
+                    <a href="https://www.processon.com" class="nav-link" data-name="流程图">流程图<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://cli.im/" class="nav-link" data-name="二维码">二维码<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.desmos.com/calculator?lang=zh-CN" class="nav-link" data-name="DESMOS">DESMOS<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://versus.com/cn" class="nav-link" data-name="对比">对比<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://vocalremover.org/zh/" class="nav-link" data-name="音频编辑">音频编辑<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://ttsmaker.cn/" class="nav-link" data-name="AI配音">AI配音<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://tugaigai.com/online_ps/" class="nav-link" data-name="在线PS">在线PS<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.latexlive.com/home" class="nav-link" data-name="LaTeX编辑">LaTeX编辑<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://convert.freelrc.com/" class="nav-link" data-name="云音乐转换">云音乐转换<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://dlj.bz/" class="nav-link" data-name="短链接1">短链接1<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://mke.cn/manage/" class="nav-link" data-name="短链接2">短链接2<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://123apps.com/" class="nav-link" data-name="文件处理">文件处理<span class="fav-star" title="收藏">☆</span></a>
+                </div>
+            </div>
+
+            <div class="nav-category" data-category="网络服务">
+                <div class="category-header">
+                    <h3 class="category-title"><span class="emoji">☁️</span> 网络服务</h3>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span class="category-count"></span>
+                        <span class="collapse-icon">▾</span>
+                    </div>
+                </div>
+                <div class="category-links">
+                    <a href="https://www.aliyun.com" class="nav-link" data-name="阿里云">阿里云<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://test.ustc.edu.cn/" class="nav-link" data-name="网络测速">网络测速<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.itdog.cn/" class="nav-link" data-name="ITDOG">ITDOG<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://ipw.cn/" class="nav-link" data-name="IPW">IPW<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.zoomeye.org/" class="nav-link" data-name="ZOOMEYE">ZOOMEYE<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://cowtransfer.com/" class="nav-link" data-name="奶牛快传">奶牛快传<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.saobby.com/webcounter" class="nav-link" data-name="访问统计">访问统计<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://kdown.moiu.cn/" class="nav-link" data-name="KDown">KDown<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://mf.dp.wpurl.cc/user/parse" class="nav-link" data-name="闪链">闪链<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.projecthoneypot.org/list_of_ips.php" class="nav-link" data-name="IP黑名单">IP黑名单<span class="fav-star" title="收藏">☆</span></a>
+					<a href="https://ping.pe/" class="nav-link" data-name="Ping">Ping<span class="fav-star" title="收藏">☆</span></a>
+					<a href="https://sdr.cqradio.cn/" class="nav-link" data-name="国内SDR">国内SDR<span class="fav-star" title="收藏">☆</span></a>
+                </div>
+            </div>
+
+            <div class="nav-category" data-category="影音浏览">
+                <div class="category-header">
+                    <h3 class="category-title"><span class="emoji">🎨</span> 影音浏览</h3>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span class="category-count"></span>
+                        <span class="collapse-icon">▾</span>
+                    </div>
+                </div>
+                <div class="category-links">
+                    <a href="https://www.douban.com" class="nav-link" data-name="豆瓣">豆瓣<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.themoviedb.org/" class="nav-link" data-name="TMDB">TMDB<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="http://www.impawards.com/" class="nav-link" data-name="IMPA">IMPA<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.yuhuage.blog/" class="nav-link" data-name="雨花阁">雨花阁<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.tedms.cn/" class="nav-link" data-name="TED下载">TED下载<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.btbtla.com/" class="nav-link" data-name="BTBTL">BTBTL<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.seedhub.cc" class="nav-link" data-name="SeedHub">SeedHub<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://hunhepan.com/search" class="nav-link" data-name="混合盘">混合盘<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.zhongchuangwl.com/" class="nav-link" data-name="资源搜">资源搜<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://4kbt.org/" class="nav-link" data-name="4KBT">4KBT<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.yydsok.com/v/" class="nav-link" data-name="视频解析">视频解析<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://vidhub.tv/" class="nav-link" data-name="VIDHUB">VIDHUB<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://zimuku.org/" class="nav-link" data-name="字幕库">字幕库<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="http://45.150.164.153:12580/" class="nav-link" data-name="磁力狗">磁力狗<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.dgcol.com/" class="nav-link" data-name="动感酷音乐">动感酷音乐<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://xmwav.net/" class="nav-link" data-name="熊猫无损">熊猫无损<span class="fav-star" title="收藏">☆</span></a>
+					<a href="https://www.gequhai.com/" class="nav-link" data-name="歌曲海">歌曲海<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://hifini.net/" class="nav-link" data-name="HiFiNi">HiFiNi<span class="fav-star" title="收藏">☆</span></a>
+                </div>
+            </div>
+
+            <div class="nav-category" data-category="休闲娱乐">
+                <div class="category-header">
+                    <h3 class="category-title"><span class="emoji">🎮</span> 休闲娱乐</h3>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span class="category-count"></span>
+                        <span class="collapse-icon">▾</span>
+                    </div>
+                </div>
+                <div class="category-links">
+                    <a href="https://www.geo-fs.com/geofs.php?v=3.9" class="nav-link" data-name="GEOFS">GEOFS<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.autopiano.cn/" class="nav-link" data-name="自由钢琴">自由钢琴<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://slowroads.io/" class="nav-link" data-name="Slowroads">Slowroads<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://iogames.space/" class="nav-link" data-name="IO游戏">IO游戏<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.arealme.com/zh" class="nav-link" data-name="ARealMe">ARealMe<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://type.method.ac/" class="nav-link" data-name="KernType">KernType<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://boolean.method.ac/" class="nav-link" data-name="布尔运算">布尔运算<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://win11.blueedge.me/" class="nav-link" data-name="模拟Win11">模拟Win11<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://cdn.playnn.com/game/black8/" class="nav-link" data-name="在线台球">在线台球<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://wuziqi.cn/" class="nav-link" data-name="在线五子棋">在线五子棋<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://www.jingziqi.com/" class="nav-link" data-name="在线三子棋">在线三子棋<span class="fav-star" title="收藏">☆</span></a>
+                    <a href="https://cn.sudokupuzzle.org/" class="nav-link" data-name="在线数独">在线数独<span class="fav-star" title="收藏">☆</span></a>
+					<a href="https://dazi.kukuw.com/" class="nav-link" data-name="在线打字测试">在线打字<span class="fav-star" title="收藏">☆</span></a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===== No Results ===== -->
+        <div class="no-results" id="noResults">
+            <div class="nr-icon">🔎</div>
+            <div class="nr-text">没有找到匹配的站点</div>
+        </div>
+
+        <!-- ===== Footer ===== -->
         <footer>
-            <p style="margin-top: 18px">" 保持热爱，下一站见! "</p>
-            <p style="margin-top: 12px">版权所有 &copy; <span id="current-year"></span> <a href="https://lhy6.top/" style="color: #aaa;">LHY主页.</a> 保留所有权利.</p>
+            <p class="quote">" 保持热爱，下一站见! "</p>
+            <p>版权所有 © <span id="currentYear"></span> <a href="https://lhy6.top/">LHY主页</a> · 保留所有权利</p>
         </footer>
     </div>
 
-    <script>
-        const searchInput = document.getElementById('search-input');
-        const searchBtn = document.getElementById('search-btn');
-        const searchSelect = document.getElementById('search-select');
-        const navLinks = document.querySelectorAll('.nav-link');
-        document.getElementById('current-year').textContent = new Date().getFullYear();
+    <!-- ===== Back to Top ===== -->
+    <button class="back-top" id="backTop" title="回到顶部">↑</button>
 
-        // 搜索引擎配置
-        const searchEngines = {
-            bing: 'https://www.bing.com/search?q=',
-            douyin: 'https://www.douyin.com/jingxuan/search/',
-            baidu: 'https://www.baidu.com/s?wd=',
-            qwen: 'https://chat.qwen.ai/?text=请用中文回答，详细专业。用户搜索：',
-            bili: 'https://search.bilibili.com/all?keyword=',
-            douban: 'https://www.douban.com/search?q=',
-            btbtl: 'https://www.btbtla.com/search/',
-            seed: 'https://www.seedhub.cc/s/',
-            music: 'https://www.dgcol.com/dgcsrc/?keyword=',
-            ciba: 'https://www.iciba.com/word?w=',
-        };
+    <!-- ===== Toast ===== -->
+    <div class="toast" id="toast"></div>
 
-        // 页面加载时自动聚焦到搜索框
-        window.addEventListener('load', function() {
-            searchInput.focus();
+    <!-- ===== Context Menu ===== -->
+    <div class="ctx-menu" id="ctxMenu">
+        <button class="ctx-item" id="ctxOpen">🔗 新标签页打开</button>
+        <button class="ctx-item" id="ctxCopy">📋 复制链接</button>
+        <button class="ctx-item" id="ctxFav">⭐ 添加收藏</button>
+    </div>
+
+    <!-- ===== Shortcut Modal ===== -->
+    <div class="modal-overlay" id="shortcutModal">
+        <div class="modal">
+            <h3>⌨️ 键盘快捷键</h3>
+            <div class="shortcut-list">
+                <div class="shortcut-item">
+                    <span>聚焦搜索框</span>
+                    <div class="shortcut-keys"><span class="kbd">/</span></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>执行搜索</span>
+                    <div class="shortcut-keys"><span class="kbd">Enter</span></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>清空搜索</span>
+                    <div class="shortcut-keys"><span class="kbd">Esc</span></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>切换主题</span>
+                    <div class="shortcut-keys"><span class="kbd">Alt</span><span class="kbd">T</span></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>折叠/展开全部</span>
+                    <div class="shortcut-keys"><span class="kbd">Alt</span><span class="kbd">C</span></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>下一个搜索引擎</span>
+                    <div class="shortcut-keys"><span class="kbd">Tab</span><span>（搜索框内）</span></div>
+                </div>
+            </div>
+            <button class="modal-close" id="modalClose">关闭</button>
+        </div>
+    </div>
+
+<script>
+(function () {
+    'use strict';
+
+    // ===== DOM Cache =====
+    const $ = id => document.getElementById(id);
+    const searchInput     = $('searchInput');
+    const clearBtn        = $('clearBtn');
+    const submitBtn       = $('submitBtn');
+    const enginePills     = $('enginePills');
+    const navGrid         = $('navGrid');
+    const noResults       = $('noResults');
+    const backTopBtn      = $('backTop');
+    const topBar          = $('topBar');
+    const toastEl         = $('toast');
+    const ctxMenu         = $('ctxMenu');
+    const favSection      = $('favSection');
+    const favGrid         = $('favGrid');
+    const categoryTabs    = $('categoryTabs');
+    const shortcutModal   = $('shortcutModal');
+    const themeBtn        = $('themeBtn');
+    const topThemeBtn2    = $('topThemeBtn2');
+    const collapseAllBtn  = $('collapseAllBtn');
+    const shortcutBtn     = $('shortcutBtn');
+
+    const allLinks    = Array.from(document.querySelectorAll('.nav-link'));
+    const allCards    = Array.from(document.querySelectorAll('.nav-category'));
+
+    // ===== Search Engines =====
+    const searchEngines = {
+        qwen:   'https://chat.qwen.ai/?text=请用中文回答，详细专业。用户搜索：',
+        bing:   'https://www.bing.com/search?q=',
+        baidu:  'https://www.baidu.com/s?wd=',
+        bili:   'https://search.bilibili.com/all?keyword=',
+        douyin: 'https://www.douyin.com/jingxuan/search/',
+        douban: 'https://www.douban.com/search?q=',
+        btbtl:  'https://www.btbtla.com/search/',
+        seed:   'https://www.seedhub.cc/s/',
+        music:  'https://www.dgcol.com/dgcsrc/?keyword=',
+        ciba:   'https://www.iciba.com/word?w=',
+		ping:   'https://www.itdog.cn/tcping/',
+    };
+
+    let currentEngine = 'qwen';
+    let allCollapsed  = false;
+    let ctxTarget     = null;
+
+    // ===== Year =====
+    $('currentYear').textContent = new Date().getFullYear();
+
+    // ===== Greeting =====
+    function setGreeting() {
+        const h = new Date().getHours();
+        let g = '🌙 夜深了，注意休息';
+        if (h >= 5 && h < 8) g = '🌅 早上好，新的一天开始了';
+        else if (h >= 8 && h < 12) g = '☀️ 上午好，状态不错';
+        else if (h >= 12 && h < 14) g = '🍱 中午好，记得吃午饭';
+        else if (h >= 14 && h < 18) g = '🌤 下午好，继续加油';
+        else if (h >= 18 && h < 22) g = '🌆 晚上好，辛苦了';
+        $('greeting').textContent = g;
+    }
+    setGreeting();
+
+    // ===== DateTime =====
+    function updateDateTime() {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        $('timeText').textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        const days = ['日','一','二','三','四','五','六'];
+        $('dateText').textContent = `${now.getFullYear()}/${pad(now.getMonth()+1)}/${pad(now.getDate())} 星期${days[now.getDay()]}`;
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    // ===== Theme =====
+    function getTheme() {
+        return localStorage.getItem('lhy-theme') || 'dark';
+    }
+
+    function applyTheme(t) {
+        document.documentElement.setAttribute('data-theme', t);
+        localStorage.setItem('lhy-theme', t);
+        const icon = t === 'dark' ? '🌙' : '☀️';
+        themeBtn.textContent = icon;
+        topThemeBtn2.textContent = icon;
+    }
+
+    function toggleTheme() {
+        applyTheme(getTheme() === 'dark' ? 'light' : 'dark');
+        showToast('主题已切换');
+    }
+
+    applyTheme(getTheme());
+    themeBtn.addEventListener('click', toggleTheme);
+    topThemeBtn2.addEventListener('click', toggleTheme);
+
+    // ===== Category Counts + Tabs =====
+    allCards.forEach(card => {
+        const links = card.querySelectorAll('.nav-link');
+        card.querySelector('.category-count').textContent = links.length;
+        const cat = card.getAttribute('data-category');
+        const tab = document.createElement('span');
+        tab.className = 'cat-tab';
+        tab.setAttribute('data-cat', cat);
+        tab.textContent = cat;
+        categoryTabs.appendChild(tab);
+    });
+
+    // ===== Category Tab Click =====
+    categoryTabs.addEventListener('click', e => {
+        const tab = e.target.closest('.cat-tab');
+        if (!tab) return;
+        categoryTabs.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const cat = tab.getAttribute('data-cat');
+        allCards.forEach(card => {
+            card.classList.toggle('hidden', cat !== 'all' && card.getAttribute('data-category') !== cat);
         });
+    });
 
-        // 搜索功能
-        function performSearch() {
-            const query = searchInput.value.trim();
+    // ===== Engine Pills =====
+    enginePills.addEventListener('click', e => {
+        const pill = e.target.closest('.engine-pill');
+        if (!pill) return;
+        enginePills.querySelectorAll('.engine-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        currentEngine = pill.getAttribute('data-engine');
+    });
 
-            const selectedEngine = searchSelect.value;
-            url = searchEngines[selectedEngine] + encodeURIComponent(query);
-            window.open(url, '_blank');
-            
+    // ===== Search =====
+    function performSearch() {
+        const q = searchInput.value.trim();
+        if (!q) return;
+        window.open(searchEngines[currentEngine] + encodeURIComponent(q), '_blank');
+    }
+
+    submitBtn.addEventListener('click', performSearch);
+    searchInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            performSearch();
         }
+        // Tab to cycle engines
+        if (e.key === 'Tab' && !e.shiftKey) {
+            e.preventDefault();
+            const pills = Array.from(enginePills.querySelectorAll('.engine-pill'));
+            const idx = pills.findIndex(p => p.classList.contains('active'));
+            pills[idx].classList.remove('active');
+            const next = pills[(idx + 1) % pills.length];
+            next.classList.add('active');
+            currentEngine = next.getAttribute('data-engine');
+            showToast(`搜索引擎: ${next.textContent}`);
+        }
+    });
 
-        // 搜索输入框事件
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                performSearch();
-            }
+    // ===== Clear Button =====
+    searchInput.addEventListener('input', () => {
+        const v = searchInput.value;
+        clearBtn.classList.toggle('show', v.length > 0);
+        filterLinks(v);
+    });
+
+    clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        clearBtn.classList.remove('show');
+        filterLinks('');
+        searchInput.focus();
+    });
+
+    // ===== Filter Links =====
+    function filterLinks(term) {
+        term = term.toLowerCase().trim();
+        let visibleCount = 0;
+        allLinks.forEach(link => {
+            const name = (link.getAttribute('data-name') || link.textContent).toLowerCase();
+            const show = !term || name.includes(term);
+            link.classList.toggle('hidden-link', !show);
+            if (show) visibleCount++;
         });
-
-        // 搜索按钮事件
-        searchBtn.addEventListener('click', performSearch);
-
-        // 导航链接搜索过滤
-        searchInput.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            if (!searchTerm) {
-                // 如果搜索框为空，显示所有链接
-                navLinks.forEach(link => {
-                    link.style.display = 'block';
-                });
-            } else {
-                navLinks.forEach(link => {
-                    const linkText = link.textContent.toLowerCase();
-                    link.style.display = linkText.includes(searchTerm) ? 'block' : 'none';
-                });
-            }
+        // hide categories with no visible links
+        allCards.forEach(card => {
+            const vis = card.querySelectorAll('.nav-link:not(.hidden-link)').length;
+            card.style.display = vis === 0 ? 'none' : '';
         });
+        noResults.classList.toggle('show', visibleCount === 0 && term.length > 0);
+    }
 
-        navLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
+    // ===== Collapse / Expand =====
+    allCards.forEach(card => {
+        const header = card.querySelector('.category-header');
+        const links  = card.querySelector('.category-links');
+        const icon   = card.querySelector('.collapse-icon');
+        header.addEventListener('click', () => {
+            const is = links.classList.toggle('collapsed');
+            icon.classList.toggle('collapsed', is);
+        });
+    });
+
+    collapseAllBtn.addEventListener('click', () => {
+        allCollapsed = !allCollapsed;
+        allCards.forEach(card => {
+            card.querySelector('.category-links').classList.toggle('collapsed', allCollapsed);
+            card.querySelector('.collapse-icon').classList.toggle('collapsed', allCollapsed);
+        });
+        collapseAllBtn.textContent = allCollapsed ? '📁' : '📂';
+        showToast(allCollapsed ? '已折叠全部' : '已展开全部');
+    });
+
+    // ===== Link Click =====
+    allLinks.forEach(link => {
+        link.addEventListener('click', e => {
+            if (e.target.classList.contains('fav-star')) {
                 e.preventDefault();
-                window.open(this.href, '_blank');
-            });
+                e.stopPropagation();
+                toggleFavorite(link);
+                return;
+            }
+            e.preventDefault();
+            window.open(link.href, '_blank');
         });
-    </script>
+    });
+
+    // ===== Favorites (localStorage) =====
+    function getFavs() {
+        try { return JSON.parse(localStorage.getItem('lhy-favs') || '[]'); } catch { return []; }
+    }
+
+    function saveFavs(arr) {
+        localStorage.setItem('lhy-favs', JSON.stringify(arr));
+    }
+
+    function toggleFavorite(link) {
+        const name = link.getAttribute('data-name') || link.textContent.replace('☆','').replace('★','').trim();
+        const href = link.href;
+        let favs = getFavs();
+        const idx = favs.findIndex(f => f.href === href);
+        const star = link.querySelector('.fav-star');
+        if (idx >= 0) {
+            favs.splice(idx, 1);
+            star.textContent = '☆';
+            star.classList.remove('is-fav');
+            showToast(`已取消收藏: ${name}`);
+        } else {
+            favs.push({ name, href });
+            star.textContent = '★';
+            star.classList.add('is-fav');
+            showToast(`已收藏: ${name}`);
+        }
+        saveFavs(favs);
+        renderFavs();
+    }
+
+    function renderFavs() {
+        const favs = getFavs();
+        favSection.classList.toggle('has-items', favs.length > 0);
+        favGrid.innerHTML = '';
+        // Mark stars
+        allLinks.forEach(link => {
+            const star = link.querySelector('.fav-star');
+            const isFav = favs.some(f => f.href === link.href);
+            star.textContent = isFav ? '★' : '☆';
+            star.classList.toggle('is-fav', isFav);
+        });
+        favs.forEach(f => {
+            const chip = document.createElement('div');
+            chip.className = 'fav-chip';
+            chip.innerHTML = `<span>${f.name}</span><span class="remove-fav" data-href="${f.href}">✕</span>`;
+            chip.addEventListener('click', e => {
+                if (e.target.classList.contains('remove-fav')) {
+                    let arr = getFavs().filter(x => x.href !== f.href);
+                    saveFavs(arr);
+                    renderFavs();
+                    showToast(`已取消收藏: ${f.name}`);
+                    return;
+                }
+                window.open(f.href, '_blank');
+            });
+            favGrid.appendChild(chip);
+        });
+    }
+
+    renderFavs();
+
+    // ===== Context Menu =====
+    allLinks.forEach(link => {
+        link.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            ctxTarget = link;
+            const favs = getFavs();
+            const isFav = favs.some(f => f.href === link.href);
+            $('ctxFav').textContent = isFav ? '💔 取消收藏' : '⭐ 添加收藏';
+
+            ctxMenu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
+            ctxMenu.style.top  = Math.min(e.clientY, window.innerHeight - 140) + 'px';
+            ctxMenu.classList.add('show');
+        });
+    });
+
+    document.addEventListener('click', () => ctxMenu.classList.remove('show'));
+
+    $('ctxOpen').addEventListener('click', () => { if (ctxTarget) window.open(ctxTarget.href, '_blank'); });
+    $('ctxCopy').addEventListener('click', () => {
+        if (!ctxTarget) return;
+        navigator.clipboard.writeText(ctxTarget.href).then(() => showToast('链接已复制'));
+    });
+    $('ctxFav').addEventListener('click', () => { if (ctxTarget) toggleFavorite(ctxTarget); });
+
+    // ===== Scroll Events =====
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                const y = window.scrollY;
+                topBar.classList.toggle('visible', y > 200);
+                backTopBtn.classList.toggle('visible', y > 400);
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
+
+    backTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    $('topSearchBtn').addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => searchInput.focus(), 400);
+    });
+
+    // ===== Toast =====
+    let toastTimer;
+    function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2000);
+    }
+
+    // ===== Shortcut Modal =====
+    shortcutBtn.addEventListener('click', () => shortcutModal.classList.add('show'));
+    $('modalClose').addEventListener('click', () => shortcutModal.classList.remove('show'));
+    shortcutModal.addEventListener('click', e => { if (e.target === shortcutModal) shortcutModal.classList.remove('show'); });
+
+    // ===== Keyboard Shortcuts =====
+    document.addEventListener('keydown', e => {
+        // "/" focus search
+        if (e.key === '/' && document.activeElement !== searchInput) {
+            e.preventDefault();
+            searchInput.focus();
+        }
+        // Esc clear
+        if (e.key === 'Escape') {
+            if (shortcutModal.classList.contains('show')) {
+                shortcutModal.classList.remove('show');
+                return;
+            }
+            searchInput.value = '';
+            clearBtn.classList.remove('show');
+            filterLinks('');
+            searchInput.blur();
+        }
+        // Alt+T theme
+        if (e.altKey && e.key.toLowerCase() === 't') {
+            e.preventDefault();
+            toggleTheme();
+        }
+        // Alt+C collapse
+        if (e.altKey && e.key.toLowerCase() === 'c') {
+            e.preventDefault();
+            collapseAllBtn.click();
+        }
+    });
+
+    // ===== Init max-height for collapse animation =====
+    allCards.forEach(card => {
+        const links = card.querySelector('.category-links');
+        links.style.maxHeight = links.scrollHeight + 100 + 'px';
+    });
+
+    // ===== Focus search on load (desktop only) =====
+    if (window.innerWidth > 768) {
+        searchInput.focus();
+    }
+
+})();
+</script>
 </body>
 </html>
