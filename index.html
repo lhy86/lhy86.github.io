@@ -1,15 +1,28 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="cinematic-startup deep-startup">
 <head>
     <meta charset="UTF-8">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="LHY主页">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#111">
     <link rel="icon" href="file/icon-32x32.png" type="image/png">
     <link rel="manifest" href="file/manifest.json">
     <link rel="apple-touch-icon" href="file/apple-touch-icon.jpg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
     <title>LHY主页</title>
+    <script data-cfasync="false">
+        (function () {
+            var root = document.documentElement;
+            root.classList.add('cinematic-startup', 'js-enabled');
+            root.classList.remove('reveal-ready', 'reveal-fallback');
+            window.__revealBootFallback = window.setTimeout(function () {
+                root.classList.add('reveal-ready', 'reveal-fallback');
+            }, 6500);
+        }());
+    </script>
     <style>
         :root {
             --primary-color: #3b82f6;
@@ -224,6 +237,19 @@
 
         .info-item p {
             color: var(--light-color);
+        }
+
+        #email-display a {
+            color: inherit;
+            font: inherit;
+            text-decoration: none;
+        }
+
+        #email-display a:hover,
+        #email-display a:focus,
+        #email-display a:visited {
+            color: inherit;
+            text-decoration: none;
         }
 
         .quote-container {
@@ -561,6 +587,185 @@
             content: url('./file/skillPc.svg');
         }
 
+
+
+        /* 朋友站点 / 友链模块：纯 CSS 渐变与悬停效果，轻量不依赖 JS */
+        .friends-section {
+            position: relative;
+            overflow: hidden;
+            padding: 1.1rem;
+            margin-bottom: 1.2rem;
+            border-radius: 12px;
+            background:
+                radial-gradient(circle at 12% 20%, rgba(125, 211, 252, 0.20), transparent 34%),
+                linear-gradient(135deg, rgba(34, 38, 46, 0.96), rgba(15, 23, 42, 0.96));
+            border: 1px solid rgba(125, 211, 252, 0.22);
+            box-shadow: var(--box-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            isolation: isolate;
+        }
+
+        .friends-section::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, transparent 0%, rgba(59, 130, 246, 0.14) 50%, transparent 100%);
+            opacity: 0.65;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .friends-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .friends-title-wrap {
+            min-width: 0;
+        }
+
+        .friends-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+            color: var(--light-color);
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .friends-title::before {
+            content: "✦";
+            color: var(--secondary-color);
+            text-shadow: 0 0 14px rgba(125, 211, 252, 0.75);
+        }
+
+        .friends-desc {
+            margin-top: 0.35rem;
+            color: var(--gray-color);
+            font-size: 0.92rem;
+            line-height: 1.55;
+        }
+
+        .friends-badge {
+            flex: 0 0 auto;
+            padding: 0.35rem 0.55rem;
+            border-radius: 999px;
+            color: #dbeafe;
+            background: rgba(59, 130, 246, 0.18);
+            border: 1px solid rgba(125, 211, 252, 0.22);
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .friend-card {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 0.9rem;
+            min-height: 86px;
+            padding: 0.85rem;
+            border-radius: 12px;
+            color: var(--light-color);
+            text-decoration: none;
+            background:
+                linear-gradient(135deg, rgba(51, 65, 85, 0.94), rgba(30, 41, 59, 0.92)),
+                linear-gradient(90deg, rgba(125, 211, 252, 0.32), rgba(59, 130, 246, 0.12));
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
+            transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+        }
+
+        .friend-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(125, 211, 252, 0.58);
+            box-shadow: 0 14px 26px rgba(0, 0, 0, 0.24), 0 0 0 1px rgba(125, 211, 252, 0.10);
+            background:
+                linear-gradient(135deg, rgba(51, 65, 85, 0.98), rgba(30, 41, 59, 0.96)),
+                linear-gradient(90deg, rgba(125, 211, 252, 0.42), rgba(59, 130, 246, 0.18));
+            text-decoration: none;
+        }
+
+        .friend-logo {
+            width: 58px;
+            height: 58px;
+            padding: 0.45rem;
+            border-radius: 16px;
+            background: rgba(15, 23, 42, 0.78);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            object-fit: contain;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.24);
+        }
+
+        .friend-info {
+            min-width: 0;
+        }
+
+        .friend-name-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.25rem;
+        }
+
+        .friend-name {
+            color: var(--light-color);
+            font-size: 1.15rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .friend-tag {
+            padding: 0.16rem 0.42rem;
+            border-radius: 999px;
+            color: #bae6fd;
+            background: rgba(14, 165, 233, 0.14);
+            border: 1px solid rgba(125, 211, 252, 0.18);
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .friend-slogan {
+            margin: 0;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
+        .friend-url {
+            display: inline-block;
+            margin-top: 0.28rem;
+            color: var(--secondary-color);
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .friend-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            min-width: 72px;
+            padding: 0.45rem 0.65rem;
+            border-radius: 999px;
+            color: white;
+            background: linear-gradient(135deg, var(--primary-color), #0ea5e9);
+            box-shadow: 0 8px 18px rgba(59, 130, 246, 0.28);
+            font-size: 0.86rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .friend-action::after {
+            content: "↗";
+            font-size: 0.82rem;
+        }
+
         footer {
             text-align: center;
             padding: 2rem 0 0.5rem 0;
@@ -568,7 +773,264 @@
             font-size: 0.875rem;
         }
 
+
+
+        /* 轻量 UI 精修补丁：仅统一质感与动效，不改结构、不动项目按钮、不替换背景图 */
+        :root {
+            --primary-color: #60a5fa;
+            --secondary-color: #93c5fd;
+            --light-color: #f8fafc;
+            --gray-color: #cbd5e1;
+            --surface-glass: rgba(15, 23, 42, 0.66);
+            --surface-glass-strong: rgba(30, 41, 59, 0.78);
+            --surface-border: rgba(148, 163, 184, 0.22);
+            --soft-glow: rgba(96, 165, 250, 0.24);
+            --box-shadow: 0 18px 45px -28px rgba(2, 6, 23, 0.85), 0 10px 24px -20px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            --transition: background-color 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, color 0.22s ease, opacity 0.22s ease, filter 0.22s ease;
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+            text-rendering: optimizeLegibility;
+        }
+
+        body {
+            color: var(--light-color);
+            background-color: #08111f;
+            font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            -webkit-tap-highlight-color: rgba(96, 165, 250, 0.16);
+        }
+
+        .avatar {
+            border-color: rgba(255, 255, 255, 0.86);
+            box-shadow: 0 16px 38px rgba(2, 6, 23, 0.38), 0 0 0 1px rgba(255, 255, 255, 0.10), 0 0 32px rgba(96, 165, 250, 0.16);
+        }
+
+        .name,
+        .typing-text {
+            letter-spacing: -0.04em;
+            text-shadow: 0 10px 28px rgba(2, 6, 23, 0.36);
+        }
+
+        .title {
+            color: #d0d8e8;
+        }
+
+        .person-tag,
+        .contact-link {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.86), rgba(30, 41, 59, 0.72));
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px) saturate(135%);
+            -webkit-backdrop-filter: blur(12px) saturate(135%);
+        }
+
+        .contact-link:hover {
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.92), rgba(14, 165, 233, 0.86));
+            border-color: rgba(191, 219, 254, 0.62);
+            box-shadow: 0 10px 24px -18px rgba(96, 165, 250, 0.88), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+            filter: brightness(1.04);
+        }
+
+        .contact-link svg,
+        .service-icon svg {
+            flex: 0 0 auto;
+            filter: drop-shadow(0 4px 10px rgba(2, 6, 23, 0.28));
+        }
+
+        .card,
+        .stat-item {
+            background:
+                radial-gradient(circle at 12% 0%, rgba(96, 165, 250, 0.10), transparent 32%),
+                linear-gradient(135deg, rgba(15, 23, 42, 0.78), rgba(30, 41, 59, 0.74));
+            border: 1px solid var(--surface-border);
+            box-shadow: var(--box-shadow);
+            backdrop-filter: blur(14px) saturate(138%);
+            -webkit-backdrop-filter: blur(14px) saturate(138%);
+        }
+
+        .card:hover,
+        .stat-item:hover {
+            border-color: rgba(147, 197, 253, 0.42);
+            box-shadow: 0 20px 46px -28px rgba(2, 6, 23, 0.9), 0 0 0 1px rgba(147, 197, 253, 0.10), 0 0 28px rgba(96, 165, 250, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+        }
+
+        .section-title {
+            position: relative;
+            border-bottom-color: rgba(147, 197, 253, 0.34);
+            letter-spacing: -0.02em;
+        }
+
+        .section-title::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 3.4rem;
+            height: 2px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--secondary-color), rgba(96, 165, 250, 0.15));
+            box-shadow: 0 0 14px rgba(147, 197, 253, 0.55);
+        }
+
+        .info-item h3 {
+            color: var(--secondary-color);
+            letter-spacing: -0.01em;
+        }
+
+        .info-item p,
+        #email-display a {
+            color: #e2e8f0;
+            font-weight: 500;
+            overflow-wrap: anywhere;
+        }
+
+        #email-display a,
+        #email-display a:hover,
+        #email-display a:focus,
+        #email-display a:visited {
+            color: inherit;
+            font: inherit;
+            text-decoration: none;
+        }
+
+        #email-toggle {
+            color: var(--secondary-color) !important;
+            background: rgba(51, 65, 85, 0.78) !important;
+            border: 1px solid rgba(147, 197, 253, 0.18) !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+            transition: var(--transition) !important;
+        }
+
+        #email-toggle:hover {
+            color: #fff !important;
+            background: rgba(96, 165, 250, 0.82) !important;
+            border-color: rgba(191, 219, 254, 0.52) !important;
+            box-shadow: 0 8px 18px -14px rgba(96, 165, 250, 0.86) !important;
+        }
+
+        .quote-container,
+        .friends-section {
+            border: 1px solid rgba(147, 197, 253, 0.24);
+            box-shadow: var(--box-shadow), 0 0 34px rgba(59, 130, 246, 0.10);
+            backdrop-filter: blur(16px) saturate(140%);
+            -webkit-backdrop-filter: blur(16px) saturate(140%);
+        }
+
+        .quote-container {
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 16% 18%, rgba(147, 197, 253, 0.28), transparent 34%),
+                linear-gradient(135deg, rgba(37, 99, 235, 0.92), rgba(14, 165, 233, 0.78));
+            cursor: pointer;
+        }
+
+        .quote-container::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.14) 46%, transparent 82%);
+            opacity: 0.62;
+            pointer-events: none;
+        }
+
+        .quote-text,
+        .quote-author {
+            position: relative;
+        }
+
+        .timeline {
+            overflow: hidden;
+            border: 1px solid rgba(147, 197, 253, 0.18);
+            box-shadow: var(--box-shadow);
+            backdrop-filter: blur(12px) saturate(130%);
+            -webkit-backdrop-filter: blur(12px) saturate(130%);
+        }
+
+        .timeline::after {
+            background: rgba(8, 17, 31, 0.68);
+        }
+
+        .timeline::before {
+            background: linear-gradient(180deg, var(--secondary-color), var(--primary-color));
+            box-shadow: 0 0 18px rgba(96, 165, 250, 0.42);
+        }
+
+        .timeline-marker {
+            background: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.16), 0 0 18px rgba(96, 165, 250, 0.42);
+        }
+
+        .timeline-title,
+        .friend-name {
+            letter-spacing: -0.02em;
+        }
+
+        .stat-value {
+            color: var(--secondary-color);
+            text-shadow: 0 0 16px rgba(96, 165, 250, 0.50);
+        }
+
+        .friends-section {
+            background:
+                radial-gradient(circle at 12% 20%, rgba(147, 197, 253, 0.20), transparent 34%),
+                linear-gradient(135deg, rgba(15, 23, 42, 0.82), rgba(30, 41, 59, 0.78));
+        }
+
+        .friend-card {
+            border-color: rgba(148, 163, 184, 0.22);
+            transition: var(--transition);
+            will-change: auto;
+        }
+
+        .friend-card:hover {
+            transform: none;
+            border-color: rgba(147, 197, 253, 0.58);
+            box-shadow: 0 18px 38px -28px rgba(2, 6, 23, 0.95), 0 0 0 1px rgba(147, 197, 253, 0.12), 0 0 30px rgba(96, 165, 250, 0.14);
+            filter: brightness(1.04);
+        }
+
+        .friend-logo,
+        .friend-action {
+            box-shadow: 0 12px 24px -18px rgba(96, 165, 250, 0.82), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        a:focus-visible,
+        button:focus-visible {
+            outline: 2px solid rgba(147, 197, 253, 0.72);
+            outline-offset: 2px;
+        }
+
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: max(1.6rem, env(safe-area-inset-left));
+                padding-right: max(1.6rem, env(safe-area-inset-right));
+                padding-bottom: max(1.6rem, env(safe-area-inset-bottom));
+            }
+        }
+
         @media (max-width: 768px) {
+            @supports (padding: max(0px)) {
+                body {
+                    padding-left: max(0.6rem, env(safe-area-inset-left));
+                    padding-right: max(0.6rem, env(safe-area-inset-right));
+                    padding-bottom: max(0.6rem, env(safe-area-inset-bottom));
+                }
+            }
+        }
+
+        @media (hover: none) {
+            .card:hover,
+            .stat-item:hover,
+            .contact-link:hover,
+            .friend-card:hover {
+                filter: none;
+            }
+        }
+@media (max-width: 768px) {
             body {
                 padding: 0.6rem;
             }
@@ -665,6 +1127,36 @@
             }
         }
         @media (max-width: 576px) {
+
+            .friends-section {
+                padding: 0.9rem;
+            }
+            .friends-head {
+                flex-direction: column;
+                gap: 0.5rem;
+                margin-bottom: 0.7rem;
+            }
+            .friend-card {
+                grid-template-columns: auto minmax(0, 1fr);
+                gap: 0.75rem;
+                padding: 0.75rem;
+            }
+            .friend-logo {
+                width: 52px;
+                height: 52px;
+                border-radius: 14px;
+            }
+            .friend-name {
+                font-size: 1.05rem;
+            }
+            .friend-slogan {
+                font-size: 0.84rem;
+            }
+            .friend-action {
+                grid-column: 1 / -1;
+                width: 100%;
+                min-height: 36px;
+            }
             .info-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -775,6 +1267,1207 @@
                 gap: 0.6rem;
             }
         }
+
+        /* prefers-reduced-motion 覆盖块已移除：本版按用户要求强制保留启动动画 */
+    
+
+        /* 高级动效与低饱和质感补丁：小幅覆盖，不改结构、不动项目按钮、不替换背景图 */
+        :root {
+            --surface-glass: rgba(16, 22, 32, 0.72);
+            --surface-glass-strong: rgba(24, 31, 43, 0.78);
+            --surface-border: rgba(174, 187, 204, 0.16);
+            --surface-border-active: rgba(190, 205, 226, 0.34);
+            --soft-glow: rgba(124, 163, 214, 0.14);
+            --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
+            --motion-ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .container {
+            animation: pageSoftIn 0.46s var(--motion-ease-soft) both;
+        }
+
+        body::before {
+            background-image: url('./file/bg.jpg') !important;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            animation: backgroundLoad 1.5s var(--motion-ease) forwards !important;
+            will-change: transform, filter;
+            transform-origin: center;
+        }
+
+        @keyframes backgroundLoad {
+            0% {
+                filter: blur(30px) brightness(0.1);
+                transform: scale(1.5);
+            }
+            100% {
+                filter: blur(1vw) brightness(0.7);
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pageSoftIn {
+            0% {
+                opacity: 0;
+                filter: saturate(0.82) contrast(0.96);
+            }
+            100% {
+                opacity: 1;
+                filter: saturate(1) contrast(1);
+            }
+        }
+
+        .card,
+        .stat-item,
+        .friends-section,
+        .friend-card,
+        .quote-container {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .card,
+        .stat-item {
+            background:
+                radial-gradient(circle at 12% 0%, rgba(124, 163, 214, 0.055), transparent 33%),
+                linear-gradient(135deg, rgba(16, 22, 32, 0.80), rgba(24, 31, 43, 0.76));
+            border-color: var(--surface-border);
+            backdrop-filter: blur(14px) saturate(106%);
+            -webkit-backdrop-filter: blur(14px) saturate(106%);
+            transition: border-color 0.28s var(--motion-ease-soft), box-shadow 0.28s var(--motion-ease-soft), filter 0.28s var(--motion-ease-soft), background 0.28s var(--motion-ease-soft);
+        }
+
+        .quote-container,
+        .friends-section {
+            backdrop-filter: blur(16px) saturate(108%);
+            -webkit-backdrop-filter: blur(16px) saturate(108%);
+        }
+
+        .quote-container {
+            background:
+                radial-gradient(circle at 16% 18%, rgba(168, 192, 224, 0.16), transparent 34%),
+                linear-gradient(135deg, rgba(31, 79, 132, 0.84), rgba(21, 103, 122, 0.76));
+        }
+
+        .friends-section {
+            background:
+                radial-gradient(circle at 12% 20%, rgba(168, 192, 224, 0.12), transparent 34%),
+                linear-gradient(135deg, rgba(16, 22, 32, 0.84), rgba(24, 31, 43, 0.80));
+        }
+
+        .friend-card {
+            background:
+                linear-gradient(135deg, rgba(32, 39, 51, 0.90), rgba(22, 29, 41, 0.88)),
+                linear-gradient(90deg, rgba(168, 192, 224, 0.16), rgba(96, 132, 178, 0.08));
+            border-color: rgba(174, 187, 204, 0.18);
+            transition: border-color 0.28s var(--motion-ease-soft), box-shadow 0.28s var(--motion-ease-soft), filter 0.28s var(--motion-ease-soft), background 0.28s var(--motion-ease-soft);
+            will-change: auto;
+        }
+
+        .card::after,
+        .stat-item::after,
+        .friends-section::after,
+        .friend-card::before,
+        .quote-container::after,
+        .contact-link::after,
+        .person-tag::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0;
+            background: radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(210, 225, 245, 0.16), transparent 38%);
+            transition: opacity 0.32s var(--motion-ease-soft);
+            z-index: 0;
+        }
+
+        .contact-link,
+        .person-tag {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+            backdrop-filter: blur(12px) saturate(108%);
+            -webkit-backdrop-filter: blur(12px) saturate(108%);
+        }
+
+        .card > *,
+        .stat-item > *,
+        .friends-section > *,
+        .friend-card > *,
+        .quote-container > *,
+        .contact-link > *,
+        .person-tag > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .card.is-glowing,
+        .stat-item.is-glowing,
+        .friends-section.is-glowing,
+        .friend-card.is-glowing,
+        .quote-container.is-glowing,
+        .contact-link.is-glowing,
+        .person-tag.is-glowing {
+            border-color: var(--surface-border-active);
+            filter: brightness(1.025) saturate(1.02);
+        }
+
+        .card.is-glowing::after,
+        .stat-item.is-glowing::after,
+        .friends-section.is-glowing::after,
+        .friend-card.is-glowing::before,
+        .quote-container.is-glowing::after,
+        .contact-link.is-glowing::after,
+        .person-tag.is-glowing::after {
+            opacity: 1;
+        }
+
+        .card.is-glowing,
+        .stat-item.is-glowing {
+            box-shadow: 0 20px 46px -30px rgba(2, 6, 23, 0.95), 0 0 0 1px rgba(190, 205, 226, 0.10), 0 0 26px rgba(124, 163, 214, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+
+        .friend-card.is-glowing {
+            transform: none !important;
+            box-shadow: 0 18px 38px -29px rgba(2, 6, 23, 0.95), 0 0 0 1px rgba(190, 205, 226, 0.12), 0 0 28px rgba(124, 163, 214, 0.12);
+        }
+
+        .quote-container.is-glowing,
+        .friends-section.is-glowing {
+            box-shadow: var(--box-shadow), 0 0 30px rgba(124, 163, 214, 0.10);
+        }
+
+        .friend-logo,
+        .friend-action {
+            box-shadow: 0 12px 24px -18px rgba(124, 163, 214, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+        }
+
+        .friend-action {
+            background: linear-gradient(135deg, rgba(74, 128, 197, 0.96), rgba(31, 118, 145, 0.92));
+        }
+
+        .motion-ready :where(header, .card, .quote-container, .stats-section, .friends-section, footer) {
+            opacity: 0.001;
+            filter: blur(8px) saturate(0.82);
+            transition: opacity 0.58s var(--motion-ease-soft), filter 0.58s var(--motion-ease-soft);
+        }
+
+        .motion-ready :where(header, .card, .quote-container, .stats-section, .friends-section, footer).is-visible {
+            opacity: 1;
+            filter: none;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .card:hover,
+            .stat-item:hover,
+            .friends-section:hover,
+            .friend-card:hover,
+            .quote-container:hover,
+            .contact-link:hover,
+            .person-tag:hover {
+                border-color: var(--surface-border-active);
+                filter: brightness(1.025) saturate(1.02);
+            }
+
+            .card:hover::after,
+            .stat-item:hover::after,
+            .friends-section:hover::after,
+            .friend-card:hover::before,
+            .quote-container:hover::after,
+            .contact-link:hover::after,
+            .person-tag:hover::after {
+                opacity: 1;
+            }
+
+            .card:hover,
+            .stat-item:hover {
+                box-shadow: 0 20px 46px -30px rgba(2, 6, 23, 0.95), 0 0 0 1px rgba(190, 205, 226, 0.10), 0 0 26px rgba(124, 163, 214, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            }
+
+            .friend-card:hover {
+                transform: none !important;
+                box-shadow: 0 18px 38px -29px rgba(2, 6, 23, 0.95), 0 0 0 1px rgba(190, 205, 226, 0.12), 0 0 28px rgba(124, 163, 214, 0.12);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card,
+            .stat-item {
+                backdrop-filter: blur(12px) saturate(104%);
+                -webkit-backdrop-filter: blur(12px) saturate(104%);
+            }
+        }
+
+        /* prefers-reduced-motion 覆盖块已移除：本版按用户要求强制保留启动动画 */
+
+    
+
+        /* 电影感启动编排：仅增强现有页面，不增加启动页、不更改布局和项目按钮 */
+        :root {
+            --cinematic-ease: cubic-bezier(0.16, 1, 0.3, 1);
+            --cinematic-ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+            --cinematic-ink: rgba(7, 13, 24, 0.34);
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        body::before {
+            animation: cinematicBackgroundLoad 1.72s var(--cinematic-ease) forwards !important;
+            will-change: transform, filter;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: -14vmax;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0;
+            background:
+                radial-gradient(circle at 15% 13%, rgba(96, 165, 250, 0.20), transparent 28%),
+                radial-gradient(circle at 84% 6%, rgba(125, 211, 252, 0.12), transparent 24%),
+                radial-gradient(circle at 52% 76%, rgba(30, 64, 175, 0.10), transparent 36%);
+            animation: ambientIgnition 2.7s 0.12s var(--cinematic-ease-soft) forwards;
+            will-change: opacity, transform;
+        }
+
+        @keyframes cinematicBackgroundLoad {
+            0% {
+                filter: blur(28px) brightness(0.12) saturate(0.58);
+                transform: scale(1.18);
+            }
+            48% {
+                filter: blur(9px) brightness(0.54) saturate(0.74);
+                transform: scale(1.05);
+            }
+            100% {
+                filter: blur(1vw) brightness(0.70) saturate(0.84);
+                transform: scale(1);
+            }
+        }
+
+        @keyframes ambientIgnition {
+            0% {
+                opacity: 0;
+                transform: scale(0.92);
+            }
+            42% {
+                opacity: 0.86;
+            }
+            100% {
+                opacity: 0.52;
+                transform: scale(1);
+            }
+        }
+
+        /* 首屏分层显现：只使用 opacity / transform / filter，一次性播放后不常驻耗性能 */
+        html.cinematic-startup .container > header,
+        html.cinematic-startup main > .quote-container,
+        html.cinematic-startup main > .stats-section,
+        html.cinematic-startup main > .card,
+        html.cinematic-startup .container > .friends-section,
+        html.cinematic-startup .container > footer {
+            opacity: 0;
+            filter: blur(10px) saturate(0.72) brightness(0.86);
+            transform: translate3d(0, 14px, 0) scale(0.988);
+            transition:
+                opacity 0.76s var(--cinematic-ease-soft) var(--startup-delay, 0ms),
+                transform 0.76s var(--cinematic-ease-soft) var(--startup-delay, 0ms),
+                filter 0.76s var(--cinematic-ease-soft) var(--startup-delay, 0ms);
+            will-change: opacity, transform, filter;
+        }
+
+        html.cinematic-startup .container > header.is-visible,
+        html.cinematic-startup main > .quote-container.is-visible,
+        html.cinematic-startup main > .stats-section.is-visible,
+        html.cinematic-startup main > .card.is-visible,
+        html.cinematic-startup .container > .friends-section.is-visible,
+        html.cinematic-startup .container > footer.is-visible {
+            opacity: 1;
+            filter: none;
+            transform: none;
+        }
+
+        html.cinematic-startup header.is-visible .avatar {
+            animation: avatarIgnite 1.04s 0.10s var(--cinematic-ease) both;
+        }
+
+        html.cinematic-startup header.is-visible .name {
+            animation: headerLineIn 0.76s 0.18s var(--cinematic-ease) both;
+        }
+
+        html.cinematic-startup header.is-visible .person-tags {
+            animation: headerLineIn 0.66s 0.34s var(--cinematic-ease-soft) both;
+        }
+
+        html.cinematic-startup header.is-visible .title {
+            animation: headerLineIn 0.62s var(--cinematic-ease-soft) both;
+        }
+
+        html.cinematic-startup header.is-visible .title:nth-of-type(1) { animation-delay: 0.46s; }
+        html.cinematic-startup header.is-visible .title:nth-of-type(2) { animation-delay: 0.54s; }
+        html.cinematic-startup header.is-visible .title:nth-of-type(3) { animation-delay: 0.62s; }
+
+        html.cinematic-startup header.is-visible .contact-links {
+            animation: headerLineIn 0.66s 0.70s var(--cinematic-ease-soft) both;
+        }
+
+        @keyframes avatarIgnite {
+            0% {
+                opacity: 0;
+                filter: brightness(1.7) saturate(0.55) blur(3px);
+                transform: scale(0.82);
+                box-shadow: 0 0 0 0 rgba(125, 211, 252, 0), 0 0 46px rgba(96, 165, 250, 0.50);
+            }
+            58% {
+                opacity: 1;
+                filter: brightness(1.12) saturate(1.08);
+                transform: scale(1.035);
+                box-shadow: 0 0 0 9px rgba(125, 211, 252, 0.10), 0 0 38px rgba(96, 165, 250, 0.28);
+            }
+            100% {
+                opacity: 1;
+                filter: none;
+                transform: none;
+            }
+        }
+
+        @keyframes headerLineIn {
+            from {
+                opacity: 0;
+                filter: blur(5px);
+                transform: translate3d(0, 9px, 0);
+            }
+            to {
+                opacity: 1;
+                filter: none;
+                transform: none;
+            }
+        }
+
+        html.cinematic-startup .stats-section.is-visible .stat-item {
+            animation: subItemIn 0.64s var(--cinematic-ease-soft) both;
+        }
+
+        html.cinematic-startup .stats-section.is-visible .stat-item:nth-child(1) { animation-delay: 0.15s; }
+        html.cinematic-startup .stats-section.is-visible .stat-item:nth-child(2) { animation-delay: 0.22s; }
+        html.cinematic-startup .stats-section.is-visible .stat-item:nth-child(3) { animation-delay: 0.29s; }
+        html.cinematic-startup .stats-section.is-visible .stat-item:nth-child(4) { animation-delay: 0.36s; }
+        html.cinematic-startup .stats-section.is-visible .stat-item:nth-child(5) { animation-delay: 0.43s; }
+        html.cinematic-startup .stats-section.is-visible .stat-item:nth-child(6) { animation-delay: 0.50s; }
+
+        html.cinematic-startup .card.is-visible .section-title::after {
+            transform-origin: left center;
+            animation: underlineIgnite 0.74s 0.16s var(--cinematic-ease-soft) both;
+        }
+
+        html.cinematic-startup .quote-container.is-visible::before {
+            animation: quoteSheen 1.45s 0.26s var(--cinematic-ease-soft) both;
+        }
+
+        html.cinematic-startup .friends-section.is-visible .friend-card {
+            animation: subItemIn 0.72s 0.22s var(--cinematic-ease-soft) both;
+        }
+
+        html.cinematic-startup .friends-section.is-visible .friend-logo {
+            animation: avatarIgnite 0.88s 0.34s var(--cinematic-ease) both;
+        }
+
+        @keyframes subItemIn {
+            from {
+                opacity: 0;
+                filter: blur(4px);
+                transform: translate3d(0, 10px, 0) scale(0.985);
+            }
+            to {
+                opacity: 1;
+                filter: none;
+                transform: none;
+            }
+        }
+
+        @keyframes underlineIgnite {
+            from {
+                opacity: 0;
+                transform: scaleX(0.08);
+                filter: brightness(1.8);
+            }
+            to {
+                opacity: 1;
+                transform: scaleX(1);
+                filter: none;
+            }
+        }
+
+        @keyframes quoteSheen {
+            0% {
+                opacity: 0;
+                transform: translate3d(-58%, 0, 0);
+            }
+            32% {
+                opacity: 0.70;
+            }
+            100% {
+                opacity: 0;
+                transform: translate3d(58%, 0, 0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body::before {
+                animation-duration: 1.34s !important;
+            }
+
+            body::after {
+                inset: -24vmax;
+                animation-duration: 2.15s;
+            }
+
+            html.cinematic-startup .container > header,
+            html.cinematic-startup main > .quote-container,
+            html.cinematic-startup main > .stats-section,
+            html.cinematic-startup main > .card,
+            html.cinematic-startup .container > .friends-section,
+            html.cinematic-startup .container > footer {
+                filter: blur(7px) saturate(0.76) brightness(0.88);
+                transform: translate3d(0, 9px, 0) scale(0.992);
+                transition-duration: 0.60s;
+            }
+        }
+
+        /* prefers-reduced-motion 覆盖块已移除：本版按用户要求强制保留启动动画 */
+
+    
+
+        /* 深度启动动画修复版：
+           1) 不再依赖 Cloudflare/Rocket Loader；
+           2) 不再依赖错误的 .quote-container/.stats-section 旧结构；
+           3) 核心启动动画由 CSS 自动播放，JS 只做增强和重播保护。 */
+        :root {
+            --deep-start-ease: cubic-bezier(0.16, 1, 0.3, 1);
+            --deep-start-soft: cubic-bezier(0.22, 1, 0.36, 1);
+            --deep-blue: rgba(96, 165, 250, 0.52);
+            --deep-cyan: rgba(147, 197, 253, 0.46);
+        }
+
+        html.deep-startup body {
+            overflow-x: hidden;
+        }
+
+        html.deep-startup body::before {
+            animation: deepBgFocus 1850ms var(--deep-start-ease) both !important;
+            transform-origin: center center;
+            will-change: transform, filter;
+        }
+
+        html.deep-startup body::after {
+            content: "";
+            position: fixed;
+            inset: -18vmax;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0;
+            background:
+                radial-gradient(circle at 18% 12%, rgba(96, 165, 250, 0.24), transparent 27%),
+                radial-gradient(circle at 88% 8%, rgba(125, 211, 252, 0.16), transparent 25%),
+                radial-gradient(circle at 50% 105%, rgba(30, 64, 175, 0.20), transparent 42%),
+                linear-gradient(115deg, transparent 0%, rgba(255, 255, 255, 0.045) 48%, transparent 62%);
+            animation: deepAmbientOn 2600ms 100ms var(--deep-start-soft) both !important;
+            will-change: opacity, transform;
+        }
+
+        html.deep-startup .container {
+            isolation: isolate;
+        }
+
+        html.deep-startup header {
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+            background:
+                radial-gradient(circle at 14% 18%, rgba(96, 165, 250, 0.14), transparent 33%),
+                linear-gradient(135deg, rgba(15, 23, 42, 0.28), rgba(15, 23, 42, 0.08));
+            box-shadow:
+                0 24px 70px -48px rgba(2, 6, 23, 0.92),
+                inset 0 1px 0 rgba(255, 255, 255, 0.065);
+        }
+
+        html.deep-startup header::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(110deg, transparent 8%, rgba(255, 255, 255, 0.10) 38%, rgba(125, 211, 252, 0.12) 50%, transparent 64%);
+            transform: translateX(-120%);
+            opacity: 0;
+            animation: deepLightSweep 1350ms 260ms var(--deep-start-soft) both;
+        }
+
+        html.deep-startup :where(.container > header, #quote-section, .stats-section, main > .card, .container > section.card, .friends-section, footer) {
+            opacity: 0;
+            filter: blur(16px) saturate(0.62) brightness(0.72);
+            transform: translate3d(0, 28px, 0) scale(0.976);
+            animation: deepElementReveal 980ms var(--startup-delay, 120ms) var(--deep-start-soft) both !important;
+            will-change: opacity, transform, filter;
+            backface-visibility: hidden;
+        }
+
+        html.deep-startup .container > header { --startup-delay: 80ms; }
+        html.deep-startup #quote-section { --startup-delay: 360ms; }
+        html.deep-startup .stats-section { --startup-delay: 540ms; }
+        html.deep-startup main > .card { --startup-delay: 700ms; }
+        html.deep-startup .container > section.card { --startup-delay: 860ms; }
+        html.deep-startup .friends-section { --startup-delay: 1040ms; }
+        html.deep-startup footer { --startup-delay: 1160ms; }
+
+        html.deep-startup #quote-section.quote-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 18px !important;
+            background:
+                radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.15), transparent 32%),
+                linear-gradient(135deg, rgba(37, 99, 235, 0.92), rgba(14, 116, 144, 0.86)) !important;
+            border: 1px solid rgba(191, 219, 254, 0.28);
+            box-shadow:
+                0 22px 52px -34px rgba(2, 6, 23, 0.95),
+                0 0 42px rgba(96, 165, 250, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        }
+
+        html.deep-startup #quote-section.quote-container::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            pointer-events: none;
+            background: linear-gradient(110deg, transparent 18%, rgba(255,255,255,0.28) 43%, rgba(147,197,253,0.20) 51%, transparent 69%);
+            transform: translate3d(-130%, 0, 0);
+            opacity: 0;
+            animation: deepLightSweep 1500ms 760ms var(--deep-start-soft) both;
+        }
+
+        html.deep-startup #quote-section > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        html.deep-startup .avatar {
+            animation: deepAvatarIgnite 1100ms 180ms var(--deep-start-ease) both !important;
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.72),
+                0 0 0 8px rgba(96, 165, 250, 0.08),
+                0 26px 58px -28px rgba(2, 6, 23, 0.95),
+                0 0 38px rgba(96, 165, 250, 0.22) !important;
+        }
+
+        html.deep-startup header .name {
+            animation: deepTextRise 840ms 300ms var(--deep-start-ease) both !important;
+            text-shadow: 0 0 28px rgba(96, 165, 250, 0.18);
+        }
+
+        html.deep-startup header .title {
+            animation: deepTextRise 720ms var(--line-delay, 430ms) var(--deep-start-soft) both !important;
+        }
+
+        html.deep-startup header .title:nth-of-type(1) { --line-delay: 430ms; }
+        html.deep-startup header .title:nth-of-type(2) { --line-delay: 510ms; }
+        html.deep-startup header .title:nth-of-type(3) { --line-delay: 590ms; }
+
+        html.deep-startup header .person-tag,
+        html.deep-startup header .contact-link {
+            opacity: 0;
+            transform: translate3d(0, 10px, 0) scale(0.94);
+            filter: blur(5px);
+            animation: deepChipPop 620ms var(--chip-delay, 560ms) var(--deep-start-soft) both !important;
+        }
+
+        html.deep-startup header .person-tag {
+            border: 1px solid rgba(147, 197, 253, 0.16);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 24px -20px rgba(96,165,250,0.35);
+        }
+
+        html.deep-startup header .contact-link {
+            border-color: rgba(147, 197, 253, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.055), 0 12px 25px -21px rgba(96,165,250,0.38);
+        }
+
+        html.deep-startup .stats-section {
+            margin-top: 1.5rem;
+        }
+
+        html.deep-startup .stats-section .stat-item {
+            opacity: 0;
+            filter: blur(8px) brightness(0.82);
+            transform: translate3d(0, 18px, 0) scale(0.92);
+            animation: deepStatPop 760ms var(--stat-delay, 760ms) var(--deep-start-soft) both !important;
+            border: 1px solid rgba(147, 197, 253, 0.13);
+            background:
+                radial-gradient(circle at 50% 0%, rgba(96, 165, 250, 0.10), transparent 55%),
+                rgba(34, 38, 46, 0.90);
+        }
+
+        html.deep-startup .stat-value {
+            text-shadow: 0 0 18px rgba(96, 165, 250, 0.48), 0 0 36px rgba(125, 211, 252, 0.14);
+        }
+
+        html.deep-startup .card,
+        html.deep-startup .friends-section {
+            border: 1px solid rgba(147, 197, 253, 0.14);
+            box-shadow:
+                0 22px 58px -44px rgba(2, 6, 23, 0.98),
+                0 0 0 1px rgba(255,255,255,0.025),
+                inset 0 1px 0 rgba(255,255,255,0.055);
+        }
+
+        html.deep-startup .card .section-title::after {
+            transform-origin: left center;
+            animation: deepUnderline 850ms 260ms var(--deep-start-soft) both !important;
+        }
+
+        html.deep-startup :where(.info-item, .timeline-item, .friend-card) {
+            animation: deepSubReveal 760ms var(--sub-delay, 960ms) var(--deep-start-soft) both !important;
+        }
+
+        html.deep-startup .friend-logo {
+            animation: deepAvatarIgnite 900ms 1160ms var(--deep-start-ease) both !important;
+        }
+
+        @keyframes deepBgFocus {
+            0% {
+                filter: blur(34px) brightness(0.08) saturate(0.42);
+                transform: scale(1.24);
+            }
+            42% {
+                filter: blur(13px) brightness(0.46) saturate(0.68);
+                transform: scale(1.08);
+            }
+            100% {
+                filter: blur(1vw) brightness(0.70) saturate(0.86);
+                transform: scale(1);
+            }
+        }
+
+        @keyframes deepAmbientOn {
+            0% {
+                opacity: 0;
+                transform: scale(0.88) rotate(-2deg);
+            }
+            42% {
+                opacity: 0.88;
+            }
+            100% {
+                opacity: 0.46;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        @keyframes deepElementReveal {
+            0% {
+                opacity: 0;
+                filter: blur(18px) saturate(0.56) brightness(0.66);
+                transform: translate3d(0, 34px, 0) scale(0.968);
+            }
+            58% {
+                opacity: 1;
+                filter: blur(3px) saturate(1.04) brightness(1.06);
+                transform: translate3d(0, -3px, 0) scale(1.006);
+            }
+            100% {
+                opacity: 1;
+                filter: none;
+                transform: none;
+            }
+        }
+
+        @keyframes deepAvatarIgnite {
+            0% {
+                opacity: 0;
+                filter: blur(7px) brightness(1.9) saturate(0.45);
+                transform: scale(0.74) rotate(-2deg);
+            }
+            58% {
+                opacity: 1;
+                filter: blur(0) brightness(1.14) saturate(1.10);
+                transform: scale(1.045) rotate(0deg);
+            }
+            100% {
+                opacity: 1;
+                filter: none;
+                transform: none;
+            }
+        }
+
+        @keyframes deepTextRise {
+            0% {
+                opacity: 0;
+                filter: blur(7px);
+                transform: translate3d(0, 14px, 0);
+            }
+            100% {
+                opacity: 1;
+                filter: none;
+                transform: none;
+            }
+        }
+
+        @keyframes deepChipPop {
+            0% {
+                opacity: 0;
+                filter: blur(5px);
+                transform: translate3d(0, 12px, 0) scale(0.90);
+            }
+            70% {
+                opacity: 1;
+                filter: blur(0);
+                transform: translate3d(0, -2px, 0) scale(1.035);
+            }
+            100% {
+                opacity: 1;
+                filter: none;
+                transform: none;
+            }
+        }
+
+        @keyframes deepStatPop {
+            0% {
+                opacity: 0;
+                filter: blur(10px) brightness(0.70);
+                transform: translate3d(0, 22px, 0) scale(0.88);
+            }
+            64% {
+                opacity: 1;
+                filter: blur(0) brightness(1.08);
+                transform: translate3d(0, -3px, 0) scale(1.035);
+            }
+            100% {
+                opacity: 1;
+                filter: none;
+                transform: none;
+            }
+        }
+
+        @keyframes deepSubReveal {
+            0% {
+                opacity: 0;
+                filter: blur(6px);
+                transform: translate3d(0, 12px, 0);
+            }
+            100% {
+                opacity: 1;
+                filter: none;
+                transform: none;
+            }
+        }
+
+        @keyframes deepUnderline {
+            0% {
+                opacity: 0;
+                filter: brightness(1.8);
+                transform: scaleX(0.06);
+            }
+            100% {
+                opacity: 1;
+                filter: none;
+                transform: scaleX(1);
+            }
+        }
+
+        @keyframes deepLightSweep {
+            0% {
+                opacity: 0;
+                transform: translate3d(-130%, 0, 0);
+            }
+            30% {
+                opacity: 0.70;
+            }
+            100% {
+                opacity: 0;
+                transform: translate3d(130%, 0, 0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            html.deep-startup :where(.container > header, #quote-section, .stats-section, main > .card, .container > section.card, .friends-section, footer) {
+                transform: translate3d(0, 18px, 0) scale(0.986);
+                animation-duration: 820ms !important;
+            }
+
+            html.deep-startup body::before {
+                animation-duration: 1500ms !important;
+            }
+
+            html.deep-startup header {
+                border-radius: 18px;
+            }
+        }
+
+
+
+        /* ==========================================================
+           深度滚动动画修复补丁 v3：
+           - 非首屏板块不再随页面启动自动播放；
+           - 由 IntersectionObserver 在用户划到时才展示；
+           - 历史时间轴单独慢速、逐项展开；
+           - 底部友链使用独立“星轨/极光”效果，和上方卡片区分开。
+           ========================================================== */
+        :root {
+            --scroll-reveal-ease: cubic-bezier(0.16, 1, 0.3, 1);
+            --scroll-reveal-soft: cubic-bezier(0.22, 1, 0.36, 1);
+            --friend-violet: rgba(196, 181, 253, 0.42);
+            --friend-teal: rgba(94, 234, 212, 0.30);
+            --friend-rose: rgba(251, 113, 133, 0.20);
+        }
+
+        html.js-enabled:not(.reveal-ready) :where(.container > header, #quote-section, .stats-section, main > .card, .container > section.card, .container > .friends-section, .container > footer) {
+            opacity: 0;
+            filter: blur(9px) saturate(0.70) brightness(0.78);
+            transform: translate3d(0, 18px, 0) scale(0.988);
+        }
+
+        html.reveal-fallback :where(.container > header, #quote-section, .stats-section, main > .card, .container > section.card, .container > .friends-section, .container > footer) {
+            opacity: 1 !important;
+            filter: none !important;
+            transform: none !important;
+            animation: none !important;
+        }
+
+        html.cinematic-startup :where(.container > header, #quote-section, .stats-section, main > .card, .container > section.card, .container > .friends-section, .container > footer),
+        html.deep-startup :where(.container > header, #quote-section, .stats-section, main > .card, .container > section.card, .container > .friends-section, .container > footer) {
+            opacity: 1;
+            filter: none;
+            transform: none;
+            animation: none !important;
+        }
+
+        body.motion-ready :where(.opening-reveal, .scroll-reveal) {
+            opacity: 0 !important;
+            filter: blur(14px) saturate(0.68) brightness(0.78) !important;
+            transform: translate3d(0, 34px, 0) scale(0.978) !important;
+            transition:
+                opacity 920ms var(--scroll-reveal-soft) var(--reveal-delay, 0ms),
+                transform 920ms var(--scroll-reveal-soft) var(--reveal-delay, 0ms),
+                filter 920ms var(--scroll-reveal-soft) var(--reveal-delay, 0ms) !important;
+            animation: none !important;
+            will-change: opacity, transform, filter;
+            backface-visibility: hidden;
+        }
+
+        body.motion-ready :where(.opening-reveal, .scroll-reveal).is-visible {
+            opacity: 1 !important;
+            filter: none !important;
+            transform: none !important;
+        }
+
+        body.motion-ready .scroll-reveal:not(.is-visible) {
+            pointer-events: none;
+        }
+
+        body.motion-ready .scroll-reveal .section-title::after {
+            transform-origin: left center;
+            transform: scaleX(0.08);
+            opacity: 0;
+            transition:
+                transform 820ms var(--scroll-reveal-soft) calc(var(--reveal-delay, 0ms) + 220ms),
+                opacity 520ms ease calc(var(--reveal-delay, 0ms) + 220ms),
+                filter 820ms var(--scroll-reveal-soft) calc(var(--reveal-delay, 0ms) + 220ms);
+            filter: brightness(1.8);
+        }
+
+        body.motion-ready .scroll-reveal.is-visible .section-title::after {
+            transform: scaleX(1);
+            opacity: 1;
+            filter: none;
+        }
+
+        body.motion-ready .scroll-reveal :where(.info-item, .service-card, .tool-card) {
+            opacity: 0;
+            filter: blur(6px);
+            transform: translate3d(0, 14px, 0);
+            transition:
+                opacity 720ms var(--scroll-reveal-soft) var(--child-delay, 160ms),
+                transform 720ms var(--scroll-reveal-soft) var(--child-delay, 160ms),
+                filter 720ms var(--scroll-reveal-soft) var(--child-delay, 160ms);
+            will-change: opacity, transform, filter;
+        }
+
+        body.motion-ready .scroll-reveal.is-visible :where(.info-item, .service-card, .tool-card) {
+            opacity: 1;
+            filter: none;
+            transform: none;
+        }
+
+        /* 历史时间轴：慢速展开，线条先长出来，节点和文字再逐项进入。 */
+        body.motion-ready .timeline-panel.scroll-reveal {
+            transition-duration: 1250ms !important;
+        }
+
+        body.motion-ready .timeline-panel.scroll-reveal .timeline {
+            opacity: 0;
+            filter: blur(12px) brightness(0.82);
+            transform: translate3d(0, 26px, 0) scale(0.985);
+            transition:
+                opacity 1280ms var(--scroll-reveal-soft) 120ms,
+                transform 1280ms var(--scroll-reveal-soft) 120ms,
+                filter 1280ms var(--scroll-reveal-soft) 120ms;
+        }
+
+        body.motion-ready .timeline-panel.scroll-reveal.is-visible .timeline {
+            opacity: 1;
+            filter: none;
+            transform: none;
+        }
+
+        body.motion-ready .timeline-panel .timeline::before {
+            transform-origin: top center;
+            transform: scaleY(0);
+            opacity: 0.35;
+            transition:
+                transform 1900ms var(--scroll-reveal-ease) 420ms,
+                opacity 900ms ease 420ms;
+        }
+
+        body.motion-ready .timeline-panel.is-visible .timeline::before {
+            transform: scaleY(1);
+            opacity: 1;
+        }
+
+        body.motion-ready .timeline-panel .timeline-item {
+            opacity: 0;
+            filter: blur(7px);
+            transform: translate3d(-12px, 18px, 0);
+            transition:
+                opacity 1050ms var(--scroll-reveal-soft) var(--timeline-delay, 620ms),
+                transform 1050ms var(--scroll-reveal-soft) var(--timeline-delay, 620ms),
+                filter 1050ms var(--scroll-reveal-soft) var(--timeline-delay, 620ms) !important;
+            animation: none !important;
+            will-change: opacity, transform, filter;
+        }
+
+        body.motion-ready .timeline-panel.is-visible .timeline-item {
+            opacity: 1;
+            filter: none;
+            transform: none;
+        }
+
+        body.motion-ready .timeline-panel .timeline-marker {
+            opacity: 0;
+            transform: scale(0.42);
+            transition:
+                opacity 720ms ease var(--timeline-delay, 620ms),
+                transform 900ms var(--scroll-reveal-ease) var(--timeline-delay, 620ms),
+                box-shadow 900ms var(--scroll-reveal-ease) var(--timeline-delay, 620ms);
+        }
+
+        body.motion-ready .timeline-panel.is-visible .timeline-marker {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* 友链：独立极光/星轨风格，不再沿用上方卡片的普通蓝色玻璃动效。 */
+        .friends-section {
+            border-radius: 20px !important;
+            padding: 1.15rem !important;
+            background:
+                radial-gradient(circle at 86% 8%, var(--friend-violet), transparent 30%),
+                radial-gradient(circle at 8% 94%, var(--friend-teal), transparent 34%),
+                radial-gradient(circle at 42% -8%, var(--friend-rose), transparent 28%),
+                linear-gradient(145deg, rgba(12, 18, 32, 0.92), rgba(28, 22, 43, 0.86) 48%, rgba(10, 29, 39, 0.84)) !important;
+            border: 1px solid rgba(216, 180, 254, 0.25) !important;
+            box-shadow:
+                0 28px 72px -48px rgba(2, 6, 23, 0.98),
+                0 0 0 1px rgba(94, 234, 212, 0.055),
+                0 0 46px rgba(168, 85, 247, 0.10),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+        }
+
+        .friends-section::before {
+            content: "";
+            position: absolute;
+            inset: -42%;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.52;
+            background:
+                conic-gradient(from 168deg at 50% 50%, transparent 0deg, rgba(216, 180, 254, 0.20) 58deg, transparent 116deg, rgba(94, 234, 212, 0.16) 202deg, transparent 290deg, rgba(251, 113, 133, 0.12) 328deg, transparent 360deg);
+            transform: rotate(0deg) scale(1.08);
+            animation: none;
+        }
+
+        .friends-section.is-visible::before {
+            animation: friendsAuroraOrbit 11s linear infinite;
+        }
+
+        .friends-section::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0;
+            background:
+                linear-gradient(105deg, transparent 18%, rgba(255, 255, 255, 0.18) 46%, rgba(94, 234, 212, 0.12) 54%, transparent 74%);
+            transform: translate3d(-120%, 0, 0);
+        }
+
+        .friends-section.is-visible::after {
+            animation: friendsCometSweep 1700ms 520ms var(--scroll-reveal-soft) both;
+        }
+
+        .friends-section > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        body.motion-ready .friends-section.scroll-reveal {
+            filter: blur(18px) saturate(0.64) brightness(0.74) !important;
+            transform: translate3d(0, 56px, 0) scale(0.956) !important;
+            transition-duration: 1320ms !important;
+        }
+
+        body.motion-ready .friends-section.scroll-reveal.is-visible {
+            filter: none !important;
+            transform: none !important;
+        }
+
+        body.motion-ready .friends-section.scroll-reveal .friends-head,
+        body.motion-ready .friends-section.scroll-reveal .friend-card {
+            opacity: 0;
+            filter: blur(8px);
+            transform: translate3d(0, 18px, 0) scale(0.978);
+            transition:
+                opacity 900ms var(--scroll-reveal-soft) var(--friend-delay, 240ms),
+                transform 900ms var(--scroll-reveal-soft) var(--friend-delay, 240ms),
+                filter 900ms var(--scroll-reveal-soft) var(--friend-delay, 240ms) !important;
+            animation: none !important;
+        }
+
+        body.motion-ready .friends-section.scroll-reveal.is-visible .friends-head,
+        body.motion-ready .friends-section.scroll-reveal.is-visible .friend-card {
+            opacity: 1;
+            filter: none;
+            transform: none;
+        }
+
+        .friends-title::before {
+            content: "✧" !important;
+            color: #c4b5fd !important;
+            text-shadow: 0 0 18px rgba(196, 181, 253, 0.78), 0 0 28px rgba(94, 234, 212, 0.22) !important;
+        }
+
+        .friends-badge {
+            color: #f5f3ff !important;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(20, 184, 166, 0.16)) !important;
+            border-color: rgba(216, 180, 254, 0.28) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 10px 24px -20px rgba(168, 85, 247, 0.75) !important;
+        }
+
+        .friend-card {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+            border-radius: 18px !important;
+            background:
+                linear-gradient(135deg, rgba(24, 24, 44, 0.92), rgba(13, 41, 46, 0.84)),
+                linear-gradient(90deg, rgba(196, 181, 253, 0.20), rgba(94, 234, 212, 0.12)) !important;
+            border: 1px solid rgba(216, 180, 254, 0.20) !important;
+            box-shadow: 0 18px 42px -32px rgba(2, 6, 23, 0.96), inset 0 1px 0 rgba(255,255,255,0.055) !important;
+            transition:
+                transform 360ms var(--scroll-reveal-soft),
+                border-color 360ms var(--scroll-reveal-soft),
+                box-shadow 360ms var(--scroll-reveal-soft),
+                filter 360ms var(--scroll-reveal-soft),
+                background 360ms var(--scroll-reveal-soft) !important;
+        }
+
+        .friend-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0;
+            background:
+                radial-gradient(circle at var(--mx, 50%) var(--my, 30%), rgba(216, 180, 254, 0.24), transparent 34%),
+                radial-gradient(circle at 100% 0%, rgba(94, 234, 212, 0.14), transparent 30%);
+            transition: opacity 360ms var(--scroll-reveal-soft);
+        }
+
+        .friend-card::after {
+            content: "";
+            position: absolute;
+            top: 14%;
+            bottom: 14%;
+            left: 0;
+            width: 3px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #c4b5fd, #5eead4);
+            box-shadow: 0 0 18px rgba(196, 181, 253, 0.60), 0 0 22px rgba(94, 234, 212, 0.28);
+            opacity: 0.72;
+        }
+
+        .friend-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .friend-card:is(:hover, .is-glowing)::before {
+            opacity: 1;
+        }
+
+        .friend-card:hover {
+            transform: translateY(-5px) scale(1.012) !important;
+            border-color: rgba(216, 180, 254, 0.52) !important;
+            box-shadow:
+                0 24px 54px -36px rgba(2, 6, 23, 0.98),
+                0 0 0 1px rgba(94, 234, 212, 0.10),
+                0 0 34px rgba(168, 85, 247, 0.16) !important;
+            filter: none !important;
+        }
+
+        .friend-logo {
+            background: rgba(15, 23, 42, 0.70) !important;
+            border-color: rgba(216, 180, 254, 0.22) !important;
+            box-shadow: 0 16px 30px -22px rgba(168, 85, 247, 0.82), 0 0 0 1px rgba(94, 234, 212, 0.06) !important;
+        }
+
+        .friend-action {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.94), rgba(20, 184, 166, 0.88)) !important;
+            box-shadow: 0 14px 28px -18px rgba(168, 85, 247, 0.80), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+        }
+
+        @keyframes friendsAuroraOrbit {
+            from { transform: rotate(0deg) scale(1.08); }
+            to { transform: rotate(360deg) scale(1.08); }
+        }
+
+        @keyframes friendsCometSweep {
+            0% { opacity: 0; transform: translate3d(-120%, 0, 0); }
+            34% { opacity: 0.70; }
+            100% { opacity: 0; transform: translate3d(120%, 0, 0); }
+        }
+
+        @media (max-width: 768px) {
+            body.motion-ready :where(.opening-reveal, .scroll-reveal) {
+                transform: translate3d(0, 24px, 0) scale(0.986) !important;
+                transition-duration: 780ms !important;
+            }
+
+            body.motion-ready .timeline-panel.scroll-reveal,
+            body.motion-ready .friends-section.scroll-reveal {
+                transition-duration: 1020ms !important;
+            }
+
+            body.motion-ready .timeline-panel .timeline-item {
+                transition-duration: 880ms !important;
+            }
+        }
+
+
     </style>
 </head>
 <body>
@@ -823,12 +2516,13 @@
         </header>
 
         <main>
-            <section style="text-align: center; margin: 2rem 0; cursor: pointer;" id="quote-section">
+            <section class="quote-container" style="text-align: center; margin: 2rem 0; cursor: pointer;" id="quote-section">
                 <p id="quote-text" class="quote-fade quote-visible" style="font-size: 1.2rem; font-style: italic; color: var(--light-color);">~ 这里是金句区，每日金句支持点击或自动刷新哦 ~</p>
                 <p id="quote-author" class="quote-fade quote-visible" style="color: var(--gray-color);">网站正在开发中...</p>
             </section>
             <!-- 数据统计栏目 -->
-            <div class="stats-grid">
+            <section class="stats-section" aria-label="数据统计">
+                <div class="stats-grid">
                 <div class="stat-item">
                     <div class="stat-value">
                         <span class="stat-number" data-target="3500000">0</span>
@@ -878,7 +2572,7 @@
             <div class="info-grid">
                 <div class="info-item"><h3>年龄</h3><p id="age">16岁</p></div>
                 <div class="info-item"><h3>所在地</h3><p>浙江, 中国</p></div>
-                <div class="info-item"><h3>邮箱<button id="email-toggle" style="margin-left: 10px; background: #334155; color: var(--secondary-color); border: none; border-radius: 8px; padding: 2px 8px; cursor: pointer;">切换</button></h3><p id="email-display">lhy866@126.com </p></div>
+                <div class="info-item"><h3>邮箱<button id="email-toggle" style="margin-left: 10px; background: #334155; color: var(--secondary-color); border: none; border-radius: 8px; padding: 2px 8px; cursor: pointer;">切换</button></h3><p id="email-display"><a href="mailto:lhy866@126.com">lhy866@126.com</a></p></div>
                 <div class="info-item"><h3>QQ</h3><p>749656150</p></div>
             </div>
         </section>
@@ -1129,13 +2823,34 @@
                 </ul>
             </div>
         </section>
+        <section class="friends-section" aria-labelledby="friends-title">
+            <div class="friends-head">
+                <div class="friends-title-wrap">
+                    <h2 class="friends-title" id="friends-title">朋友们</h2>
+                    <p class="friends-desc">以下是一些优秀的朋友站点，欢迎串门访问。友谊不只是互挂链接，更是一起把互联网角落点亮。</p>
+                </div>
+                <span class="friends-badge">友情推荐</span>
+            </div>
+            <a class="friend-card" href="https://maochenhuan.cn/" target="_blank" rel="noopener" aria-label="访问毛晨欢的网站">
+                <img class="friend-logo" src="./file/friends/maochenhuan.svg" alt="毛晨欢站点图标">
+                <div class="friend-info">
+                    <div class="friend-name-row">
+                        <span class="friend-name">毛晨欢</span>
+                        <span class="friend-tag">Python 架构专家</span>
+                        <span class="friend-tag">全栈开发者</span>
+                    </div>
+                    <p class="friend-slogan">用代码构建未来，以数据驱动创新。</p>
+                    <span class="friend-url">maochenhuan.cn</span>
+                </div>
+                <span class="friend-action">访问</span>
+            </a>
+        </section>
         <footer>
             <p style="margin-top: 18px">" 保持热爱，下一站见! "</p>
             <p style="margin-top: 18px">版权所有 &copy; <span id="current-year"></span> LHY主页. 保留所有权利.</p>
         </footer>
     </div>
-
-    <script>
+    <script data-cfasync="false">
         // 设置当前年份
         document.getElementById('current-year').textContent = new Date().getFullYear();
         // 打字效果文本数组
@@ -1238,23 +2953,234 @@
                 }, 50);
             }, 500);
         }
-        document.addEventListener('DOMContentLoaded', function() {
-            // 添加点击切换功能
-            document.getElementById('quote-section').addEventListener('click', changeQuote);
-            // 每30秒自动更换一次好句
+
+        // 高级轻量动效：滚动触发为唯一权威；项目按钮区域只保留原有悬停，不被强制改样式
+        function setupPremiumMotion() {
+            if (window.__premiumMotionReady) return;
+            window.__premiumMotionReady = true;
+
+            const root = document.documentElement;
+            root.classList.add('cinematic-startup', 'deep-startup', 'reveal-ready');
+            if (window.__revealBootFallback) {
+                clearTimeout(window.__revealBootFallback);
+                window.__revealBootFallback = null;
+            }
+
+            document.body.classList.add('motion-ready');
+
+            const openingSelector = '.container > header, #quote-section, .stats-section';
+            const scrollSelector = 'main > .card, .container > section.card, .container > .friends-section, .container > footer';
+            const openingTargets = Array.from(document.querySelectorAll(openingSelector));
+            const scrollTargets = Array.from(document.querySelectorAll(scrollSelector));
+            const allRevealTargets = [...openingTargets, ...scrollTargets];
+
+            allRevealTargets.forEach((element) => {
+                element.classList.remove('startup-reveal', 'opening-reveal', 'scroll-reveal', 'is-visible');
+                element.style.removeProperty('--startup-delay');
+                element.style.removeProperty('--reveal-delay');
+                if (element.querySelector('.timeline')) {
+                    element.classList.add('timeline-panel');
+                }
+            });
+
+            document.querySelectorAll('header .person-tag, header .contact-link').forEach((element, index) => {
+                element.style.setProperty('--chip-delay', (520 + index * 45) + 'ms');
+            });
+
+            document.querySelectorAll('.stats-section .stat-item, .stats-grid .stat-item').forEach((element, index) => {
+                element.style.setProperty('--stat-delay', (220 + index * 85) + 'ms');
+            });
+
+            document.querySelectorAll('.scroll-reveal :where(.info-item, .service-card, .tool-card)').forEach((element, index) => {
+                element.style.setProperty('--child-delay', (180 + (index % 10) * 55) + 'ms');
+            });
+
+            document.querySelectorAll('.timeline-item').forEach((element, index) => {
+                element.style.setProperty('--timeline-delay', (640 + index * 210) + 'ms');
+            });
+
+            const friendsHead = document.querySelector('.friends-section .friends-head');
+            if (friendsHead) friendsHead.style.setProperty('--friend-delay', '280ms');
+            document.querySelectorAll('.friends-section .friend-card').forEach((element, index) => {
+                element.style.setProperty('--friend-delay', (560 + index * 160) + 'ms');
+            });
+
+            function isInOpeningView(element) {
+                const rect = element.getBoundingClientRect();
+                const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+                return rect.top < viewportHeight * 0.92 && rect.bottom > viewportHeight * 0.04;
+            }
+
+            function revealElement(element, delay = 0) {
+                if (!element || element.classList.contains('is-visible')) return;
+                element.style.setProperty('--reveal-delay', delay + 'ms');
+                requestAnimationFrame(() => {
+                    element.classList.add('is-visible');
+                    if (element.classList.contains('stats-section')) {
+                        window.setTimeout(animateStats, delay + 280);
+                    }
+                    window.setTimeout(() => {
+                        element.style.willChange = 'auto';
+                    }, delay + 1500);
+                });
+            }
+
+            let openingDelay = 80;
+            openingTargets.forEach((element) => {
+                if (element.classList.contains('stats-section') && !isInOpeningView(element)) {
+                    element.classList.add('scroll-reveal');
+                    scrollTargets.unshift(element);
+                    return;
+                }
+                element.classList.add('opening-reveal');
+                const delay = openingDelay;
+                openingDelay += 150;
+                window.setTimeout(() => revealElement(element, delay), 40);
+            });
+
+            scrollTargets.forEach((element) => {
+                if (!element.classList.contains('opening-reveal')) {
+                    element.classList.add('scroll-reveal');
+                }
+            });
+
+            // 子项延迟必须在 scroll-reveal 类加好之后再赋值。
+            document.querySelectorAll('.scroll-reveal :where(.info-item, .service-card, .tool-card)').forEach((element, index) => {
+                element.style.setProperty('--child-delay', (220 + (index % 12) * 65) + 'ms');
+            });
+
+            const pendingScrollTargets = Array.from(new Set(scrollTargets)).filter((element) => element.classList.contains('scroll-reveal'));
+
+            function shouldRevealOnScroll(element) {
+                const rect = element.getBoundingClientRect();
+                const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+                const visibleEnough = rect.top < viewportHeight * 0.84 && rect.bottom > viewportHeight * 0.10;
+                return visibleEnough;
+            }
+
+            function checkScrollReveals() {
+                pendingScrollTargets.forEach((element) => {
+                    if (!element.classList.contains('is-visible') && shouldRevealOnScroll(element)) {
+                        revealElement(element, 0);
+                    }
+                });
+            }
+            window.__checkScrollReveals = checkScrollReveals;
+
+            if ('IntersectionObserver' in window) {
+                const revealObserver = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            revealElement(entry.target, 0);
+                            revealObserver.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.16, rootMargin: '0px 0px -12% 0px' });
+
+                pendingScrollTargets.forEach((element) => revealObserver.observe(element));
+            } else {
+                let ticking = false;
+                const onScroll = () => {
+                    if (ticking) return;
+                    ticking = true;
+                    requestAnimationFrame(() => {
+                        checkScrollReveals();
+                        ticking = false;
+                    });
+                };
+                window.addEventListener('scroll', onScroll, { passive: true });
+                window.addEventListener('resize', onScroll, { passive: true });
+                checkScrollReveals();
+            }
+
+            const activeSelector = '.card, .stat-item, .friends-section, .friend-card, .quote-container, .contact-link, .person-tag';
+            const targets = Array.from(document.querySelectorAll(activeSelector));
+            let frame = 0;
+            let lastTarget = null;
+            let lastX = 50;
+            let lastY = 0;
+
+            function isProjectButtonArea(element) {
+                return element && element.closest && element.closest('.service-card, .tool-card');
+            }
+
+            function applyGlow(element, clientX, clientY) {
+                const rect = element.getBoundingClientRect();
+                if (!rect.width || !rect.height) return;
+                const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+                const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+                element.style.setProperty('--mx', x.toFixed(2) + '%');
+                element.style.setProperty('--my', y.toFixed(2) + '%');
+                element.classList.add('is-glowing');
+            }
+
+            function scheduleGlow(element, clientX, clientY) {
+                lastTarget = element;
+                lastX = clientX;
+                lastY = clientY;
+                if (frame) return;
+                frame = requestAnimationFrame(() => {
+                    if (lastTarget) applyGlow(lastTarget, lastX, lastY);
+                    frame = 0;
+                });
+            }
+
+            document.addEventListener('pointermove', (event) => {
+                const element = event.target.closest(activeSelector);
+                if (!element || isProjectButtonArea(event.target)) return;
+                scheduleGlow(element, event.clientX, event.clientY);
+            }, { passive: true });
+
+            targets.forEach((element) => {
+                element.addEventListener('pointerdown', (event) => {
+                    if (isProjectButtonArea(event.target)) return;
+                    applyGlow(element, event.clientX, event.clientY);
+                }, { passive: true });
+
+                element.addEventListener('pointerleave', () => {
+                    element.classList.remove('is-glowing');
+                }, { passive: true });
+
+                element.addEventListener('pointerup', () => {
+                    window.setTimeout(() => element.classList.remove('is-glowing'), 180);
+                }, { passive: true });
+
+                element.addEventListener('pointercancel', () => {
+                    element.classList.remove('is-glowing');
+                }, { passive: true });
+            });
+        }
+
+        function initializePage() {
+            const quoteSection = document.getElementById('quote-section');
+            if (quoteSection) {
+                quoteSection.addEventListener('click', changeQuote);
+            }
             setInterval(changeQuote, 10000);
-            // 启动打字效果
             setTimeout(type, 300);
             setTimeout(changeQuote, 1500);
-            // 启动数字动画效果
-            setTimeout(animateStats, 500);
-            // 计算并显示年龄
             calculateAge();
-            // 设置邮箱切换功能
             setupEmailToggle();
-        });
+            setupPremiumMotion();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePage, { once: true });
+        } else {
+            initializePage();
+        }
+
+        window.addEventListener('pageshow', function (event) {
+            document.documentElement.classList.add('cinematic-startup', 'reveal-ready');
+            if (event.persisted && window.__checkScrollReveals) {
+                requestAnimationFrame(window.__checkScrollReveals);
+            }
+        }, { passive: true });
+        let statsAnimated = false;
         // 数字动画函数
         function animateStats() {
+            if (statsAnimated) return;
+            statsAnimated = true;
             const statElements = document.querySelectorAll('.stat-number');
             statElements.forEach(element => {
                 // 特殊处理
@@ -1320,13 +3246,14 @@
                 'rnicrosoft@yeah.net'];
             let currentEmailIndex = 0;
             const emailDisplay = document.getElementById('email-display');
+            const emailLink = emailDisplay ? emailDisplay.querySelector('a') : null;
             const emailToggle = document.getElementById('email-toggle');
-            if (emailToggle) {
+            if (emailToggle && emailLink) {
                 emailToggle.addEventListener('click', function() {
                     currentEmailIndex = (currentEmailIndex + 1) % emails.length;
-                    if (emailDisplay) {
-                        emailDisplay.firstChild.textContent = emails[currentEmailIndex] + ' ';
-                    }
+                    const currentEmail = emails[currentEmailIndex];
+                    emailLink.textContent = currentEmail;
+                    emailLink.href = 'mailto:' + currentEmail;
                 });
             }
         }
