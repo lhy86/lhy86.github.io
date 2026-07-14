@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="dark light" />
-  <meta name="description" content="专业 Office 预览器：支持本地文件、拖拽和远程下载链接，自动识别 Word、Excel、PowerPoint。" />
-  <title>Office Preview Pro · Word Excel PowerPoint 文件查看器</title>
+  <meta name="description" content="LHY文件预览：专业的浏览器文件预览服务，支持 Office、PDF、图片、音频、视频、文本代码与 ZIP，自动识别真实格式。" />
+  <title>LHY文件预览 · 专业多格式文件查看器</title>
   <style>
     :root {
       --topbar-h: 60px;
@@ -355,6 +355,87 @@
     .mobile-only { display: none; }
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+
+
+    html[data-office-kind="pdf"] .brand-mark { background: linear-gradient(145deg,#ec6a6a,#bd2f39); box-shadow: 0 9px 24px rgba(207,53,65,.24); }
+    html[data-office-kind="image"] .brand-mark { background: linear-gradient(145deg,#a56ff0,#7041c8); box-shadow: 0 9px 24px rgba(118,72,198,.24); }
+    html[data-office-kind="audio"] .brand-mark { background: linear-gradient(145deg,#e05ca3,#a93378); box-shadow: 0 9px 24px rgba(185,48,126,.24); }
+    html[data-office-kind="video"] .brand-mark { background: linear-gradient(145deg,#4f9be8,#2865ba); box-shadow: 0 9px 24px rgba(40,101,186,.24); }
+    html[data-office-kind="text"] .brand-mark { background: linear-gradient(145deg,#73819a,#435066); box-shadow: 0 9px 24px rgba(67,80,102,.24); }
+    html[data-office-kind="archive"] .brand-mark { background: linear-gradient(145deg,#e3a84f,#b97816); box-shadow: 0 9px 24px rgba(185,120,22,.24); }
+    html[data-office-kind="pdf"] .type-badge { color:#ff9aa2;border-color:rgba(207,53,65,.38);background:rgba(207,53,65,.14); }
+    html[data-office-kind="image"] .type-badge { color:#c8a7ff;border-color:rgba(118,72,198,.38);background:rgba(118,72,198,.14); }
+    html[data-office-kind="audio"] .type-badge { color:#ff9dd0;border-color:rgba(185,48,126,.38);background:rgba(185,48,126,.14); }
+    html[data-office-kind="video"] .type-badge { color:#8fc5ff;border-color:rgba(40,101,186,.38);background:rgba(40,101,186,.14); }
+    html[data-office-kind="text"] .type-badge { color:#bdc8d9;border-color:rgba(115,129,154,.38);background:rgba(115,129,154,.14); }
+    html[data-office-kind="archive"] .type-badge { color:#ffd18b;border-color:rgba(185,120,22,.38);background:rgba(185,120,22,.14); }
+
+    .format-dot.pdf { background:#d94652; }
+    .format-dot.image { background:#8a5bd4; }
+    .format-dot.audio { background:#ca3f89; }
+    .format-dot.video { background:#347fd0; }
+    .format-dot.archive { background:#ca8524; }
+    .multi-format-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+
+    .pdf-host { width:100%; min-height:100%; display:grid; place-items:center; padding:0 0 26px; }
+    .pdf-page-shell { position:relative; width:max-content; max-width:none; overflow:hidden; background:#fff; box-shadow:var(--page-shadow); transform-origin:top center; }
+    #pdfCanvas { display:block; background:#fff; }
+    .pdf-text-layer { position:absolute; inset:0; overflow:hidden; line-height:1; opacity:1; transform-origin:0 0; }
+    .pdf-text-layer span { position:absolute; color:transparent; white-space:pre; transform-origin:0 0; cursor:text; }
+    .pdf-text-layer span::selection { color:transparent; background:rgba(65,120,255,.4); }
+    .pdf-text-layer span.pdf-search-hit { opacity:1; color:transparent; border-radius:2px; background:rgba(240,186,91,.72); box-shadow:0 0 0 1px rgba(147,94,0,.35); }
+    .pdf-thumb { width:100%; display:block; background:#fff; }
+
+    .image-view { width:100%; min-height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; }
+    .image-stage { display:grid; place-items:center; width:max-content; max-width:none; min-height:1px; padding:12px; border:1px solid var(--border); border-radius:12px; background-color:#d9dde4; background-image:linear-gradient(45deg,#c8cdd5 25%,transparent 25%),linear-gradient(-45deg,#c8cdd5 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#c8cdd5 75%),linear-gradient(-45deg,transparent 75%,#c8cdd5 75%); background-size:20px 20px; background-position:0 0,0 10px,10px -10px,-10px 0; box-shadow:var(--page-shadow); }
+    .image-element { display:block; max-width:none; max-height:none; transform-origin:center center; user-select:none; -webkit-user-drag:none; }
+    .asset-caption { max-width:min(900px,90vw); color:var(--text-3); font-size:11px; text-align:center; overflow-wrap:anywhere; }
+
+    .media-view { width:100%; min-height:100%; display:grid; place-items:center; }
+    .media-card { width:min(920px,calc(100vw - 72px)); padding:24px; border:1px solid var(--border); border-radius:18px; background:var(--surface-1); box-shadow:var(--panel-shadow); text-align:center; }
+    .audio-art { width:150px; height:150px; display:grid; place-items:center; margin:4px auto 22px; color:#fff; border-radius:34px; background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.34),transparent 32%),linear-gradient(145deg,#e05ca3,#6f3fd0); box-shadow:0 22px 50px rgba(120,51,160,.28); }
+    .audio-art .icon { width:64px; height:64px; stroke-width:1.4; }
+    .media-card audio { display:block; width:min(700px,100%); margin:0 auto; }
+    .media-card video { display:block; width:100%; max-height:calc(100dvh - var(--topbar-h) - var(--statusbar-h) - 190px); margin:0 auto; border-radius:12px; background:#000; box-shadow:0 12px 42px rgba(0,0,0,.32); }
+    .media-file-name { margin-top:17px; overflow:hidden; font-size:14px; font-weight:760; text-overflow:ellipsis; white-space:nowrap; }
+    .media-meta { margin-top:5px; color:var(--text-3); font-size:11px; }
+    .media-options { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:12px; margin-top:16px; color:var(--text-2); font-size:11px; }
+    .compact-select { height:30px; padding:0 25px 0 8px; color:var(--text); border:1px solid var(--border); border-radius:7px; outline:0; background:var(--input); }
+    .compact-check { display:inline-flex; width:auto; margin:0; gap:6px; }
+
+    .text-view { width:min(1480px,100%); min-height:calc(100dvh - var(--topbar-h) - var(--statusbar-h) - 72px); align-self:stretch; display:grid; grid-template-rows:auto auto minmax(0,1fr); overflow:hidden; border:1px solid var(--border); border-radius:14px; background:var(--surface-1); box-shadow:var(--panel-shadow); }
+    .text-toolbar { min-width:0; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:9px 12px; border-bottom:1px solid var(--border); background:var(--surface-2); }
+    .text-toolbar-left,.text-toolbar-actions { min-width:0; display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+    .text-toolbar-left span { color:var(--text-3); font-size:10.5px; }
+    .text-toolbar-actions { justify-content:flex-end; color:var(--text-2); font-size:10.5px; }
+    .text-notice { padding:8px 12px; color:var(--warning); border-bottom:1px solid color-mix(in srgb,var(--warning) 25%,transparent); background:color-mix(in srgb,var(--warning) 7%,var(--surface-1)); font-size:10.5px; }
+    .text-document { min-width:0; min-height:0; overflow:auto; overscroll-behavior:contain; background:var(--grid-cell); scrollbar-width:thin; scrollbar-color:var(--border-strong) transparent; }
+    .text-lines { width:max-content; min-width:100%; padding:10px 0 24px; color:var(--text); font:13px/1.65 var(--mono); counter-reset:line; }
+    .text-line { position:relative; min-height:1.65em; padding:0 18px 0 74px; white-space:pre; counter-increment:line; }
+    .text-document.wrap .text-lines { width:100%; }
+    .text-document.wrap .text-line { white-space:pre-wrap; overflow-wrap:anywhere; }
+    .text-line::before { content:attr(data-line); position:absolute; left:0; width:58px; padding-right:11px; color:var(--text-3); text-align:right; border-right:1px solid var(--grid-line); user-select:none; }
+    .text-line:hover { background:var(--hover); }
+    .text-line.search-hit { background:color-mix(in srgb,var(--warning) 16%,transparent); box-shadow:inset 3px 0 0 var(--warning); }
+    .text-line mark { background:color-mix(in srgb,var(--warning) 58%,transparent); }
+
+    .archive-view { width:min(1380px,100%); min-height:calc(100dvh - var(--topbar-h) - var(--statusbar-h) - 72px); align-self:stretch; display:grid; grid-template-rows:auto minmax(0,1fr); overflow:hidden; border:1px solid var(--border); border-radius:14px; background:var(--surface-1); box-shadow:var(--panel-shadow); }
+    .archive-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border-bottom:1px solid var(--border); background:var(--surface-2); }
+    .archive-head strong { margin-right:10px; }
+    .archive-head span { color:var(--text-3); font-size:10.5px; }
+    .archive-safety { color:var(--success)!important; }
+    .archive-table-wrap { min-width:0; min-height:0; overflow:auto; }
+    .archive-table { width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed; font-size:11px; }
+    .archive-table th,.archive-table td { padding:8px 10px; text-align:left; border-bottom:1px solid var(--border); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .archive-table th { position:sticky; z-index:2; top:0; color:var(--text-2); background:var(--grid-header); }
+    .archive-table th:nth-child(1){width:auto}.archive-table th:nth-child(2){width:110px}.archive-table th:nth-child(3),.archive-table th:nth-child(4){width:100px}.archive-table th:nth-child(5){width:90px}
+    .archive-table tbody tr:hover { background:var(--hover); }
+    .archive-table tbody tr.search-hit { background:color-mix(in srgb,var(--warning) 16%,transparent); box-shadow:inset 3px 0 0 var(--warning); }
+    .archive-name { display:flex; align-items:center; gap:8px; min-width:0; }
+    .archive-name-icon { flex:0 0 auto; width:22px; height:22px; display:grid; place-items:center; color:var(--text-3); border:1px solid var(--border); border-radius:5px; background:var(--input); font-size:10px; }
+    .archive-name-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .archive-empty { padding:44px; color:var(--text-3); text-align:center; }
+
     @media (max-width: 1080px) {
       .topbar { grid-template-columns: minmax(170px,1fr) auto; backdrop-filter: none; }
       .toolbar { position: fixed; z-index: 45; left: 50%; bottom: 45px; max-width: calc(100vw - 24px); padding: 7px; transform: translateX(-50%); border: 1px solid var(--border-strong); border-radius: 12px; background: var(--glass); box-shadow: var(--panel-shadow); backdrop-filter: blur(16px); }
@@ -384,6 +465,11 @@
       .center-card { padding: 28px 19px; }
       .format-grid { grid-template-columns: 1fr; }
       .format-card p { display: none; }
+      .multi-format-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .media-card { width:calc(100vw - 28px); padding:15px; }
+      .text-toolbar { align-items:flex-start; flex-direction:column; }
+      .text-toolbar-actions { justify-content:flex-start; }
+      .archive-table th:nth-child(2),.archive-table td:nth-child(2),.archive-table th:nth-child(4),.archive-table td:nth-child(4){display:none;}
       .formula-bar { grid-template-columns: 68px 22px minmax(0,1fr); }
       .name-box { width: 68px; }
     }
@@ -391,7 +477,7 @@
     @media print {
       @page { margin: 0; }
       html, body { overflow: visible; background: #fff; }
-      .topbar, .sidebar, .resizer, .statusbar, .toolbar, .toast-stack, .formula-bar, .sheet-tabs, .excel-notice { display: none !important; }
+      .topbar, .sidebar, .resizer, .statusbar, .toolbar, .toast-stack, .formula-bar, .sheet-tabs, .excel-notice, .text-toolbar, .archive-head, .media-options { display: none !important; }
       .app, .workspace, .viewer-area, .generic-scroller, .generic-stage, .excel-view, .excel-scroller { position: static; display: block; width: 100%; height: auto; overflow: visible; background: #fff; }
       .ppt-host > *, .word-host section.docx { box-shadow: none !important; }
       .excel-grid { font-size: 9pt; }
@@ -413,10 +499,10 @@
           <div class="brand-mark" aria-hidden="true"><span class="office-letter" id="officeLetter">O</span></div>
           <div class="file-head">
             <div class="file-title-row">
-              <div class="file-title" id="fileTitle">Office Preview Pro</div>
-              <span class="type-badge" id="typeBadge">OFFICE</span>
+              <div class="file-title" id="fileTitle">LHY文件预览</div>
+              <span class="type-badge" id="typeBadge">LHY</span>
             </div>
-            <div class="file-subtitle" id="fileSubtitle">拖入文件或打开下载链接，自动识别 Office 格式</div>
+            <div class="file-subtitle" id="fileSubtitle">拖入文件或打开下载链接，自动识别真实格式</div>
           </div>
         </div>
       </div>
@@ -461,7 +547,7 @@
         <button class="icon-btn optional-action" id="shareBtn" aria-label="复制远程直开链接" title="复制远程直开链接" disabled>
           <svg class="icon" viewBox="0 0 24 24"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="m8.7 10.6 6.6-3.2M8.7 13.4l6.6 3.2"/></svg>
         </button>
-        <button class="icon-btn optional-action" id="remoteOpenBtn" aria-label="打开下载链接" title="打开 Office 下载链接">
+        <button class="icon-btn optional-action" id="remoteOpenBtn" aria-label="打开下载链接" title="打开 文件下载链接">
           <svg class="icon" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1"/></svg>
         </button>
         <button class="icon-btn optional-action" id="printBtn" aria-label="打印" title="打印" disabled>
@@ -476,11 +562,11 @@
         <button class="icon-btn optional-action" id="infoBtn" aria-label="文件与兼容性信息" title="文件与兼容性信息">
           <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>
         </button>
-        <button class="text-btn primary" id="openBtn" title="选择 Office 文件">
+        <button class="text-btn primary" id="openBtn" title="选择文件">
           <svg class="icon" viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/><path d="M12 12v5M9.5 14.5 12 12l2.5 2.5"/></svg>
           <span class="btn-label">打开文件</span>
         </button>
-        <input id="fileInput" type="file" accept=".docx,.docm,.dotx,.dotm,.xlsx,.xlsm,.xlsb,.xls,.ods,.csv,.tsv,.xml,.txt,.pptx,.pptm,.ppsx,.ppsm,.potx,.potm,.doc,.ppt" hidden />
+        <input id="fileInput" type="file" accept=".docx,.docm,.dotx,.dotm,.xlsx,.xlsm,.xlsb,.xls,.ods,.csv,.tsv,.pptx,.pptm,.ppsx,.ppsm,.potx,.potm,.doc,.ppt,.pdf,.jpg,.jpeg,.jfif,.png,.apng,.gif,.webp,.avif,.svg,.bmp,.ico,.tif,.tiff,.mp3,.wav,.ogg,.oga,.m4a,.aac,.flac,.opus,.weba,.mp4,.webm,.ogv,.mov,.m4v,.mkv,.avi,.txt,.md,.markdown,.json,.xml,.yaml,.yml,.log,.ini,.conf,.toml,.html,.htm,.css,.js,.mjs,.cjs,.ts,.tsx,.jsx,.py,.java,.c,.h,.cpp,.hpp,.cs,.go,.rs,.php,.sql,.sh,.bat,.ps1,.srt,.vtt,.zip" hidden />
       </div>
     </header>
 
@@ -506,24 +592,27 @@
           <div class="generic-stage" id="genericStage">
             <section class="center-card" id="emptyState">
               <div class="empty-logo"><svg class="icon" viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h5M10 12h6M10 16h4"/></svg></div>
-              <h1>专业 Office 文件预览器</h1>
-              <p class="lead">拖入、选择文件，或粘贴公开下载链接。查看器会自动识别 Word、Excel 或 PowerPoint；文件解析始终在浏览器本地完成。</p>
+              <h1>LHY文件预览</h1>
+              <p class="lead">拖入、选择文件，或粘贴公开下载链接。系统会根据文件签名、MIME 与内部结构自动识别格式；本地文件不会上传到服务器。</p>
               <div class="empty-actions">
-                <button class="text-btn primary" id="emptyOpenBtn"><svg class="icon" viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/><path d="M12 12v5M9.5 14.5 12 12l2.5 2.5"/></svg>选择 Office 文件</button>
+                <button class="text-btn primary" id="emptyOpenBtn"><svg class="icon" viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/><path d="M12 12v5M9.5 14.5 12 12l2.5 2.5"/></svg>选择文件</button>
                 <button class="text-btn" id="emptyUrlBtn"><svg class="icon" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1"/></svg>打开下载链接</button>
               </div>
-              <div class="direct-link-note">直开格式：viewer.html?file=&lt;encodeURIComponent(下载地址)&gt;&amp;name=可选文件名.xlsx</div>
-              <div class="format-grid">
-                <div class="format-card"><div class="format-card-head"><span class="format-dot word"></span>Word</div><p>DOCX / DOCM / DOTX，分页、页导航、全文搜索与打印。</p></div>
-                <div class="format-card"><div class="format-card-head"><span class="format-dot excel"></span>Excel</div><p>XLSX / XLSM / XLSB / XLS / ODS / CSV，工作表、公式栏与单元格跳转。</p></div>
-                <div class="format-card"><div class="format-card-head"><span class="format-dot powerpoint"></span>PowerPoint</div><p>PPTX / PPTM / PPSX / POTX，高保真图形、表格、图表与 SmartArt。</p></div>
+              <div class="direct-link-note">直开格式：LHY文件预览.html?file=&lt;encodeURIComponent(下载地址)&gt;&amp;name=可选文件名.pdf</div>
+              <div class="format-grid multi-format-grid">
+                <div class="format-card"><div class="format-card-head"><span class="format-dot word"></span>Office</div><p>Word、Excel、PowerPoint，支持分页、工作表、缩略图、搜索与常见版式。</p></div>
+                <div class="format-card"><div class="format-card-head"><span class="format-dot pdf"></span>PDF / 文本</div><p>PDF、TXT、Markdown、JSON、XML、代码、日志与字幕文件。</p></div>
+                <div class="format-card"><div class="format-card-head"><span class="format-dot image"></span>图片</div><p>JPEG、PNG、GIF、WebP、AVIF、SVG、BMP、ICO、TIFF（依浏览器解码能力）。</p></div>
+                <div class="format-card"><div class="format-card-head"><span class="format-dot audio"></span>音频</div><p>MP3、WAV、M4A/AAC、OGG、FLAC、Opus 与 WebM Audio。</p></div>
+                <div class="format-card"><div class="format-card-head"><span class="format-dot video"></span>视频</div><p>MP4、WebM、MOV、M4V、OGV、MKV、AVI；能否播放取决于浏览器编解码器。</p></div>
+                <div class="format-card"><div class="format-card-head"><span class="format-dot archive"></span>ZIP 压缩包</div><p>安全列出目录、搜索文件名，并可按需提取单个文件，不自动执行内容。</p></div>
               </div>
-              <div class="privacy-line"><span class="privacy-chip">自动识别真实格式</span><span class="privacy-chip">宏永不执行</span><span class="privacy-chip">大文件安全限制</span><span class="privacy-chip">首次加载引擎需联网</span></div>
+              <div class="privacy-line"><span class="privacy-chip">自动识别真实格式</span><span class="privacy-chip">脚本与宏永不执行</span><span class="privacy-chip">ZIP 炸弹防护</span><span class="privacy-chip">首次加载高级引擎需联网</span></div>
             </section>
 
             <section class="loading-card" id="loadingCard" hidden aria-live="polite">
-              <h2 id="loadingTitle">正在打开 Office 文件</h2>
-              <p id="loadingMessage">正在读取文件并识别真实格式。</p>
+              <h2 id="loadingTitle">正在打开文件</h2>
+              <p id="loadingMessage">正在读取文件签名并识别真实格式。</p>
               <div class="download-progress" id="downloadProgress" hidden>
                 <div class="download-progress-head"><span id="downloadProgressText">正在下载远程文件</span><strong id="downloadProgressPercent">0%</strong></div>
                 <div class="download-progress-track"><div class="download-progress-bar" id="downloadProgressBar"></div></div>
@@ -547,6 +636,48 @@
 
             <div class="ppt-host" id="pptHost" hidden></div>
             <div class="word-shell" id="wordShell" hidden><div class="word-style-host" id="wordStyleHost"></div><div class="word-host" id="wordHost"></div></div>
+
+            <div class="pdf-host" id="pdfHost" hidden>
+              <div class="pdf-page-shell" id="pdfPageShell"><canvas id="pdfCanvas" aria-label="PDF 页面"></canvas><div class="pdf-text-layer" id="pdfTextLayer" aria-hidden="true"></div></div>
+            </div>
+
+            <section class="image-view" id="imageView" hidden>
+              <div class="image-stage" id="imageStage"><img class="image-element" id="imageElement" alt="图片预览" /></div>
+              <div class="asset-caption" id="imageCaption"></div>
+            </section>
+
+            <section class="media-view" id="mediaView" hidden>
+              <div class="media-card">
+                <div class="audio-art" id="audioArt"><svg class="icon" viewBox="0 0 24 24"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg></div>
+                <video id="videoElement" controls playsinline preload="metadata" hidden></video>
+                <audio id="audioElement" controls preload="metadata" hidden></audio>
+                <div class="media-file-name" id="mediaFileName"></div>
+                <div class="media-meta" id="mediaMeta"></div>
+                <div class="media-options">
+                  <label>速度 <select class="compact-select" id="mediaRateSelect"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label>
+                  <label class="check-row compact-check"><input id="mediaLoopCheckbox" type="checkbox" /> 循环播放</label>
+                  <button class="text-btn" id="pipBtn" type="button" hidden>画中画</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="text-view" id="textView" hidden>
+              <div class="text-toolbar">
+                <div class="text-toolbar-left"><strong id="textModeLabel">纯文本</strong><span id="textStats"></span></div>
+                <div class="text-toolbar-actions">
+                  <label>编码 <select class="compact-select" id="textEncodingSelect"><option value="auto">自动</option><option value="utf-8">UTF-8</option><option value="gb18030">GB18030</option><option value="utf-16le">UTF-16 LE</option><option value="utf-16be">UTF-16 BE</option><option value="windows-1252">Windows-1252</option></select></label>
+                  <label class="check-row compact-check"><input id="textWrapCheckbox" type="checkbox" checked /> 自动换行</label>
+                  <button class="text-btn" id="copyTextBtn" type="button">复制全文</button>
+                </div>
+              </div>
+              <div class="text-notice" id="textNotice" hidden></div>
+              <div class="text-document wrap" id="textDocument"><div class="text-lines" id="textLines"></div></div>
+            </section>
+
+            <section class="archive-view" id="archiveView" hidden>
+              <div class="archive-head"><div><strong>ZIP 压缩包内容</strong><span id="archiveStats"></span></div><span class="archive-safety">仅列出并按需提取，不执行文件</span></div>
+              <div class="archive-table-wrap"><table class="archive-table"><thead><tr><th>名称</th><th>类型</th><th>大小</th><th>压缩后</th><th></th></tr></thead><tbody id="archiveTableBody"></tbody></table></div>
+            </section>
           </div>
         </div>
 
@@ -569,19 +700,19 @@
     </footer>
   </div>
 
-  <div class="drop-overlay" id="dropOverlay" hidden><div class="drop-card"><h2>释放以打开 Office 文件</h2><p>可拖入本地文件或网页中的 Office 下载链接</p></div></div>
+  <div class="drop-overlay" id="dropOverlay" hidden><div class="drop-card"><h2>释放以使用 LHY文件预览打开</h2><p>支持本地文件，也可拖入网页中的公开下载链接</p></div></div>
   <div class="toast-stack" id="toastStack" aria-live="polite"></div>
 
   <dialog id="urlDialog">
-    <div class="dialog-head"><h2>打开 Office 下载链接</h2><button class="icon-btn" data-close-dialog="urlDialog" aria-label="关闭"><svg class="icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-head"><h2>打开文件下载链接</h2><button class="icon-btn" data-close-dialog="urlDialog" aria-label="关闭"><svg class="icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="dialog-body">
       <form class="link-form" id="urlForm">
         <label class="field-label">文件下载地址
-          <input class="url-input" id="urlInput" type="url" inputmode="url" autocomplete="url" spellcheck="false" placeholder="https://example.com/report.xlsx" required />
+          <input class="url-input" id="urlInput" type="url" inputmode="url" autocomplete="url" spellcheck="false" placeholder="https://example.com/report.pdf" required />
           <span class="field-hint">必须是最终文件地址或可跟随重定向的公开下载地址。需要登录、Cookie 或验证码的页面通常无法直接读取。</span>
         </label>
         <label class="field-label">文件名（可选）
-          <input class="url-input" id="remoteNameInput" type="text" autocomplete="off" spellcheck="false" placeholder="季度报告.xlsx" />
+          <input class="url-input" id="remoteNameInput" type="text" autocomplete="off" spellcheck="false" placeholder="资料文件.pdf" />
           <span class="field-hint">当服务器未暴露 Content-Disposition，或链接路径没有扩展名时使用。</span>
         </label>
         <label class="check-row"><input id="updateAddressCheckbox" type="checkbox" checked /> <span>成功打开后，把下载地址写入当前页面地址，便于复制分享。</span></label>
@@ -592,7 +723,7 @@
             <span class="field-hint">模板应包含 <code>{url}</code>。留空时，直接下载失败后会尝试同源 <code>/api/fetch?url=…</code>，可配合附带的 Python 服务。</span>
           </div>
         </details>
-        <div class="link-example">示例：office_preview_pro_url.html?file=https%3A%2F%2Fexample.com%2Freport.xlsx<br />推荐始终对 file 参数执行 encodeURIComponent。</div>
+        <div class="link-example">示例：LHY文件预览.html?file=https%3A%2F%2Fexample.com%2Freport.pdf<br />推荐始终对 file 参数执行 encodeURIComponent。</div>
       </form>
     </div>
     <div class="dialog-actions"><button class="text-btn" data-close-dialog="urlDialog">取消</button><button class="text-btn primary" id="urlOpenConfirmBtn" type="submit" form="urlForm">下载并打开</button></div>
@@ -601,17 +732,17 @@
   <dialog id="infoDialog">
     <div class="dialog-head"><h2>文件与兼容性信息</h2><button class="icon-btn" data-close-dialog="infoDialog" aria-label="关闭"><svg class="icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="dialog-body">
-      <dl class="info-grid" id="fileInfoGrid"><dt>文件</dt><dd>尚未加载</dd><dt>支持范围</dt><dd>Word、Excel、PowerPoint 现代格式与常见表格格式</dd><dt>处理方式</dt><dd>浏览器本地解析，不上传文件</dd></dl>
+      <dl class="info-grid" id="fileInfoGrid"><dt>服务</dt><dd>LHY文件预览</dd><dt>支持范围</dt><dd>Office、PDF、图片、音频、视频、文本代码与 ZIP</dd><dt>处理方式</dt><dd>本地文件在浏览器中解析，不上传</dd></dl>
       <div class="compat-box" id="compatBox">
         <strong>兼容性说明</strong><br />
-        本工具优先保证可读性、导航、搜索和常见版式。Office 格式规范极其庞大，特殊字体、嵌入式 OLE 对象、ActiveX、复杂域、部分矢量图与少数高级效果可能和桌面 Office 有差异。宏只读取数据，绝不执行。对像素级交付有强制要求时，应同时提供由 Office 导出的 PDF 校对版。
+        LHY文件预览优先保证安全、可读性、导航与常见版式。Office 的特殊字体、OLE、ActiveX、复杂域和少数高级效果可能与桌面软件有差异；宏和脚本不会执行。音视频能否播放取决于浏览器、系统与文件内部编解码器。PDF 由 PDF.js 渲染，图片优先使用浏览器原生解码。
       </div>
-      <p style="margin-bottom:0">使用的浏览器端组件：docx-preview、SheetJS Community Edition、pptx-renderer 与 JSZip。建议在正式内网部署时将依赖文件固定版本并本地托管。</p>
+      <p style="margin-bottom:0">使用的浏览器端组件：docx-preview、SheetJS Community Edition、pptx-renderer、PDF.js 与 JSZip。正式部署建议固定版本并本地托管依赖；跨域下载链接可配合附带的可选 Python 服务。</p>
     </div>
     <div class="dialog-actions"><button class="text-btn" data-close-dialog="infoDialog">关闭</button></div>
   </dialog>
 
-  <script>
+  <script type="text/javascript">
   (() => {
     "use strict";
 
@@ -626,6 +757,11 @@
       navTitle: $("#navTitle"), navCount: $("#navCount"), navList: $("#navList"), sideScroll: $("#sideScroll"), searchInput: $("#searchInput"), clearSearchBtn: $("#clearSearchBtn"), searchResults: $("#searchResults"),
       viewerArea: $("#viewerArea"), genericScroller: $("#genericScroller"), genericStage: $("#genericStage"), emptyState: $("#emptyState"), loadingCard: $("#loadingCard"), loadingTitle: $("#loadingTitle"), loadingMessage: $("#loadingMessage"), errorCard: $("#errorCard"), errorMessage: $("#errorMessage"), errorDetails: $("#errorDetails"),
       pptHost: $("#pptHost"), wordShell: $("#wordShell"), wordStyleHost: $("#wordStyleHost"), wordHost: $("#wordHost"),
+      pdfHost: $("#pdfHost"), pdfPageShell: $("#pdfPageShell"), pdfCanvas: $("#pdfCanvas"), pdfTextLayer: $("#pdfTextLayer"),
+      imageView: $("#imageView"), imageStage: $("#imageStage"), imageElement: $("#imageElement"), imageCaption: $("#imageCaption"),
+      mediaView: $("#mediaView"), audioArt: $("#audioArt"), audioElement: $("#audioElement"), videoElement: $("#videoElement"), mediaFileName: $("#mediaFileName"), mediaMeta: $("#mediaMeta"), mediaRateSelect: $("#mediaRateSelect"), mediaLoopCheckbox: $("#mediaLoopCheckbox"), pipBtn: $("#pipBtn"),
+      textView: $("#textView"), textModeLabel: $("#textModeLabel"), textStats: $("#textStats"), textEncodingSelect: $("#textEncodingSelect"), textWrapCheckbox: $("#textWrapCheckbox"), copyTextBtn: $("#copyTextBtn"), textNotice: $("#textNotice"), textDocument: $("#textDocument"), textLines: $("#textLines"),
+      archiveView: $("#archiveView"), archiveStats: $("#archiveStats"), archiveTableBody: $("#archiveTableBody"),
       excelView: $("#excelView"), excelScroller: $("#excelScroller"), excelScaleShell: $("#excelScaleShell"), excelNotice: $("#excelNotice"), excelGrid: $("#excelGrid"), sheetTabs: $("#sheetTabs"), nameBox: $("#nameBox"), formulaInput: $("#formulaInput"),
       prevBtn: $("#prevBtn"), nextBtn: $("#nextBtn"), positionInput: $("#positionInput"), positionTotal: $("#positionTotal"), zoomOutBtn: $("#zoomOutBtn"), zoomInBtn: $("#zoomInBtn"), zoomSelect: $("#zoomSelect"), fitBtn: $("#fitBtn"),
       searchBtn: $("#searchBtn"), downloadBtn: $("#downloadBtn"), shareBtn: $("#shareBtn"), printBtn: $("#printBtn"), fullscreenBtn: $("#fullscreenBtn"), themeBtn: $("#themeBtn"), infoBtn: $("#infoBtn"), infoDialog: $("#infoDialog"), urlDialog: $("#urlDialog"), urlForm: $("#urlForm"), urlInput: $("#urlInput"), remoteNameInput: $("#remoteNameInput"), updateAddressCheckbox: $("#updateAddressCheckbox"), proxyInput: $("#proxyInput"), urlOpenConfirmBtn: $("#urlOpenConfirmBtn"), fileInfoGrid: $("#fileInfoGrid"), compatBox: $("#compatBox"),
@@ -634,7 +770,7 @@
       steps: { download: $("#stepDownload"), detect: $("#stepDetect"), engine: $("#stepEngine"), parse: $("#stepParse"), render: $("#stepRender") }
     };
 
-    const VERSIONS = { jszip: "3.10.1", docx: "0.4.0", sheetjs: "0.20.3", pptx: "1.2.4" };
+    const VERSIONS = { jszip: "3.10.1", docx: "0.4.0", sheetjs: "0.20.3", pptx: "1.2.4", pdfjs: "6.1.200" };
     const URLS = {
       jszip: [
         `https://cdn.jsdelivr.net/npm/jszip@${VERSIONS.jszip}/dist/jszip.min.js`,
@@ -654,6 +790,11 @@
         `https://cdn.jsdelivr.net/npm/@aiden0z/pptx-renderer@${VERSIONS.pptx}/+esm`,
         `https://esm.sh/@aiden0z/pptx-renderer@${VERSIONS.pptx}/browser?bundle&target=es2022`,
         `https://esm.sh/@aiden0z/pptx-renderer@${VERSIONS.pptx}?bundle&target=es2022`
+      ],
+      pdfjs: [
+        { module:`https://cdn.jsdelivr.net/npm/pdfjs-dist@${VERSIONS.pdfjs}/build/pdf.min.mjs`, worker:`https://cdn.jsdelivr.net/npm/pdfjs-dist@${VERSIONS.pdfjs}/build/pdf.worker.min.mjs` },
+        { module:`https://unpkg.com/pdfjs-dist@${VERSIONS.pdfjs}/build/pdf.min.mjs`, worker:`https://unpkg.com/pdfjs-dist@${VERSIONS.pdfjs}/build/pdf.worker.min.mjs` },
+        { module:`https://cdn.jsdelivr.net/npm/pdfjs-dist@${VERSIONS.pdfjs}/legacy/build/pdf.min.mjs`, worker:`https://cdn.jsdelivr.net/npm/pdfjs-dist@${VERSIONS.pdfjs}/legacy/build/pdf.worker.min.mjs` }
       ]
     };
 
@@ -661,17 +802,35 @@
       kind: null, file: null, buffer: null, fileUrl: null, detection: null,
       sourceMode: "local", sourceUrl: null, remoteMeta: null, remoteController: null,
       busy: false, loadToken: 0, current: 0, total: 0, zoom: 100, fit: true, sidebarOpen: false, dragDepth: 0,
-      enginePromises: new Map(), pptModule: null, searchTimer: null, searchQuery: "", searchMarkPage: null,
+      enginePromises: new Map(), pptModule: null, pdfModule: null, pdfWorkerSrc: "", searchTimer: null, searchQuery: "", searchMarkPage: null,
       navNodes: new Map(),
       ppt: { viewer: null, presentation: null, thumbObserver: null, thumbHandles: new Map(), activeHighlight: null },
       word: { pages: [], observer: null, naturalWidth: 816 },
-      excel: { workbook: null, sheetMeta: [], selectedAddress: "A1", windowRange: null, renderedSheet: -1, lastSearchAddress: null }
+      excel: { workbook: null, sheetMeta: [], selectedAddress: "A1", windowRange: null, renderedSheet: -1, lastSearchAddress: null },
+      pdf: { document: null, loadingTask: null, renderTask: null, thumbObserver: null, textCache: new Map(), naturalWidth: 0, naturalHeight: 0 },
+      image: { width: 0, height: 0 },
+      media: { duration: 0, width: 0, height: 0 },
+      text: { encoding: "auto", detectedEncoding: "utf-8", content: "", lines: [], renderedCount: 0, truncated: false },
+      archive: { zip: null, entries: [], rowNodes: new Map() }
     };
 
     const KIND_META = {
       word: { letter: "W", badge: "WORD", title: "Word 文档", nav: "页面", unit: "页", search: "搜索 Word 文档中的文字", fit: "适合页面宽度" },
       excel: { letter: "X", badge: "EXCEL", title: "Excel 工作簿", nav: "工作表", unit: "表", search: "搜索工作簿中的单元格", fit: "适合可见区域" },
-      powerpoint: { letter: "P", badge: "PPT", title: "PowerPoint 演示文稿", nav: "幻灯片", unit: "页", search: "搜索演示文稿中的文字", fit: "适合窗口" }
+      powerpoint: { letter: "P", badge: "PPT", title: "PowerPoint 演示文稿", nav: "幻灯片", unit: "页", search: "搜索演示文稿中的文字", fit: "适合窗口" },
+      pdf: { letter: "P", badge: "PDF", title: "PDF 文档", nav: "页面", unit: "页", search: "搜索 PDF 中的文字", fit: "适合页面" },
+      image: { letter: "I", badge: "IMAGE", title: "图片", nav: "图像信息", unit: "张", search: "图片不支持全文搜索", fit: "适合窗口" },
+      audio: { letter: "A", badge: "AUDIO", title: "音频", nav: "媒体信息", unit: "项", search: "音频不支持全文搜索", fit: "适合窗口" },
+      video: { letter: "V", badge: "VIDEO", title: "视频", nav: "媒体信息", unit: "项", search: "视频不支持全文搜索", fit: "适合窗口" },
+      text: { letter: "T", badge: "TEXT", title: "文本 / 代码", nav: "文件信息", unit: "项", search: "搜索文本内容", fit: "恢复默认字号" },
+      archive: { letter: "Z", badge: "ZIP", title: "ZIP 压缩包", nav: "压缩包信息", unit: "项", search: "搜索压缩包中的文件名", fit: "适合窗口" }
+    };
+
+    const KIND_CAPABILITIES = {
+      word:{navigation:true,zoom:true,search:true,print:true,sidebar:true}, excel:{navigation:true,zoom:true,search:true,print:true,sidebar:true}, powerpoint:{navigation:true,zoom:true,search:true,print:true,sidebar:true},
+      pdf:{navigation:true,zoom:true,search:true,print:true,sidebar:true}, image:{navigation:false,zoom:true,search:false,print:true,sidebar:true},
+      audio:{navigation:false,zoom:false,search:false,print:false,sidebar:true}, video:{navigation:false,zoom:false,search:false,print:false,sidebar:true},
+      text:{navigation:false,zoom:true,search:true,print:true,sidebar:true}, archive:{navigation:false,zoom:false,search:true,print:true,sidebar:true}
     };
 
     const MAX_REMOTE_BYTES = 300 * 1024 * 1024;
@@ -690,7 +849,11 @@
       ["application/vnd.openxmlformats-officedocument.presentationml.slideshow","ppsx"],
       ["application/vnd.ms-powerpoint.slideshow.macroenabled.12","ppsm"],
       ["application/msword","doc"],
-      ["application/vnd.ms-powerpoint","ppt"]
+      ["application/vnd.ms-powerpoint","ppt"],
+      ["application/pdf","pdf"], ["image/jpeg","jpg"], ["image/png","png"], ["image/gif","gif"], ["image/webp","webp"], ["image/avif","avif"], ["image/svg+xml","svg"], ["image/bmp","bmp"], ["image/x-icon","ico"], ["image/tiff","tiff"],
+      ["audio/mpeg","mp3"], ["audio/wav","wav"], ["audio/x-wav","wav"], ["audio/ogg","ogg"], ["audio/mp4","m4a"], ["audio/aac","aac"], ["audio/flac","flac"], ["audio/webm","weba"],
+      ["video/mp4","mp4"], ["video/webm","webm"], ["video/ogg","ogv"], ["video/quicktime","mov"], ["video/x-matroska","mkv"], ["video/x-msvideo","avi"],
+      ["text/plain","txt"], ["text/markdown","md"], ["application/json","json"], ["application/xml","xml"], ["text/xml","xml"], ["text/html","html"], ["text/css","css"], ["text/javascript","js"], ["application/javascript","js"], ["application/zip","zip"], ["application/x-zip-compressed","zip"]
     ]);
 
     function formatBytes(bytes) {
@@ -711,6 +874,53 @@
     function safeUrl(url) { try { const parsed = new URL(url, location.href); return ["http:","https:","mailto:","tel:"].includes(parsed.protocol) ? parsed.href : ""; } catch { return ""; } }
     function cssEscape(value) { return window.CSS?.escape ? window.CSS.escape(String(value)) : String(value).replace(/[^a-zA-Z0-9_-]/g, ch => `\\${ch}`); }
     function columnName(index) { let n = index + 1, result = ""; while (n > 0) { const mod = (n - 1) % 26; result = String.fromCharCode(65 + mod) + result; n = Math.floor((n - 1) / 26); } return result; }
+
+    const TEXT_EXTENSIONS = new Set(["txt","md","markdown","json","xml","yaml","yml","log","ini","conf","toml","html","htm","css","js","mjs","cjs","ts","tsx","jsx","py","java","c","h","cpp","hpp","cs","go","rs","php","sql","sh","bash","zsh","bat","cmd","ps1","srt","vtt"]);
+    const IMAGE_EXTENSIONS = new Set(["jpg","jpeg","jfif","png","apng","gif","webp","avif","svg","bmp","ico","cur","tif","tiff"]);
+    const AUDIO_EXTENSIONS = new Set(["mp3","wav","ogg","oga","m4a","aac","flac","opus","weba"]);
+    const VIDEO_EXTENSIONS = new Set(["mp4","webm","ogv","mov","m4v","mkv","avi","3gp"]);
+    const OFFICE_EXTENSIONS = new Set(["docx","docm","dotx","dotm","xlsx","xlsm","xlsb","xls","ods","csv","tsv","pptx","pptm","ppsx","ppsm","potx","potm","doc","ppt"]);
+    const formatDuration = seconds => { if (!Number.isFinite(seconds) || seconds < 0) return "未知"; const s=Math.floor(seconds%60),m=Math.floor(seconds/60)%60,h=Math.floor(seconds/3600); return h?`${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`:`${m}:${String(s).padStart(2,"0")}`; };
+    const startsWithBytes = (bytes, signature, offset=0) => signature.every((value,index)=>bytes[offset+index]===value);
+    const asciiSlice = (bytes,start,end) => String.fromCharCode(...bytes.slice(start,end));
+
+    function isLikelyText(bytes) {
+      if (!bytes.length) return true;
+      let controls=0,zeros=0,printable=0;
+      for (let i=0;i<bytes.length;i++) { const b=bytes[i]; if (b===0) zeros++; if (b===9||b===10||b===13||(b>=32&&b!==127)) printable++; else controls++; }
+      if (startsWithBytes(bytes,[0xff,0xfe]) || startsWithBytes(bytes,[0xfe,0xff]) || startsWithBytes(bytes,[0xef,0xbb,0xbf])) return true;
+      return zeros < Math.max(2,bytes.length*.02) && printable / bytes.length > .82 && controls / bytes.length < .08;
+    }
+
+    function detectFastFileType(file, headBuffer) {
+      const ext=extensionOf(file.name),mime=String(file.type||"").split(";",1)[0].toLowerCase(),bytes=new Uint8Array(headBuffer),sample=new TextDecoder("utf-8",{fatal:false}).decode(bytes.slice(0,Math.min(bytes.length,65536))).trimStart();
+      const zip=startsWithBytes(bytes,[0x50,0x4b,0x03,0x04])||startsWithBytes(bytes,[0x50,0x4b,0x05,0x06])||startsWithBytes(bytes,[0x50,0x4b,0x07,0x08]);
+      const ole=startsWithBytes(bytes,[0xd0,0xcf,0x11,0xe0,0xa1,0xb1,0x1a,0xe1]);
+      if (startsWithBytes(bytes,[0x25,0x50,0x44,0x46,0x2d]) || ext==="pdf" || mime==="application/pdf") return {kind:"pdf",extension:"pdf",confidence:startsWithBytes(bytes,[0x25,0x50,0x44,0x46])?"signature":"extension/mime",requiresBuffer:true,macro:false};
+      if (startsWithBytes(bytes,[0xff,0xd8,0xff])) return {kind:"image",extension:ext||"jpg",confidence:"signature",requiresBuffer:false,macro:false};
+      if (startsWithBytes(bytes,[0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a])) return {kind:"image",extension:ext||"png",confidence:"signature",requiresBuffer:false,macro:false};
+      if (["GIF87a","GIF89a"].includes(asciiSlice(bytes,0,6))) return {kind:"image",extension:ext||"gif",confidence:"signature",requiresBuffer:false,macro:false};
+      if (asciiSlice(bytes,0,4)==="RIFF" && asciiSlice(bytes,8,12)==="WEBP") return {kind:"image",extension:ext||"webp",confidence:"signature",requiresBuffer:false,macro:false};
+      if (asciiSlice(bytes,0,2)==="BM" || startsWithBytes(bytes,[0,0,1,0]) || startsWithBytes(bytes,[0x49,0x49,0x2a,0]) || startsWithBytes(bytes,[0x4d,0x4d,0,0x2a])) return {kind:"image",extension:ext||"image",confidence:"signature",requiresBuffer:false,macro:false};
+      if (/^(?:<\?xml[^>]*>\s*)?<svg[\s>]/i.test(sample) || mime==="image/svg+xml") return {kind:"image",extension:ext||"svg",confidence:"content",requiresBuffer:false,macro:false};
+      const brand=bytes.length>=12&&asciiSlice(bytes,4,8)==="ftyp"?asciiSlice(bytes,8,16):"";
+      if (/avif|avis/i.test(brand)) return {kind:"image",extension:ext||"avif",confidence:"signature",requiresBuffer:false,macro:false};
+      if (asciiSlice(bytes,0,4)==="fLaC") return {kind:"audio",extension:ext||"flac",confidence:"signature",requiresBuffer:false,macro:false};
+      if (asciiSlice(bytes,0,3)==="ID3" || (bytes[0]===0xff && (bytes[1]&0xe0)===0xe0 && !["jpg","jpeg"].includes(ext))) return {kind:"audio",extension:ext||"mp3",confidence:"signature",requiresBuffer:false,macro:false};
+      if (asciiSlice(bytes,0,4)==="RIFF" && asciiSlice(bytes,8,12)==="WAVE") return {kind:"audio",extension:ext||"wav",confidence:"signature",requiresBuffer:false,macro:false};
+      if (asciiSlice(bytes,0,4)==="OggS") { const hay=asciiSlice(bytes,0,Math.min(bytes.length,128)); const kind=VIDEO_EXTENSIONS.has(ext)||/theora/i.test(hay)||mime.startsWith("video/")?"video":"audio"; return {kind,extension:ext||(kind==="video"?"ogv":"ogg"),confidence:"signature",requiresBuffer:false,macro:false}; }
+      if (bytes[0]===0xff && (bytes[1]&0xf6)===0xf0) return {kind:"audio",extension:ext||"aac",confidence:"signature",requiresBuffer:false,macro:false};
+      if (brand) { const kind=AUDIO_EXTENSIONS.has(ext)||mime.startsWith("audio/")||/M4A|M4B/i.test(brand)?"audio":"video"; return {kind,extension:ext||(kind==="audio"?"m4a":"mp4"),confidence:"signature",requiresBuffer:false,macro:false}; }
+      if (startsWithBytes(bytes,[0x1a,0x45,0xdf,0xa3])) { const kind=AUDIO_EXTENSIONS.has(ext)||mime.startsWith("audio/")?"audio":"video"; return {kind,extension:ext||(kind==="audio"?"weba":"webm"),confidence:"signature",requiresBuffer:false,macro:false}; }
+      if (ext==="xml" && /urn:schemas-microsoft-com:office:spreadsheet|<Workbook[\s>]/i.test(sample)) return {probe:"office-or-archive",extension:"xml",requiresBuffer:true};
+      if (zip || ole || OFFICE_EXTENSIONS.has(ext) || ["application/zip","application/x-zip-compressed"].includes(mime)) return {probe:"office-or-archive",extension:ext||"zip",requiresBuffer:true};
+      if (mime.startsWith("image/") || IMAGE_EXTENSIONS.has(ext)) return {kind:"image",extension:ext||OFFICE_MIME_EXTENSIONS.get(mime)||"image",confidence:"extension/mime",requiresBuffer:false,macro:false};
+      if (mime.startsWith("audio/") || AUDIO_EXTENSIONS.has(ext)) return {kind:"audio",extension:ext||OFFICE_MIME_EXTENSIONS.get(mime)||"audio",confidence:"extension/mime",requiresBuffer:false,macro:false};
+      if (mime.startsWith("video/") || VIDEO_EXTENSIONS.has(ext)) return {kind:"video",extension:ext||OFFICE_MIME_EXTENSIONS.get(mime)||"video",confidence:"extension/mime",requiresBuffer:false,macro:false};
+      if (TEXT_EXTENSIONS.has(ext) || mime.startsWith("text/") || ["application/json","application/xml","application/javascript"].includes(mime) || isLikelyText(bytes)) return {kind:"text",extension:ext||OFFICE_MIME_EXTENSIONS.get(mime)||"txt",confidence:TEXT_EXTENSIONS.has(ext)?"extension":"content/mime",requiresBuffer:true,macro:false};
+      return null;
+    }
+
 
     function setStatus(text, kind = "idle") {
       els.statusText.textContent = text;
@@ -735,6 +945,14 @@
       els.errorCard.hidden = name !== "error";
       els.pptHost.hidden = name !== "powerpoint";
       els.wordShell.hidden = name !== "word";
+      els.pdfHost.hidden = name !== "pdf";
+      els.imageView.hidden = name !== "image";
+      els.mediaView.hidden = !["audio","video"].includes(name);
+      els.audioElement.hidden = name !== "audio";
+      els.audioArt.hidden = name !== "audio";
+      els.videoElement.hidden = name !== "video";
+      els.textView.hidden = name !== "text";
+      els.archiveView.hidden = name !== "archive";
       els.excelView.hidden = name !== "excel";
       els.genericScroller.hidden = name === "excel";
     }
@@ -753,8 +971,8 @@
       state.kind = kind || null;
       document.documentElement.dataset.officeKind = kind || "none";
       const meta = KIND_META[kind];
-      els.officeLetter.textContent = meta?.letter || "O";
-      els.typeBadge.textContent = meta?.badge || "OFFICE";
+      els.officeLetter.textContent = meta?.letter || "L";
+      els.typeBadge.textContent = meta?.badge || "LHY";
       els.navTitle.textContent = meta?.nav || "导航";
       els.searchInput.placeholder = meta?.search || "搜索文档内容";
       els.fitBtn.title = meta?.fit || "适合窗口";
@@ -763,36 +981,37 @@
 
     function setFileHeader(file, detail = "") {
       if (!file) {
-        els.fileTitle.textContent = "Office Preview Pro";
-        els.fileSubtitle.textContent = "拖入文件或打开下载链接，自动识别 Office 格式";
+        els.fileTitle.textContent = "LHY文件预览";
+        els.fileSubtitle.textContent = "拖入文件或打开下载链接，自动识别真实格式";
         els.fileSizeStatus.textContent = "未加载文件";
         return;
       }
-      els.fileTitle.textContent = file.name || "未命名 Office 文件";
+      els.fileTitle.textContent = file.name || "未命名文件";
       els.fileSubtitle.textContent = detail || `${formatBytes(file.size)} · 正在读取`;
       els.fileSizeStatus.textContent = `${formatBytes(file.size)} · ${(state.detection?.extension || extensionOf(file.name) || "FILE").toUpperCase()}`;
     }
 
     function updateControls() {
-      const loaded = Boolean(state.kind && state.total > 0);
+      const loaded = Boolean(state.kind && state.total > 0), caps=KIND_CAPABILITIES[state.kind]||{};
       const disabled = !loaded || state.busy;
-      els.prevBtn.disabled = disabled || state.current <= 0;
-      els.nextBtn.disabled = disabled || state.current >= state.total - 1;
-      els.positionInput.disabled = disabled;
-      els.zoomOutBtn.disabled = disabled;
-      els.zoomInBtn.disabled = disabled;
-      els.zoomSelect.disabled = disabled;
-      els.fitBtn.disabled = disabled;
-      els.searchBtn.disabled = disabled;
+      els.prevBtn.disabled = disabled || !caps.navigation || state.current <= 0;
+      els.nextBtn.disabled = disabled || !caps.navigation || state.current >= state.total - 1;
+      els.positionInput.disabled = disabled || !caps.navigation;
+      els.zoomOutBtn.disabled = disabled || !caps.zoom;
+      els.zoomInBtn.disabled = disabled || !caps.zoom;
+      els.zoomSelect.disabled = disabled || !caps.zoom;
+      els.fitBtn.disabled = disabled || !caps.zoom;
+      els.searchBtn.disabled = disabled || !caps.search;
+      els.searchInput.disabled = disabled || !caps.search;
       els.downloadBtn.disabled = !state.file || state.busy;
       els.shareBtn.disabled = !state.sourceUrl || state.busy;
-      els.printBtn.disabled = disabled;
+      els.printBtn.disabled = disabled || !caps.print;
       els.fullscreenBtn.disabled = disabled;
       els.positionInput.value = loaded ? String(state.current + 1) : "0";
       els.positionTotal.textContent = loaded ? String(state.total) : "0";
       const unit = KIND_META[state.kind]?.unit || "项";
       els.navCount.textContent = `${state.total} ${unit}`;
-      els.fitBtn.classList.toggle("active", loaded && state.fit);
+      els.fitBtn.classList.toggle("active", loaded && state.fit && Boolean(caps.zoom));
       const exact = [...els.zoomSelect.options].some(option => Number(option.value) === state.zoom);
       if (exact) els.zoomSelect.value = String(state.zoom);
       else {
@@ -845,6 +1064,14 @@
     }
 
 
+
+    async function loadPdfEngine() {
+      if (state.pdfModule) return state.pdfModule;
+      if (state.enginePromises.has("pdfjs")) return state.enginePromises.get("pdfjs");
+      const promise=(async()=>{const errors=[];for(const source of URLS.pdfjs){try{const mod=await import(source.module);if(mod?.getDocument){state.pdfModule=mod;state.pdfWorkerSrc=source.worker;if(mod.GlobalWorkerOptions)mod.GlobalWorkerOptions.workerSrc=source.worker;return mod;}errors.push(`${source.module}: 模块导出不完整`);}catch(error){errors.push(`${source.module}: ${error?.message||error}`);}}throw new Error(`PDF.js 加载失败。请检查网络、内容安全策略或 CDN 访问权限。\n${errors.join("\n")}`);})();
+      state.enginePromises.set("pdfjs",promise);try{return await promise;}catch(error){state.enginePromises.delete("pdfjs");throw error;}
+    }
+
     function assertSafeZip(zip, compressedBytes) {
       let entries = 0, totalUncompressed = 0, largest = 0, knownCompressed = 0;
       for (const entry of Object.values(zip.files || {})) {
@@ -853,11 +1080,11 @@
         const uncompressed = Number(data.uncompressedSize) || 0, compressed = Number(data.compressedSize) || 0;
         totalUncompressed += uncompressed; knownCompressed += compressed; largest = Math.max(largest,uncompressed);
       }
-      if (entries > 25000) throw new Error(`Office 包含 ${entries.toLocaleString("zh-CN")} 个文件条目，超过安全上限。`);
-      if (largest > 420 * 1024 * 1024) throw new Error("Office 包中存在超过 420 MB 的单个解压资源，已阻止以避免浏览器内存耗尽。");
-      if (totalUncompressed > 1800 * 1024 * 1024) throw new Error("Office 包解压后超过 1.8 GB，已阻止以避免 ZIP 炸弹或浏览器内存耗尽。");
+      if (entries > 25000) throw new Error(`文档包含 ${entries.toLocaleString("zh-CN")} 个文件条目，超过安全上限。`);
+      if (largest > 420 * 1024 * 1024) throw new Error("文档包中存在超过 420 MB 的单个解压资源，已阻止以避免浏览器内存耗尽。");
+      if (totalUncompressed > 1800 * 1024 * 1024) throw new Error("文档包解压后超过 1.8 GB，已阻止以避免 ZIP 炸弹或浏览器内存耗尽。");
       const denominator = knownCompressed || compressedBytes || 1;
-      if (totalUncompressed > 80 * 1024 * 1024 && totalUncompressed / denominator > 320) throw new Error("Office 包压缩膨胀比异常，已按安全策略阻止打开。");
+      if (totalUncompressed > 80 * 1024 * 1024 && totalUncompressed / denominator > 320) throw new Error("文档包压缩膨胀比异常，已按安全策略阻止打开。");
     }
 
     async function detectOfficeType(file, buffer) {
@@ -881,20 +1108,21 @@
           const mime = (await mimeEntry.async("string")).trim();
           if (mime === "application/vnd.oasis.opendocument.spreadsheet") return { kind:"excel", extension: ext === "ods" ? ext : "ods", confidence:"package", macro:false };
         }
-        throw new Error("文件是 ZIP 容器，但未检测到 Word、Excel 或 PowerPoint 的核心文档结构。可能是损坏文件或其他类型的压缩包。");
+        if (wordExt || pptExt || ["xlsx","xlsm","xlsb","ods"].includes(ext)) throw new Error("文件扩展名表示 Office 文档，但 ZIP 内未检测到对应核心结构，文件可能损坏、加密或扩展名错误。");
+        return { kind:"archive", extension:"zip", confidence:"package", macro:false };
       }
 
       if (isOle) {
-        if (["docx","docm","dotx","dotm","xlsx","xlsm","xlsb","pptx","pptm","ppsx","ppsm","potx","potm"].includes(ext)) throw new Error("检测到加密或密码保护的现代 Office 文件。纯浏览器预览器无法解密，请先在桌面 Office 中取消密码保护后重试。");
+        if (["docx","docm","dotx","dotm","xlsx","xlsm","xlsb","pptx","pptm","ppsx","ppsm","potx","potm"].includes(ext)) throw new Error("检测到加密或密码保护的现代 文件。纯浏览器预览器无法解密，请先在桌面 Office 中取消密码保护后重试。");
         if (ext === "xls") return { kind:"excel", extension:"xls", confidence:"signature+extension", macro:false, legacy:true };
         if (ext === "doc") return { kind:"legacy-word", extension:"doc", confidence:"signature+extension", legacy:true };
         if (ext === "ppt") return { kind:"legacy-powerpoint", extension:"ppt", confidence:"signature+extension", legacy:true };
-        throw new Error("检测到旧版 OLE Office 文件，但缺少可识别扩展名。请使用正确的 .xls、.doc 或 .ppt 文件名，或转换为现代 OOXML 格式。");
+        throw new Error("检测到旧版 OLE 文件，但缺少可识别扩展名。请使用正确的 .xls、.doc 或 .ppt 文件名，或转换为现代 OOXML 格式。");
       }
 
       if (["csv","tsv"].includes(ext)) return { kind:"excel", extension:ext, confidence:"extension", macro:false, text:true };
       const sample = new TextDecoder("utf-8", { fatal:false }).decode(new Uint8Array(buffer,0,Math.min(buffer.byteLength,65536)));
-      if (ext === "xml" || /urn:schemas-microsoft-com:office:spreadsheet|<Workbook[\s>]/i.test(sample)) return { kind:"excel", extension:"xml", confidence:"content", macro:false, text:true };
+      if (/urn:schemas-microsoft-com:office:spreadsheet|<Workbook[\s>]/i.test(sample)) return { kind:"excel", extension:"xml", confidence:"content", macro:false, text:true };
       if (!ext || ext === "txt") {
         const lines = sample.replace(/^\uFEFF/,"").split(/\r?\n/).filter(line=>line.trim()).slice(0,20);
         const candidates = [["\t","tsv"],[",","csv"],[";","csv"],["|","csv"]];
@@ -905,7 +1133,8 @@
       if (ext === "xls") return { kind:"excel", extension:ext, confidence:"extension", macro:false, legacy:true };
       if (pptExt) throw new Error("文件扩展名表示 PowerPoint 文档，但内部不是有效的 PPTX/OOXML ZIP 包，文件可能已损坏或扩展名错误。");
       if (["doc","ppt"].includes(ext)) return { kind: ext === "doc" ? "legacy-word" : "legacy-powerpoint", extension:ext, confidence:"extension", legacy:true };
-      throw new Error("无法自动识别文件类型。请选择 Word、Excel 或 PowerPoint 支持格式。");
+      if (TEXT_EXTENSIONS.has(ext) || isLikelyText(new Uint8Array(buffer,0,Math.min(buffer.byteLength,65536)))) return { kind:"text", extension:ext||"txt", confidence:"content/extension", macro:false };
+      throw new Error("无法自动识别文件类型，或该二进制格式暂不受支持。");
     }
 
     function normalizeRemoteUrl(value) {
@@ -920,7 +1149,7 @@
 
     function sanitizeFilename(name) {
       const cleaned = String(name || "").replace(/[\\/:*?"<>|\u0000-\u001f\u007f]/g,"_").replace(/\s+/g," ").trim().replace(/^\.+/,"").slice(0,180);
-      return cleaned || "office-file";
+      return cleaned || "file";
     }
 
     function filenameFromContentDisposition(header) {
@@ -936,11 +1165,11 @@
         const parsed = new URL(url);
         for (const key of ["filename","file_name","name","download","file"]) {
           const value = parsed.searchParams.get(key);
-          if (value && /\.[a-z0-9]{2,6}(?:$|[?#])/i.test(value)) return sanitizeFilename(value.split(/[\\/]/).pop());
+          if (value && /\.[a-z0-9]{1,12}(?:$|[?#])/i.test(value)) return sanitizeFilename(value.split(/[\\/]/).pop());
         }
         const pathName = decodeURIComponent(parsed.pathname.split("/").pop() || "");
-        return sanitizeFilename(pathName || "office-file");
-      } catch { return "office-file"; }
+        return sanitizeFilename(pathName || "file");
+      } catch { return "file"; }
     }
 
     function ensureFilenameExtension(name, contentType, url) {
@@ -1040,7 +1269,7 @@
       let connectTimer = setTimeout(() => controller.abort("connect-timeout"), 30000);
       let response;
       try {
-        response = await fetch(requestUrl, { method:"GET", mode:"cors", credentials:"omit", cache:"no-store", redirect:"follow", referrerPolicy:"no-referrer", signal:controller.signal, headers:{ "Accept":"application/octet-stream,application/vnd.openxmlformats-officedocument.*,application/vnd.ms-*,text/csv,*/*;q=0.8" } });
+        response = await fetch(requestUrl, { method:"GET", mode:"cors", credentials:"omit", cache:"no-store", redirect:"follow", referrerPolicy:"no-referrer", signal:controller.signal, headers:{ "Accept":"application/octet-stream,application/pdf,image/*,audio/*,video/*,text/*,application/zip,application/vnd.openxmlformats-officedocument.*,application/vnd.ms-*,*/*;q=0.8" } });
       } finally { clearTimeout(connectTimer); }
       if (!response.ok) throw new Error(`下载服务器返回 HTTP ${response.status}${response.statusText ? ` ${response.statusText}` : ""}。`);
       const contentType = response.headers.get("content-type") || "application/octet-stream";
@@ -1048,9 +1277,10 @@
       const finalUrlHeader = response.headers.get("x-office-final-url");
       const effectiveUrl = viaProxy ? (finalUrlHeader ? decodeURIComponent(finalUrlHeader) : targetUrl) : (response.url || targetUrl);
       const buffer = await readResponseBuffer(response,controller,token);
-      const firstText = /^text\/html\b/i.test(contentType) ? new TextDecoder().decode(new Uint8Array(buffer,0,Math.min(buffer.byteLength,256))).toLowerCase() : "";
-      if (/^text\/html\b/i.test(contentType) && /<!doctype html|<html|<form|<title/.test(firstText)) throw new Error("下载地址返回了网页而不是 Office 文件，可能需要登录、验证码，或分享链接已过期。");
-      const name = ensureFilenameExtension(preferredName || dispositionName || filenameFromUrl(effectiveUrl),contentType,effectiveUrl);
+      const firstText = /^text\/html\b/i.test(contentType) ? new TextDecoder().decode(new Uint8Array(buffer,0,Math.min(buffer.byteLength,512))).toLowerCase() : "";
+      const candidateName=ensureFilenameExtension(preferredName || dispositionName || filenameFromUrl(effectiveUrl),contentType,effectiveUrl),candidateExt=extensionOf(candidateName),isAttachment=/attachment/i.test(response.headers.get("content-disposition")||"");
+      if (/^text\/html\b/i.test(contentType) && /<!doctype html|<html|<form|<title/.test(firstText) && !["html","htm"].includes(candidateExt) && !isAttachment) throw new Error("下载地址返回了网页而不是可预览文件，可能需要登录、验证码，或分享链接已过期。");
+      const name = candidateName;
       const file = new File([buffer],name,{ type:contentType, lastModified:Date.now() });
       state.remoteController = null;
       return { file, buffer, meta:{ originalUrl:targetUrl, effectiveUrl, viaProxy, contentType, contentDisposition:response.headers.get("content-disposition") || "" } };
@@ -1067,7 +1297,7 @@
       const template = configuredProxyTemplate();
       const proxyUrl = buildProxyUrl(targetUrl,template);
       if (!proxyUrl || proxyUrl === targetUrl) {
-        throw new Error(`浏览器无法直接读取该链接：${directError?.message || directError}。目标服务器需要允许 CORS；也可用附带的 Python 服务启动查看器，或配置跨域代理。`);
+        throw new Error(`浏览器无法直接读取该链接：${directError?.message || directError}。目标服务器需要允许 CORS；可使用附带的 LHY Python 服务启动查看器，或配置跨域代理。`);
       }
       setRemoteProgress(0,0,template ? "直接读取失败，正在使用自定义代理" : "直接读取失败，正在尝试同源 Python 代理");
       try { return await fetchRemoteAttempt(proxyUrl,targetUrl,{...options,viaProxy:true}); }
@@ -1128,7 +1358,7 @@
       abortRemoteDownload();
       state.sourceMode = "remote"; state.sourceUrl = target; state.remoteMeta = null;
       setBusy(true); showSurface("loading"); hideRemoteProgress(); setLoadStep("download");
-      els.loadingTitle.textContent = "正在获取远程 Office 文件";
+      els.loadingTitle.textContent = "正在获取远程文件";
       els.loadingMessage.textContent = "先尝试浏览器直接下载；若跨域受限，将自动尝试同源代理。";
       const provisionalName = sanitizeFilename(options.name || filenameFromUrl(target));
       setFileHeader({ name:provisionalName, size:0 },"远程链接 · 准备下载");
@@ -1151,7 +1381,8 @@
     function validateFile(file) {
       if (!file) throw new Error("未选择文件。");
       if (!file.size) throw new Error("文件为空。");
-      if (file.size > 300 * 1024 * 1024) throw new Error("文件超过 300 MB。为防止浏览器内存不足，请压缩媒体、拆分文件或使用桌面 Office 打开。");
+      const limit=state.sourceMode==="remote"?MAX_REMOTE_BYTES:4*1024*1024*1024;
+      if (file.size > limit) throw new Error(`文件为 ${formatBytes(file.size)}，超过当前模式的 ${formatBytes(limit)} 安全上限。`);
     }
 
     function revokeBlobUrls(root) {
@@ -1168,6 +1399,9 @@
       $$('[data-office-search-mark="1"]', els.wordHost).forEach(mark => mark.replaceWith(document.createTextNode(mark.textContent || "")));
       els.wordHost.normalize();
       $$("td.search-hit", els.excelGrid).forEach(cell => cell.classList.remove("search-hit"));
+      $$(".pdf-search-hit",els.pdfTextLayer).forEach(node=>node.classList.remove("pdf-search-hit"));
+      $$(".text-line.search-hit",els.textLines).forEach(node=>{node.classList.remove("search-hit");const index=Number(node.dataset.index);node.textContent=state.text.lines[index]||"​";});
+      $$("tr.search-hit",els.archiveTableBody).forEach(row=>row.classList.remove("search-hit"));
       state.searchMarkPage = null;
     }
 
@@ -1183,6 +1417,11 @@
       try { state.ppt.viewer?.destroy?.(); } catch {}
       state.ppt.viewer = null; state.ppt.presentation = null; els.pptHost.replaceChildren();
       state.word.observer?.disconnect(); state.word.observer = null; revokeBlobUrls(els.wordHost); els.wordHost.replaceChildren(); els.wordStyleHost.replaceChildren(); els.wordHost.style.zoom = ""; els.wordHost.style.transform = ""; els.wordHost.style.transformOrigin = ""; state.word.pages = [];
+      state.pdf.renderTask?.cancel?.(); state.pdf.renderTask=null; state.pdf.thumbObserver?.disconnect(); state.pdf.thumbObserver=null; try{state.pdf.loadingTask?.destroy?.();}catch{} try{state.pdf.document?.destroy?.();}catch{} state.pdf.loadingTask=null; state.pdf.document=null; state.pdf.textCache.clear(); els.pdfCanvas.width=1;els.pdfCanvas.height=1;els.pdfTextLayer.replaceChildren();
+      els.imageElement.removeAttribute("src");els.imageElement.style.zoom="";els.imageElement.style.transform="";state.image={width:0,height:0};
+      for(const media of [els.audioElement,els.videoElement]){try{media.pause();}catch{}media.removeAttribute("src");media.load?.();}state.media={duration:0,width:0,height:0};
+      els.textLines.replaceChildren();state.text={encoding:"auto",detectedEncoding:"utf-8",content:"",lines:[],renderedCount:0,truncated:false};
+      state.archive.zip=null;state.archive.entries=[];state.archive.rowNodes.clear();els.archiveTableBody.replaceChildren();
       els.excelScaleShell.style.zoom = ""; els.excelScaleShell.style.transform = ""; els.excelScaleShell.style.transformOrigin = ""; state.excel.workbook = null; state.excel.sheetMeta = []; state.excel.selectedAddress = "A1"; state.excel.windowRange = null; state.excel.renderedSheet = -1; els.excelGrid.replaceChildren(); els.sheetTabs.replaceChildren(); els.excelNotice.hidden = true;
       state.navNodes.clear(); els.navList.replaceChildren();
       state.current = 0; state.total = 0; state.zoom = 100; state.fit = true;
@@ -1199,45 +1438,42 @@
         state.sourceMode = options.sourceMode || "local";
         state.sourceUrl = options.sourceUrl || null;
         state.remoteMeta = options.remoteMeta || null;
-        validateFile(file); setBusy(true); cleanupDocument(); resetFileUrl(); applyKind(null); showSurface("loading"); hideRemoteProgress(); setFileHeader(file); setStatus("正在读取并识别文件", "busy");
-        els.loadingTitle.textContent = "正在打开 Office 文件"; els.loadingMessage.textContent = state.sourceMode === "remote" ? "远程文件已获取，正在验证文件签名与内部结构。" : "将根据文件签名与内部结构自动选择预览引擎。"; setLoadStep("detect");
-        const buffer = options.buffer || await file.arrayBuffer(); if (token !== state.loadToken) return false;
-        const detection = await detectOfficeType(file, buffer); if (token !== state.loadToken) return false;
-        const currentExt = extensionOf(file.name);
-        if ((!currentExt || ["bin","dat","tmp"].includes(currentExt)) && detection.extension) {
-          const base = sanitizeFilename(file.name.replace(/\.[^.]+$/,"") || "office-file");
-          file = new File([buffer],`${base}.${detection.extension}`,{type:file.type || "application/octet-stream",lastModified:file.lastModified || Date.now()});
-        }
-        if (detection.kind === "legacy-word") throw new Error("旧版 .doc 二进制格式无法在纯浏览器中可靠还原。请使用 Microsoft Word、WPS 或 LibreOffice 另存为 .docx 后再预览。");
-        if (detection.kind === "legacy-powerpoint") throw new Error("旧版 .ppt 二进制格式无法在纯浏览器中可靠还原。请使用 PowerPoint、WPS 或 LibreOffice 另存为 .pptx 后再预览。");
+        validateFile(file); setBusy(true); cleanupDocument(); resetFileUrl(); applyKind(null); showSurface("loading"); hideRemoteProgress(); setFileHeader(file); setStatus("正在读取文件签名并识别格式", "busy");
+        els.loadingTitle.textContent = "正在打开文件"; els.loadingMessage.textContent = state.sourceMode === "remote" ? "远程文件已获取，正在验证文件签名、MIME 与内部结构。" : "系统会优先读取文件头；仅在解析 PDF、Office、文本或 ZIP 时读取完整内容。"; setLoadStep("detect");
+        let buffer=options.buffer||null;
+        const head=buffer?buffer.slice(0,Math.min(buffer.byteLength,262144)):await file.slice(0,Math.min(file.size,262144)).arrayBuffer(); if(token!==state.loadToken)return false;
+        let detection=detectFastFileType(file,head);
+        if(!detection) throw new Error("无法从文件签名、MIME 或扩展名识别格式。该二进制格式暂不受支持。");
+        if(detection.requiresBuffer&&!buffer){setStatus("正在读取完整文件内容","busy");buffer=await file.arrayBuffer();if(token!==state.loadToken)return false;}
+        if(detection.probe==="office-or-archive") detection=await detectOfficeType(file,buffer); if(token!==state.loadToken)return false;
+        const currentExt=extensionOf(file.name);
+        if((!currentExt||["bin","dat","tmp","download"].includes(currentExt))&&detection.extension){const base=sanitizeFilename(file.name.replace(/\.[^.]+$/," ").trim()||"file");file=new File([file],`${base}.${detection.extension}`,{type:file.type||"application/octet-stream",lastModified:file.lastModified||Date.now()});}
+        if(detection.kind==="legacy-word")throw new Error("旧版 .doc 二进制格式无法在纯浏览器中可靠还原。请另存为 .docx 后预览。");
+        if(detection.kind==="legacy-powerpoint")throw new Error("旧版 .ppt 二进制格式无法在纯浏览器中可靠还原。请另存为 .pptx 后预览。");
 
-        state.file = file; state.buffer = buffer; state.detection = detection; state.fileUrl = URL.createObjectURL(file); applyKind(detection.kind);
-        setLoadStep("engine", ["detect"]); setStatus(`已识别为 ${KIND_META[detection.kind].title}，正在加载引擎`, "busy");
-
-        if (detection.kind === "word") await renderWord(token);
-        else if (detection.kind === "excel") await renderExcel(token);
-        else if (detection.kind === "powerpoint") await renderPowerPoint(token);
+        state.file=file;state.buffer=buffer;state.detection=detection;state.fileUrl=URL.createObjectURL(file);applyKind(detection.kind);
+        setLoadStep("engine",["detect"]);setStatus(`已识别为 ${KIND_META[detection.kind].title}，正在准备预览`,"busy");
+        if(detection.kind==="word")await renderWord(token);
+        else if(detection.kind==="excel")await renderExcel(token);
+        else if(detection.kind==="powerpoint")await renderPowerPoint(token);
+        else if(detection.kind==="pdf")await renderPdf(token);
+        else if(detection.kind==="image")await renderImage(token);
+        else if(detection.kind==="audio"||detection.kind==="video")await renderMedia(token,detection.kind);
+        else if(detection.kind==="text")await renderText(token);
+        else if(detection.kind==="archive")await renderArchive(token);
         else throw new Error("暂不支持该文件类型。");
 
-        if (token !== state.loadToken) return false;
-        setLoadStep("", ["detect","engine","parse","render"]); setBusy(false); updateFileInfo(); updateControls();
-        const meta = KIND_META[state.kind];
-        const sourceLabel = state.sourceMode === "remote" ? " · 远程链接" : "";
-        setFileHeader(file, `${state.total} ${meta.unit} · ${formatBytes(file.size)}${sourceLabel}${detection.macro ? " · 宏已禁用" : ""}`);
-        setStatus(`已打开 ${meta.title} · ${state.current + 1} / ${state.total}`, "ready");
-        if (window.innerWidth > 740) setSidebar(true);
-        toast(`${meta.title}已打开`, `${state.total} ${meta.unit} · ${formatBytes(file.size)}${sourceLabel}${detection.macro ? " · 宏不会执行" : ""}`);
-        return true;
-      } catch (error) {
-        console.error(error); if (token !== state.loadToken) return false;
-        setBusy(false); hideRemoteProgress(); showSurface("error");
-        els.errorMessage.textContent = error?.message?.split("\n")[0] || "打开文件时发生未知错误。";
-        els.errorDetails.textContent = error?.stack || error?.message || String(error);
-        setStatus("打开失败", "error"); toast("无法预览文件", els.errorMessage.textContent);
-        return false;
-      } finally {
-        if (token === state.loadToken) { els.fileInput.value = ""; updateControls(); }
-      }
+        if(token!==state.loadToken)return false;
+        setLoadStep("",["detect","engine","parse","render"]);setBusy(false);updateFileInfo();updateControls();
+        const meta=KIND_META[state.kind],sourceLabel=state.sourceMode==="remote"?" · 远程链接":"",structure=describeCurrentStructure();
+        setFileHeader(file,`${structure} · ${formatBytes(file.size)}${sourceLabel}${detection.macro?" · 宏已禁用":""}`);
+        setStatus(`已打开 ${meta.title}${state.total>1?` · ${state.current+1} / ${state.total}`:""}`,"ready");
+        if(window.innerWidth>740&&(KIND_CAPABILITIES[state.kind]?.sidebar))setSidebar(true);
+        toast(`${meta.title}已打开`,`${structure} · ${formatBytes(file.size)}${sourceLabel}${detection.macro?" · 宏不会执行":""}`);return true;
+      } catch(error) {
+        console.error(error);if(token!==state.loadToken)return false;setBusy(false);hideRemoteProgress();showSurface("error");
+        els.errorMessage.textContent=error?.message?.split("\n")[0]||"打开文件时发生未知错误。";els.errorDetails.textContent=error?.stack||error?.message||String(error);setStatus("打开失败","error");toast("无法预览文件",els.errorMessage.textContent);return false;
+      } finally { if(token===state.loadToken){els.fileInput.value="";updateControls();} }
     }
 
     function sanitizeRenderedLinks(root) {
@@ -1248,6 +1484,61 @@
       });
       $$('script,iframe,object,embed', root).forEach(node => node.remove());
     }
+
+
+    function buildSingleInfoNav(title, meta, badge="INFO") {
+      els.navList.replaceChildren();state.navNodes.clear();const button=document.createElement("button");button.type="button";button.className="nav-card current";button.innerHTML=`<div class="nav-card-row"><div class="nav-icon-box"><strong>${escapeHtml(badge.slice(0,3))}</strong></div><div class="nav-main"><div class="nav-name"></div><div class="nav-meta"></div></div><div class="nav-index">01</div></div>`;$(".nav-name",button).textContent=title;$(".nav-meta",button).textContent=meta;state.navNodes.set(0,button);els.navList.appendChild(button);
+    }
+
+    function describeCurrentStructure() {
+      if(!state.kind)return "未加载";
+      if(state.kind==="pdf")return `${state.total} 页`;
+      if(state.kind==="image")return state.image.width?`${state.image.width} × ${state.image.height} px`:"1 张图片";
+      if(state.kind==="audio")return `${formatDuration(state.media.duration)} 音频`;
+      if(state.kind==="video")return `${state.media.width||0} × ${state.media.height||0} · ${formatDuration(state.media.duration)}`;
+      if(state.kind==="text")return `${state.text.lines.length.toLocaleString("zh-CN")} 行文本`;
+      if(state.kind==="archive")return `${state.archive.entries.length.toLocaleString("zh-CN")} 个条目`;
+      return `${state.total} ${KIND_META[state.kind]?.unit||"项"}`;
+    }
+
+    async function renderPdf(token) {
+      if(!state.buffer)throw new Error("PDF 内容未读取。");if(state.file.size>650*1024*1024)throw new Error("PDF 超过 650 MB，浏览器端渲染可能耗尽内存。");
+      setLoadStep("engine",["detect"]);const pdfjs=await loadPdfEngine();if(token!==state.loadToken)return;
+      setLoadStep("parse",["detect","engine"]);setStatus("正在解析 PDF 目录、字体与页面","busy");
+      const loadingTask=pdfjs.getDocument({data:new Uint8Array(state.buffer),useSystemFonts:true,isEvalSupported:false,stopAtErrors:false});state.pdf.loadingTask=loadingTask;const doc=await loadingTask.promise;if(token!==state.loadToken)return;if(!doc.numPages)throw new Error("PDF 中没有可显示的页面。");
+      state.pdf.document=doc;state.total=doc.numPages;state.current=0;state.zoom=100;state.fit=true;showSurface("pdf");setLoadStep("render",["detect","engine","parse"]);setStatus("正在呈现 PDF 第一页并构建缩略图","busy");buildPdfNav();await renderPdfPage(0,{fit:true});updateControls();highlightCurrentNav();
+    }
+
+    async function renderPdfPage(index, options={}) {
+      const doc=state.pdf.document;if(!doc)return;const target=Math.max(0,Math.min(doc.numPages-1,Number(index)||0));state.pdf.renderTask?.cancel?.();
+      const page=await doc.getPage(target+1),base=page.getViewport({scale:1});state.pdf.naturalWidth=base.width;state.pdf.naturalHeight=base.height;
+      let scale=state.zoom/100;if(options.fit||state.fit){const aw=Math.max(260,els.genericScroller.clientWidth-74),ah=Math.max(260,els.genericScroller.clientHeight-74);scale=Math.max(.1,Math.min(4,Math.min(aw/base.width,ah/base.height)));state.zoom=Math.max(10,Math.min(400,Math.round(scale*100)));}
+      const viewport=page.getViewport({scale}),output=Math.min(2.5,window.devicePixelRatio||1),canvas=els.pdfCanvas,ctx=canvas.getContext("2d",{alpha:false});canvas.width=Math.max(1,Math.floor(viewport.width*output));canvas.height=Math.max(1,Math.floor(viewport.height*output));canvas.style.width=`${viewport.width}px`;canvas.style.height=`${viewport.height}px`;els.pdfPageShell.style.width=`${viewport.width}px`;els.pdfPageShell.style.height=`${viewport.height}px`;els.pdfTextLayer.style.width=`${viewport.width}px`;els.pdfTextLayer.style.height=`${viewport.height}px`;ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);
+      const task=page.render({canvasContext:ctx,viewport,transform:output!==1?[output,0,0,output,0,0]:null,background:"white"});state.pdf.renderTask=task;await task.promise;state.pdf.renderTask=null;
+      let textContent=state.pdf.textCache.get(target);if(!textContent){try{textContent=await page.getTextContent({includeMarkedContent:false,disableNormalization:false});state.pdf.textCache.set(target,textContent);}catch{textContent={items:[]};}}
+      renderPdfTextLayer(textContent,viewport);state.current=target;if(options.query)highlightPdfText(options.query);setStatus(`PDF · 第 ${target+1} / ${state.total} 页`,"ready");
+    }
+
+    function renderPdfTextLayer(textContent,viewport){const layer=els.pdfTextLayer;layer.replaceChildren();const util=state.pdfModule?.Util;if(!util)return;for(const item of textContent?.items||[]){if(!item?.str)continue;const tx=util.transform(viewport.transform,item.transform),angle=Math.atan2(tx[1],tx[0]),fontHeight=Math.hypot(tx[2],tx[3]),span=document.createElement("span");span.textContent=item.str;span.dataset.text=item.str;span.style.left=`${tx[4]}px`;span.style.top=`${tx[5]-fontHeight}px`;span.style.fontSize=`${fontHeight}px`;span.style.fontFamily="sans-serif";span.style.transform=`rotate(${angle}rad)`;layer.appendChild(span);}}
+    function highlightPdfText(term){const q=String(term||"").toLocaleLowerCase();if(!q)return;for(const span of $$('span',els.pdfTextLayer))if((span.dataset.text||span.textContent||"").toLocaleLowerCase().includes(q))span.classList.add("pdf-search-hit");}
+
+    function buildPdfNav(){els.navList.replaceChildren();state.navNodes.clear();state.pdf.thumbObserver?.disconnect();const observer=new IntersectionObserver(async entries=>{for(const entry of entries){if(!entry.isIntersecting)continue;const box=entry.target,index=Number(box.dataset.index);observer.unobserve(box);try{const page=await state.pdf.document.getPage(index+1),base=page.getViewport({scale:1}),scale=Math.max(.08,(box.clientWidth||190)/base.width),viewport=page.getViewport({scale}),canvas=document.createElement("canvas"),ctx=canvas.getContext("2d",{alpha:false}),output=Math.min(1.5,window.devicePixelRatio||1);canvas.className="pdf-thumb";canvas.width=Math.max(1,Math.floor(viewport.width*output));canvas.height=Math.max(1,Math.floor(viewport.height*output));canvas.style.width=`${viewport.width}px`;canvas.style.height=`${viewport.height}px`;box.replaceChildren(canvas);await page.render({canvasContext:ctx,viewport,transform:output!==1?[output,0,0,output,0,0]:null,background:"white"}).promise;}catch(error){box.textContent="缩略图不可用";console.warn(error);}}},{root:els.sideScroll,rootMargin:"280px 0px",threshold:.01});state.pdf.thumbObserver=observer;const fragment=document.createDocumentFragment();for(let i=0;i<state.total;i++){const button=document.createElement("button");button.type="button";button.className="nav-card thumb-card";button.dataset.index=String(i);button.innerHTML=`<div class="thumb-preview" data-index="${i}"><span class="thumb-placeholder">第 ${i+1} 页</span></div><div class="thumb-meta"><span>${String(i+1).padStart(2,"0")}</span><span>PDF</span></div>`;button.addEventListener("click",()=>navigateTo(i));state.navNodes.set(i,button);fragment.appendChild(button);observer.observe($(".thumb-preview",button));}els.navList.appendChild(fragment);}
+
+    async function renderImage(token){setLoadStep("engine",["detect"]);setLoadStep("parse",["detect","engine"]);showSurface("image");els.imageElement.src=state.fileUrl;els.imageElement.alt=state.file.name;await new Promise((resolve,reject)=>{if(els.imageElement.complete&&els.imageElement.naturalWidth)return resolve();const timer=setTimeout(()=>reject(new Error("图片解码超时，浏览器可能不支持该格式。")),15000);els.imageElement.onload=()=>{clearTimeout(timer);resolve();};els.imageElement.onerror=()=>{clearTimeout(timer);reject(new Error("浏览器无法解码此图片。TIFF、HEIC 等格式在部分浏览器中不受支持。"));};});if(token!==state.loadToken)return;state.image.width=els.imageElement.naturalWidth;state.image.height=els.imageElement.naturalHeight;state.total=1;state.current=0;state.zoom=100;state.fit=true;els.imageCaption.textContent=`${state.file.name} · ${state.image.width} × ${state.image.height} px · ${formatBytes(state.file.size)}`;buildSingleInfoNav(state.file.name,`${state.image.width} × ${state.image.height} px · ${formatBytes(state.file.size)}`,"IMG");setLoadStep("render",["detect","engine","parse"]);await fitToWindow();updateControls();}
+
+    async function waitMediaMetadata(media){return new Promise((resolve,reject)=>{const done=()=>{cleanup();resolve();},fail=()=>{cleanup();reject(new Error("浏览器无法解码该媒体文件或不支持其内部编解码器。"));},cleanup=()=>{clearTimeout(timer);media.removeEventListener("loadedmetadata",done);media.removeEventListener("error",fail);},timer=setTimeout(()=>{cleanup();if(media.readyState>=1)resolve();else reject(new Error("媒体元数据读取超时。"));},15000);media.addEventListener("loadedmetadata",done,{once:true});media.addEventListener("error",fail,{once:true});media.load();});}
+    async function renderMedia(token,kind){setLoadStep("engine",["detect"]);setLoadStep("parse",["detect","engine"]);showSurface(kind);const media=kind==="audio"?els.audioElement:els.videoElement;media.src=state.fileUrl;media.loop=els.mediaLoopCheckbox.checked;media.playbackRate=Number(els.mediaRateSelect.value)||1;await waitMediaMetadata(media);if(token!==state.loadToken)return;state.media.duration=media.duration;state.media.width=kind==="video"?media.videoWidth:0;state.media.height=kind==="video"?media.videoHeight:0;state.total=1;state.current=0;state.zoom=100;state.fit=true;els.mediaFileName.textContent=state.file.name;els.mediaMeta.textContent=kind==="video"?`${state.media.width} × ${state.media.height} · ${formatDuration(state.media.duration)} · ${formatBytes(state.file.size)}`:`${formatDuration(state.media.duration)} · ${formatBytes(state.file.size)}`;els.pipBtn.hidden=kind!=="video"||!document.pictureInPictureEnabled;buildSingleInfoNav(state.file.name,els.mediaMeta.textContent,kind==="video"?"VID":"AUD");setLoadStep("render",["detect","engine","parse"]);updateControls();}
+
+    function detectTextEncoding(bytes,requested="auto"){if(requested!=="auto")return requested;if(startsWithBytes(bytes,[0xef,0xbb,0xbf]))return"utf-8";if(startsWithBytes(bytes,[0xff,0xfe]))return"utf-16le";if(startsWithBytes(bytes,[0xfe,0xff]))return"utf-16be";try{new TextDecoder("utf-8",{fatal:true}).decode(bytes);return"utf-8";}catch{}return"gb18030";}
+    function prettyXml(value){try{return value.replace(/>\s*</g,"><").replace(/(>)(<)(\/*)/g,"$1\n$2$3").split("\n").reduce((out,line)=>{let indent=0;if(/^<\//.test(line))out.level=Math.max(0,out.level-1);out.lines.push("  ".repeat(out.level)+line);if(/^<[^!?/][^>]*[^/]?>$/.test(line)&&!/<\/[^>]+>$/.test(line))out.level++;return out;},{level:0,lines:[]}).lines.join("\n");}catch{return value;}}
+    function textModeName(ext){const map={json:"JSON",md:"Markdown",markdown:"Markdown",xml:"XML",yaml:"YAML",yml:"YAML",html:"HTML 源码",htm:"HTML 源码",css:"CSS",js:"JavaScript",mjs:"JavaScript",cjs:"JavaScript",ts:"TypeScript",tsx:"TSX",jsx:"JSX",py:"Python",java:"Java",c:"C",h:"C Header",cpp:"C++",hpp:"C++ Header",cs:"C#",go:"Go",rs:"Rust",php:"PHP",sql:"SQL",sh:"Shell",bat:"Batch",ps1:"PowerShell",srt:"SRT 字幕",vtt:"WebVTT 字幕",log:"日志"};return map[ext]||"纯文本";}
+    function decodeTextBuffer(buffer,requested="auto"){const bytes=new Uint8Array(buffer),encoding=detectTextEncoding(bytes,requested);let content;try{content=new TextDecoder(encoding,{fatal:false}).decode(bytes);}catch{content=new TextDecoder("utf-8",{fatal:false}).decode(bytes);}content=content.replace(/^\uFEFF/,"");const ext=state.detection?.extension||extensionOf(state.file?.name);if(ext==="json"){try{content=JSON.stringify(JSON.parse(content),null,2);}catch{}}else if(ext==="xml")content=prettyXml(content);return{content,encoding};}
+    function renderTextLines(){const all=state.text.lines,maxLines=20000,maxChars=6_000_000;let chars=0,count=0,fragment=document.createDocumentFragment();for(let i=0;i<all.length&&count<maxLines;i++){const line=all[i],next=chars+line.length+1;if(next>maxChars)break;const div=document.createElement("div");div.className="text-line";div.dataset.index=String(i);div.dataset.line=String(i+1);div.textContent=line||"\u200b";fragment.appendChild(div);chars=next;count++;}els.textLines.replaceChildren(fragment);state.text.renderedCount=count;state.text.truncated=count<all.length;els.textNotice.hidden=!state.text.truncated;els.textNotice.textContent=state.text.truncated?`性能保护：当前显示前 ${count.toLocaleString("zh-CN")} 行；搜索仍可覆盖已解码全文。`:"";els.textStats.textContent=`${all.length.toLocaleString("zh-CN")} 行 · ${state.text.detectedEncoding.toUpperCase()}${state.text.truncated?" · 已截断显示":""}`;}
+    async function renderText(token){if(!state.buffer)throw new Error("文本内容未读取。");if(state.file.size>80*1024*1024)throw new Error("文本文件超过 80 MB，为避免浏览器卡顿已阻止预览。");setLoadStep("engine",["detect"]);setLoadStep("parse",["detect","engine"]);showSurface("text");const decoded=decodeTextBuffer(state.buffer,state.text.encoding);state.text.detectedEncoding=decoded.encoding;state.text.content=decoded.content;state.text.lines=decoded.content.split(/\r\n|\n|\r/);state.total=1;state.current=0;state.zoom=100;state.fit=true;els.textEncodingSelect.value=state.text.encoding;els.textModeLabel.textContent=textModeName(state.detection.extension);renderTextLines();buildSingleInfoNav(state.file.name,`${state.text.lines.length.toLocaleString("zh-CN")} 行 · ${decoded.encoding.toUpperCase()} · ${formatBytes(state.file.size)}`,"TXT");setLoadStep("render",["detect","engine","parse"]);updateControls();}
+
+    async function renderArchive(token){if(!state.buffer)throw new Error("ZIP 内容未读取。");if(state.file.size>500*1024*1024)throw new Error("ZIP 超过 500 MB，浏览器端解压索引可能耗尽内存。");setLoadStep("engine",["detect"]);const JSZip=await loadJSZip();if(token!==state.loadToken)return;setLoadStep("parse",["detect","engine"]);const zip=await JSZip.loadAsync(state.buffer,{checkCRC32:false,createFolders:false});assertSafeZip(zip,state.file.size);const entries=Object.values(zip.files).map(entry=>{const data=entry._data||{};return{name:entry.name,dir:entry.dir,entry,size:Number(data.uncompressedSize)||0,compressed:Number(data.compressedSize)||0};}).sort((a,b)=>Number(b.dir)-Number(a.dir)||a.name.localeCompare(b.name,"zh-CN"));state.archive.zip=zip;state.archive.entries=entries;state.total=1;state.current=0;state.zoom=100;state.fit=true;showSurface("archive");setLoadStep("render",["detect","engine","parse"]);renderArchiveTable();const totalSize=entries.reduce((sum,item)=>sum+item.size,0);els.archiveStats.textContent=`${entries.length.toLocaleString("zh-CN")} 个条目 · 解压后约 ${formatBytes(totalSize)}`;buildSingleInfoNav(state.file.name,`${entries.length.toLocaleString("zh-CN")} 个条目 · ${formatBytes(state.file.size)}`,"ZIP");updateControls();}
+    function renderArchiveTable(){els.archiveTableBody.replaceChildren();state.archive.rowNodes.clear();const fragment=document.createDocumentFragment(),limit=5000,entries=state.archive.entries.slice(0,limit);entries.forEach((item,index)=>{const tr=document.createElement("tr");tr.dataset.index=String(index);const name=document.createElement("td"),type=document.createElement("td"),size=document.createElement("td"),compressed=document.createElement("td"),action=document.createElement("td"),wrap=document.createElement("div");wrap.className="archive-name";const icon=document.createElement("span");icon.className="archive-name-icon";icon.textContent=item.dir?"D":"F";const label=document.createElement("span");label.className="archive-name-text";label.textContent=item.name;label.title=item.name;wrap.append(icon,label);name.appendChild(wrap);type.textContent=item.dir?"文件夹":(extensionOf(item.name)||"文件").toUpperCase();size.textContent=item.dir?"—":formatBytes(item.size);compressed.textContent=item.dir?"—":formatBytes(item.compressed);if(!item.dir){const button=document.createElement("button");button.type="button";button.className="text-btn";button.dataset.extract=String(index);button.textContent="提取";action.appendChild(button);}tr.append(name,type,size,compressed,action);fragment.appendChild(tr);state.archive.rowNodes.set(index,tr);});els.archiveTableBody.appendChild(fragment);if(!entries.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.className="archive-empty";td.textContent="压缩包为空";tr.appendChild(td);els.archiveTableBody.appendChild(tr);}if(state.archive.entries.length>limit)toast("压缩包条目较多",`列表仅显示前 ${limit.toLocaleString("zh-CN")} 项。`);}
+    async function extractArchiveEntry(index){const item=state.archive.entries[index];if(!item||item.dir)return;try{const blob=await item.entry.async("blob"),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=sanitizeFilename(item.name.split("/").pop()||"file");document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(error){toast("提取失败",error?.message||String(error));}}
 
     async function renderWord(token) {
       setLoadStep("engine", ["detect"]); const docx = await loadWordEngine(); if (token !== state.loadToken) return;
@@ -1491,7 +1782,10 @@
 
     async function navigateTo(index, options = {}) {
       if (!state.kind || state.busy) return; const target=Math.max(0,Math.min(state.total-1,Number(index)||0));
-      if (state.kind === "powerpoint") {
+      if (state.kind === "pdf") {
+        if(target===state.current&&!options.force)return;setBusy(true);clearSearchMarks();setStatus(`正在呈现 PDF 第 ${target+1} 页`,"busy");
+        try{await renderPdfPage(target,{fit:state.fit,query:options.query});}catch(error){if(error?.name!=="RenderingCancelledException"){toast("PDF 页面呈现失败",error?.message||String(error));setStatus("呈现失败","error");}}finally{setBusy(false);highlightCurrentNav();updateControls();}
+      } else if (state.kind === "powerpoint") {
         if (target===state.current && !options.force) return; setBusy(true); clearSearchMarks(); setStatus(`正在呈现第 ${target+1} 页`,"busy");
         try { await state.ppt.viewer.renderSlide(target); sanitizeRenderedLinks(els.pptHost); state.current=target; if(options.searchResult){await nextFrame();state.ppt.activeHighlight=await state.ppt.viewer.highlightSearchResult?.(options.searchResult,{borderColor:"#f0ba5b",backgroundColor:"rgba(240,186,91,.22)",borderRadius:5,borderWidth:2,padding:3,boxShadow:"0 0 0 3px rgba(240,186,91,.14)"});} setStatus(`PowerPoint · 第 ${target+1} / ${state.total} 页`,"ready"); }
         catch(error){toast("幻灯片呈现失败",error?.message||String(error));setStatus("呈现失败","error");} finally{setBusy(false);highlightCurrentNav();updateControls();}
@@ -1512,17 +1806,21 @@
     }
 
     async function setZoom(value, fit = false) {
-      if (!state.kind || state.busy) return; const next=Math.max(10,Math.min(400,Math.round(Number(value)||100))); state.fit=Boolean(fit);
+      if (!state.kind) return; const next=Math.max(10,Math.min(400,Math.round(Number(value)||100))); state.fit=Boolean(fit);
       try {
         if (state.kind === "powerpoint") { if(fit){await state.ppt.viewer.setFitMode("contain");state.zoom=100;}else{await state.ppt.viewer.setFitMode("none");await state.ppt.viewer.setZoom(next);state.zoom=next;} }
         else if (state.kind === "word") { state.zoom=fit?await calculateWordFit():next; setVisualZoom(els.wordHost,state.zoom,"top center"); }
         else if (state.kind === "excel") { state.zoom=fit?await calculateExcelFit():next; setVisualZoom(els.excelScaleShell,state.zoom,"top left"); }
+        else if (state.kind === "pdf") { state.zoom=fit?100:next; await renderPdfPage(state.current,{fit}); }
+        else if (state.kind === "image") { state.zoom=fit?await calculateImageFit():next; setVisualZoom(els.imageElement,state.zoom,"center center"); }
+        else if (state.kind === "text") { state.zoom=fit?100:next; els.textLines.style.fontSize=`${Math.max(8,13*state.zoom/100)}px`; }
         updateControls(); setStatus(fit?KIND_META[state.kind].fit:`缩放 ${state.zoom}%`,"ready");
       } catch(error){toast("缩放失败",error?.message||String(error));}
     }
 
     async function calculateWordFit() { setVisualZoom(els.wordHost,100,"top center"); await nextFrame(); const width=Math.max(...state.word.pages.map(page=>page.offsetWidth||0),state.word.naturalWidth||816); const available=Math.max(260,els.genericScroller.clientWidth-54); return Math.max(25,Math.min(200,Math.floor(available/width*100))); }
     async function calculateExcelFit() { setVisualZoom(els.excelScaleShell,100,"top left"); await nextFrame(); const width=Math.max(1,els.excelGrid.offsetWidth); const available=Math.max(260,els.excelScroller.clientWidth-20); return Math.max(25,Math.min(150,Math.floor(available/width*100))); }
+    async function calculateImageFit(){setVisualZoom(els.imageElement,100,"center center");await nextFrame();const w=Math.max(1,state.image.width),h=Math.max(1,state.image.height),aw=Math.max(200,els.genericScroller.clientWidth-90),ah=Math.max(200,els.genericScroller.clientHeight-110);return Math.max(5,Math.min(400,Math.floor(Math.min(aw/w,ah/h,1)*100)));}
     async function fitToWindow() { return setZoom(100,true); }
     function stepZoom(direction) { const presets=[25,33,50,67,75,90,100,110,125,150,175,200,250,300,400], current=state.fit?state.zoom:state.zoom; setZoom(direction>0?(presets.find(v=>v>current)??400):([...presets].reverse().find(v=>v<current)??25)); }
 
@@ -1534,7 +1832,7 @@
     }
 
     function performSearch(query) {
-      clearTimeout(state.searchTimer); state.searchTimer=setTimeout(async()=>{const term=String(query||"").trim();els.clearSearchBtn.hidden=!term;if(!term||!state.kind){els.searchResults.hidden=true;els.searchResults.replaceChildren();state.searchQuery="";clearSearchMarks();return;}state.searchQuery=term;setStatus(`正在搜索“${term}”`,"busy");try{let results=[];if(state.kind==="powerpoint")results=searchPpt(term);else if(state.kind==="word")results=searchWord(term);else if(state.kind==="excel")results=await searchExcel(term);renderSearchResults(term,results.slice(0,120),results.length);setStatus(`搜索完成 · ${results.length} 个匹配`,"ready");}catch(error){console.error(error);els.searchResults.hidden=false;els.searchResults.innerHTML=`<div class="search-summary">搜索失败：${escapeHtml(error?.message||String(error))}</div>`;setStatus("搜索失败","error");}},230);
+      clearTimeout(state.searchTimer); state.searchTimer=setTimeout(async()=>{const term=String(query||"").trim();els.clearSearchBtn.hidden=!term;if(!term||!state.kind){els.searchResults.hidden=true;els.searchResults.replaceChildren();state.searchQuery="";clearSearchMarks();return;}state.searchQuery=term;setStatus(`正在搜索“${term}”`,"busy");try{let results=[];if(state.kind==="powerpoint")results=searchPpt(term);else if(state.kind==="word")results=searchWord(term);else if(state.kind==="excel")results=await searchExcel(term);else if(state.kind==="pdf")results=await searchPdf(term);else if(state.kind==="text")results=searchText(term);else if(state.kind==="archive")results=searchArchive(term);renderSearchResults(term,results.slice(0,120),results.length);setStatus(`搜索完成 · ${results.length} 个匹配`,"ready");}catch(error){console.error(error);els.searchResults.hidden=false;els.searchResults.innerHTML=`<div class="search-summary">搜索失败：${escapeHtml(error?.message||String(error))}</div>`;setStatus("搜索失败","error");}},230);
     }
 
     function searchPpt(term) { return state.ppt.viewer?.searchText(term,{matchCase:false,wholeWord:false,snippetRadius:58}) || []; }
@@ -1544,27 +1842,33 @@
       for(let s=0;s<wb.SheetNames.length&&results.length<500;s++){const name=wb.SheetNames[s],ws=wb.Sheets[name];let range;try{range=XLSX.utils.decode_range(ws["!ref"]||"A1");}catch{continue;}for(let r=range.s.r;r<=range.e.r&&results.length<500;r++){for(let c=range.s.c;c<=range.e.c&&results.length<500;c++){if(++inspected>MAX_INSPECT)return results;if(inspected%20000===0)await new Promise(resolve=>setTimeout(resolve,0));const cell=getExcelCell(ws,r,c,XLSX);if(!cell)continue;const content=renderCellContent(cell,XLSX),hay=`${content.text} ${content.formula} ${content.raw}`.toLocaleLowerCase();if(hay.includes(q))results.push({kind:"excel",unitIndex:s,address:XLSX.utils.encode_cell({r,c}),text:content.formula?`${content.formula} → ${content.text}`:content.text,sheetName:name});}}}return results;
     }
 
+
+    async function searchPdf(term){const q=term.toLocaleLowerCase(),results=[];for(let i=0;i<state.total&&results.length<500;i++){let content=state.pdf.textCache.get(i);if(!content){const page=await state.pdf.document.getPage(i+1);content=await page.getTextContent({includeMarkedContent:false,disableNormalization:false});state.pdf.textCache.set(i,content);}const text=(content.items||[]).map(item=>item.str||"").join(" ").replace(/\s+/g," ").trim(),lower=text.toLocaleLowerCase();let from=0,pos;while((pos=lower.indexOf(q,from))!==-1&&results.length<500){results.push({kind:"pdf",unitIndex:i,text:text.slice(Math.max(0,pos-55),Math.min(text.length,pos+q.length+75))});from=pos+Math.max(1,q.length);}if(i%12===0)await new Promise(resolve=>setTimeout(resolve,0));}return results;}
+    function searchText(term){const q=term.toLocaleLowerCase(),results=[];for(let i=0;i<state.text.lines.length&&results.length<500;i++){const line=state.text.lines[i],lower=line.toLocaleLowerCase();let from=0,pos;while((pos=lower.indexOf(q,from))!==-1&&results.length<500){results.push({kind:"text",lineIndex:i,text:line.slice(Math.max(0,pos-35),Math.min(line.length,pos+q.length+70))});from=pos+Math.max(1,q.length);}}return results;}
+    function searchArchive(term){const q=term.toLocaleLowerCase(),results=[];state.archive.entries.forEach((item,index)=>{if(results.length<500&&item.name.toLocaleLowerCase().includes(q))results.push({kind:"archive",rowIndex:index,name:item.name,text:`${item.name} · ${item.dir?"文件夹":formatBytes(item.size)}`});});return results;}
+    function focusTextResult(result,term){const index=result.lineIndex,node=$(`.text-line[data-index="${index}"]`,els.textLines);if(!node){toast("结果不在当前显示窗口",`第 ${index+1} 行超出性能保护的显示范围。`);return;}clearSearchMarks();node.classList.add("search-hit");node.innerHTML=highlightedSnippet(state.text.lines[index]||"",term);node.scrollIntoView({block:"center",inline:"nearest"});setStatus(`文本 · 第 ${index+1} 行`,"ready");}
+    function focusArchiveResult(result){const node=state.archive.rowNodes.get(result.rowIndex);if(!node){toast("结果未显示","该条目超出当前 5000 项显示上限。");return;}clearSearchMarks();node.classList.add("search-hit");node.scrollIntoView({block:"center",inline:"nearest"});setStatus(`ZIP · ${result.name}`,"ready");}
+
     function highlightedSnippet(text,term){const clean=String(text||"").replace(/\s+/g," ").trim(),safe=escapeHtml(clean),escaped=term.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");try{return safe.replace(new RegExp(escaped,"ig"),m=>`<mark>${m}</mark>`);}catch{return safe;}}
 
     function renderSearchResults(term,results,total){els.searchResults.replaceChildren();els.searchResults.hidden=false;const summary=document.createElement("div");summary.className="search-summary";summary.textContent=total>results.length?`找到 ${total} 个匹配，显示前 ${results.length} 个`:`找到 ${total} 个匹配`;els.searchResults.appendChild(summary);if(!results.length){const empty=document.createElement("div");empty.className="search-summary";empty.textContent="没有找到相关内容。";els.searchResults.appendChild(empty);return;}
-      results.forEach(result=>{const button=document.createElement("button");button.type="button";button.className="search-result";let location="";if(state.kind==="powerpoint")location=`第 ${result.slideIndex+1} 页`;else if(state.kind==="word")location=`第 ${result.unitIndex+1} 页`;else location=`${result.sheetName}!${result.address}`;button.innerHTML=`<div class="search-result-loc"></div><div class="search-result-text">${highlightedSnippet(result.snippet||result.text,term)}</div>`;$(".search-result-loc",button).textContent=location;button.addEventListener("click",()=>{if(state.kind==="powerpoint")navigateTo(result.slideIndex,{force:true,searchResult:result});else if(state.kind==="word")navigateTo(result.unitIndex,{query:term,force:true});else navigateTo(result.unitIndex,{focusAddress:result.address,query:term,force:true});});els.searchResults.appendChild(button);});
+      results.forEach(result=>{const button=document.createElement("button");button.type="button";button.className="search-result";let location="";if(result.kind==="powerpoint"||state.kind==="powerpoint")location=`第 ${result.slideIndex+1} 页`;else if(result.kind==="word"||state.kind==="word")location=`第 ${result.unitIndex+1} 页`;else if(result.kind==="excel"||state.kind==="excel")location=`${result.sheetName}!${result.address}`;else if(result.kind==="pdf")location=`PDF 第 ${result.unitIndex+1} 页`;else if(result.kind==="text")location=`第 ${result.lineIndex+1} 行`;else if(result.kind==="archive")location="ZIP 条目";button.innerHTML=`<div class="search-result-loc"></div><div class="search-result-text">${highlightedSnippet(result.snippet||result.text,term)}</div>`;$(".search-result-loc",button).textContent=location;button.addEventListener("click",()=>{if(state.kind==="powerpoint")navigateTo(result.slideIndex,{force:true,searchResult:result});else if(state.kind==="word")navigateTo(result.unitIndex,{query:term,force:true});else if(state.kind==="excel")navigateTo(result.unitIndex,{focusAddress:result.address,query:term,force:true});else if(state.kind==="pdf")navigateTo(result.unitIndex,{query:term,force:true});else if(state.kind==="text")focusTextResult(result,term);else if(state.kind==="archive")focusArchiveResult(result);});els.searchResults.appendChild(button);});
     }
 
-    function clearSearch(){resetSearch();els.searchInput.focus();setStatus(state.kind?`${KIND_META[state.kind].title} · ${state.current+1} / ${state.total}`:"等待打开文件",state.kind?"ready":"idle");}
+    function clearSearch(){resetSearch();els.searchInput.focus();setStatus(state.kind?`${KIND_META[state.kind].title}${state.total>1?` · ${state.current+1} / ${state.total}`:""}`:"等待打开文件",state.kind?"ready":"idle");}
 
     function updateFileInfo(){
       els.fileInfoGrid.replaceChildren();
-      if(!state.file){const rows=[["文件","尚未加载"],["支持范围","Word、Excel、PowerPoint 现代格式与常见表格格式"],["处理方式","浏览器本地解析，不上传文件"]];appendInfoRows(rows);return;}
-      const meta=KIND_META[state.kind],ext=(state.detection?.extension||extensionOf(state.file.name)).toUpperCase();let structure=`${state.total} ${meta.unit}`;
-      if(state.kind==="excel"&&state.excel.workbook)structure+=` · ${state.excel.sheetMeta.reduce((sum,s)=>sum+s.rows*s.cols,0).toLocaleString("zh-CN")} 个使用范围单元格`;
-      const engine=state.kind==="word"?`docx-preview ${VERSIONS.docx}`:state.kind==="excel"?`SheetJS CE ${VERSIONS.sheetjs}`:`pptx-renderer ${VERSIONS.pptx}`;
+      if(!state.file){appendInfoRows([["服务","LHY文件预览"],["支持范围","Office、PDF、图片、音频、视频、文本代码与 ZIP"],["处理方式","本地文件在浏览器中解析，不上传"]]);return;}
+      const meta=KIND_META[state.kind],ext=(state.detection?.extension||extensionOf(state.file.name)||"FILE").toUpperCase(),structure=describeCurrentStructure();
+      const engines={word:`docx-preview ${VERSIONS.docx}`,excel:`SheetJS CE ${VERSIONS.sheetjs}`,powerpoint:`pptx-renderer ${VERSIONS.pptx}`,pdf:`PDF.js ${VERSIONS.pdfjs}`,image:"浏览器原生图片解码器",audio:"HTML5 Audio / 系统媒体解码器",video:"HTML5 Video / 系统媒体解码器",text:"TextDecoder + 安全文本渲染",archive:`JSZip ${VERSIONS.jszip}`};
       const source=state.sourceMode==="remote"?(state.remoteMeta?.viaProxy?"远程下载链接（经同源/自定义代理获取）":"远程下载链接（浏览器直接获取）"):"本地文件";
-      const rows=[["文件",state.file.name],["来源",source]];if(state.sourceUrl)rows.push(["源地址",state.sourceUrl]);rows.push(["检测类型",`${meta.title}（${ext}）`],["识别依据",state.detection?.confidence==="package"?"OOXML 包内部结构":state.detection?.confidence||"文件签名与扩展名"],["文件大小",formatBytes(state.file.size)],["文档结构",structure],["修改时间",formatDate(state.file.lastModified)],["预览引擎",engine],["宏与脚本",state.detection?.macro?"检测到宏格式；宏已完全禁用":"不执行任何宏、ActiveX 或脚本"],["处理方式","下载完成后在浏览器本地解析；文件内容不上传到预览服务"]);appendInfoRows(rows);
+      const rows=[["服务","LHY文件预览"],["文件",state.file.name],["来源",source]];if(state.sourceUrl)rows.push(["源地址",state.sourceUrl]);rows.push(["检测类型",`${meta.title}（${ext}）`],["识别依据",state.detection?.confidence==="package"?"文件包内部结构":state.detection?.confidence||"文件签名、MIME 与扩展名"],["文件大小",formatBytes(state.file.size)],["内容结构",structure],["修改时间",formatDate(state.file.lastModified)],["预览引擎",engines[state.kind]||"浏览器原生能力"],["安全策略",state.detection?.macro?"检测到宏格式；宏已完全禁用":"不执行宏、ActiveX、HTML/脚本或压缩包内容"],["处理方式","文件获取后在浏览器本地解析；本地文件不上传"]);appendInfoRows(rows);
     }
 
     function appendInfoRows(rows){for(const [key,value] of rows){const dt=document.createElement("dt"),dd=document.createElement("dd");dt.textContent=key;dd.textContent=value;els.fileInfoGrid.append(dt,dd);}}
 
-    function setSidebar(open){state.sidebarOpen=Boolean(open);els.workspace.classList.toggle("sidebar-collapsed",!state.sidebarOpen);els.sidebarBtn.classList.toggle("active",state.sidebarOpen);try{localStorage.setItem("office-preview-sidebar",state.sidebarOpen?"1":"0");}catch{}requestAnimationFrame(()=>{if(state.kind&&state.fit)fitToWindow();});}
+    function setSidebar(open){state.sidebarOpen=Boolean(open);els.workspace.classList.toggle("sidebar-collapsed",!state.sidebarOpen);els.sidebarBtn.classList.toggle("active",state.sidebarOpen);try{localStorage.setItem("office-preview-sidebar",state.sidebarOpen?"1":"0");}catch{}requestAnimationFrame(()=>{if(state.kind&&state.fit&&KIND_CAPABILITIES[state.kind]?.zoom)fitToWindow();});}
     function setMobileSidebar(open){els.workspace.classList.toggle("mobile-sidebar-open",Boolean(open));}
     function applyTheme(theme){const next=theme==="light"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("office-preview-theme",next);}catch{}}
     function toggleTheme(){applyTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");}
@@ -1587,11 +1891,11 @@
     function setupKeyboard(){
       window.addEventListener("keydown",event=>{const tag=event.target?.tagName?.toLowerCase(),editing=["input","textarea","select"].includes(tag)||event.target?.isContentEditable;
         if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="o"){event.preventDefault();els.fileInput.click();return;}
-        if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="f"){event.preventDefault();if(!state.kind)return;if(window.innerWidth<=740)setMobileSidebar(true);else setSidebar(true);els.searchInput.focus();els.searchInput.select();return;}
-        if(editing||!state.kind)return;
-        if(["ArrowLeft","PageUp"].includes(event.key)){event.preventDefault();navigateTo(state.current-1);}else if(["ArrowRight","PageDown"].includes(event.key)){event.preventDefault();navigateTo(state.current+1);}else if(event.key==="Home"){event.preventDefault();navigateTo(0);}else if(event.key==="End"){event.preventDefault();navigateTo(state.total-1);}else if(["+","="].includes(event.key)){event.preventDefault();stepZoom(1);}else if(["-","_"].includes(event.key)){event.preventDefault();stepZoom(-1);}else if(event.key==="0"&&(event.ctrlKey||event.metaKey)){event.preventDefault();fitToWindow();}else if(event.key==="Escape"&&els.workspace.classList.contains("mobile-sidebar-open"))setMobileSidebar(false);
+        if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="f"){if(!state.kind||!KIND_CAPABILITIES[state.kind]?.search)return;event.preventDefault();if(window.innerWidth<=740)setMobileSidebar(true);else setSidebar(true);els.searchInput.focus();els.searchInput.select();return;}
+        if(editing||!state.kind)return;const caps=KIND_CAPABILITIES[state.kind]||{};
+        if(caps.navigation&&["ArrowLeft","PageUp"].includes(event.key)){event.preventDefault();navigateTo(state.current-1);}else if(caps.navigation&&["ArrowRight","PageDown"].includes(event.key)){event.preventDefault();navigateTo(state.current+1);}else if(caps.navigation&&event.key==="Home"){event.preventDefault();navigateTo(0);}else if(caps.navigation&&event.key==="End"){event.preventDefault();navigateTo(state.total-1);}else if(caps.zoom&&["+","="].includes(event.key)){event.preventDefault();stepZoom(1);}else if(caps.zoom&&["-","_"].includes(event.key)){event.preventDefault();stepZoom(-1);}else if(caps.zoom&&event.key==="0"&&(event.ctrlKey||event.metaKey)){event.preventDefault();fitToWindow();}else if(event.key==="Escape"&&els.workspace.classList.contains("mobile-sidebar-open"))setMobileSidebar(false);
       });
-      const wheelHandler=event=>{if(!state.kind||!(event.ctrlKey||event.metaKey))return;event.preventDefault();stepZoom(event.deltaY<0?1:-1);};els.genericScroller.addEventListener("wheel",wheelHandler,{passive:false});els.excelScroller.addEventListener("wheel",wheelHandler,{passive:false});
+      const wheelHandler=event=>{if(!state.kind||!KIND_CAPABILITIES[state.kind]?.zoom||!(event.ctrlKey||event.metaKey))return;event.preventDefault();stepZoom(event.deltaY<0?1:-1);};els.genericScroller.addEventListener("wheel",wheelHandler,{passive:false});els.excelScroller.addEventListener("wheel",wheelHandler,{passive:false});
     }
 
     function bindEvents(){
@@ -1605,13 +1909,16 @@
       els.sidebarBtn.addEventListener("click",()=>{if(window.innerWidth<=740)setMobileSidebar(!els.workspace.classList.contains("mobile-sidebar-open"));else setSidebar(!state.sidebarOpen);});els.mobileSidebarBtn.addEventListener("click",()=>setMobileSidebar(!els.workspace.classList.contains("mobile-sidebar-open")));els.workspace.addEventListener("click",event=>{if(window.innerWidth<=740&&els.workspace.classList.contains("mobile-sidebar-open")&&!els.sidebar.contains(event.target)&&!els.mobileSidebarBtn.contains(event.target))setMobileSidebar(false);});
       els.prevBtn.addEventListener("click",()=>navigateTo(state.current-1));els.nextBtn.addEventListener("click",()=>navigateTo(state.current+1));els.positionInput.addEventListener("keydown",event=>{if(event.key!=="Enter")return;event.preventDefault();const value=Number.parseInt(els.positionInput.value,10);if(Number.isFinite(value))navigateTo(value-1,{force:true});else updateControls();els.positionInput.blur();});els.positionInput.addEventListener("blur",updateControls);
       els.zoomOutBtn.addEventListener("click",()=>stepZoom(-1));els.zoomInBtn.addEventListener("click",()=>stepZoom(1));els.zoomSelect.addEventListener("change",()=>setZoom(Number(els.zoomSelect.value)));els.fitBtn.addEventListener("click",fitToWindow);
-      els.searchBtn.addEventListener("click",()=>{if(window.innerWidth<=740)setMobileSidebar(true);else setSidebar(true);els.searchInput.focus();els.searchInput.select();});els.searchInput.addEventListener("input",()=>performSearch(els.searchInput.value));els.clearSearchBtn.addEventListener("click",clearSearch);
+      els.searchBtn.addEventListener("click",()=>{if(!KIND_CAPABILITIES[state.kind]?.search)return;if(window.innerWidth<=740)setMobileSidebar(true);else setSidebar(true);els.searchInput.focus();els.searchInput.select();});els.searchInput.addEventListener("input",()=>performSearch(els.searchInput.value));els.clearSearchBtn.addEventListener("click",clearSearch);
       els.downloadBtn.addEventListener("click",downloadOriginal);els.shareBtn.addEventListener("click",copyShareLink);els.printBtn.addEventListener("click",()=>window.print());els.fullscreenBtn.addEventListener("click",toggleFullscreen);els.themeBtn.addEventListener("click",toggleTheme);els.infoBtn.addEventListener("click",()=>{updateFileInfo();openDialog(els.infoDialog);});
+      els.mediaRateSelect.addEventListener("change",()=>{const rate=Number(els.mediaRateSelect.value)||1;els.audioElement.playbackRate=rate;els.videoElement.playbackRate=rate;});els.mediaLoopCheckbox.addEventListener("change",()=>{els.audioElement.loop=els.mediaLoopCheckbox.checked;els.videoElement.loop=els.mediaLoopCheckbox.checked;});els.pipBtn.addEventListener("click",async()=>{try{if(document.pictureInPictureElement)await document.exitPictureInPicture();else await els.videoElement.requestPictureInPicture();}catch(error){toast("画中画不可用",error?.message||String(error));}});
+      els.textEncodingSelect.addEventListener("change",()=>{if(state.kind!=="text"||!state.buffer)return;state.text.encoding=els.textEncodingSelect.value;const decoded=decodeTextBuffer(state.buffer,state.text.encoding);state.text.detectedEncoding=decoded.encoding;state.text.content=decoded.content;state.text.lines=decoded.content.split(/\r\n|\n|\r/);renderTextLines();buildSingleInfoNav(state.file.name,`${state.text.lines.length.toLocaleString("zh-CN")} 行 · ${decoded.encoding.toUpperCase()} · ${formatBytes(state.file.size)}`,"TXT");clearSearch();});els.textWrapCheckbox.addEventListener("change",()=>els.textDocument.classList.toggle("wrap",els.textWrapCheckbox.checked));els.copyTextBtn.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(state.text.content);toast("文本已复制",`${state.text.content.length.toLocaleString("zh-CN")} 个字符`);}catch{toast("复制失败","浏览器未授予剪贴板权限。");}});
+      els.archiveTableBody.addEventListener("click",event=>{const button=event.target.closest("button[data-extract]");if(button)extractArchiveEntry(Number(button.dataset.extract));});
       $$('[data-close-dialog]').forEach(button=>button.addEventListener("click",()=>closeDialog(document.getElementById(button.dataset.closeDialog))));els.infoDialog.addEventListener("click",event=>{if(event.target===els.infoDialog)closeDialog(els.infoDialog);});els.urlDialog.addEventListener("click",event=>{if(event.target===els.urlDialog)closeDialog(els.urlDialog);});
       els.excelGrid.addEventListener("click",event=>{const td=event.target.closest("td[data-address]");if(td)selectExcelCell(td.dataset.address,{scroll:false});});els.excelGrid.addEventListener("dblclick",event=>{const link=event.target.closest("a[href]");if(link)return;const td=event.target.closest("td[data-address]");if(td)selectExcelCell(td.dataset.address,{scroll:true});});
       els.nameBox.addEventListener("keydown",event=>{if(event.key!=="Enter")return;event.preventDefault();selectExcelCell(els.nameBox.value,{scroll:true});els.nameBox.blur();});
-      document.addEventListener("fullscreenchange",()=>{els.fullscreenBtn.classList.toggle("active",Boolean(document.fullscreenElement));if(state.kind&&state.fit)requestAnimationFrame(fitToWindow);});
-      window.addEventListener("resize",()=>{if(window.innerWidth>740)setMobileSidebar(false);if(state.kind&&state.fit)requestAnimationFrame(fitToWindow);});
+      document.addEventListener("fullscreenchange",()=>{els.fullscreenBtn.classList.toggle("active",Boolean(document.fullscreenElement));if(state.kind&&state.fit&&KIND_CAPABILITIES[state.kind]?.zoom)requestAnimationFrame(fitToWindow);});
+      window.addEventListener("resize",()=>{if(window.innerWidth>740)setMobileSidebar(false);if(state.kind&&state.fit&&KIND_CAPABILITIES[state.kind]?.zoom)requestAnimationFrame(fitToWindow);});
       window.addEventListener("beforeunload",()=>{abortRemoteDownload();cleanupDocument();resetFileUrl();});
     }
 
