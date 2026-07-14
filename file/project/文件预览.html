@@ -1,0 +1,1627 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark" data-office-kind="none">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="description" content="专业 Office 预览器：支持本地文件、拖拽和远程下载链接，自动识别 Word、Excel、PowerPoint。" />
+  <title>Office Preview Pro · Word Excel PowerPoint 文件查看器</title>
+  <style>
+    :root {
+      --topbar-h: 60px;
+      --statusbar-h: 34px;
+      --sidebar-w: 272px;
+      --radius-xl: 20px;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 8px;
+      --font: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      --word: #2b73d2;
+      --excel: #18864b;
+      --powerpoint: #d35230;
+      --neutral: #6a7a96;
+    }
+
+    html[data-theme="dark"] {
+      --bg: #090c12;
+      --surface-1: #10151d;
+      --surface-2: #151b25;
+      --surface-3: #1b2330;
+      --surface-4: #222d3c;
+      --glass: rgba(16, 21, 29, .94);
+      --canvas: #080b10;
+      --canvas-grid: rgba(255,255,255,.024);
+      --text: #f4f7fc;
+      --text-2: #b9c2d0;
+      --text-3: #7d899b;
+      --border: rgba(255,255,255,.085);
+      --border-strong: rgba(255,255,255,.16);
+      --input: rgba(255,255,255,.05);
+      --hover: rgba(255,255,255,.07);
+      --accent: #718cff;
+      --accent-soft: rgba(113,140,255,.15);
+      --success: #51d1a4;
+      --warning: #f0ba5b;
+      --danger: #ff7885;
+      --page-shadow: 0 24px 75px rgba(0,0,0,.48);
+      --panel-shadow: 0 22px 70px rgba(0,0,0,.34);
+      --grid-header: #161d27;
+      --grid-cell: #0f141c;
+      --grid-cell-alt: #111721;
+      --grid-line: rgba(255,255,255,.075);
+    }
+
+    html[data-theme="light"] {
+      --bg: #e9edf4;
+      --surface-1: #ffffff;
+      --surface-2: #f7f9fc;
+      --surface-3: #eef2f8;
+      --surface-4: #e4eaf3;
+      --glass: rgba(255,255,255,.95);
+      --canvas: #dce2eb;
+      --canvas-grid: rgba(20,34,59,.035);
+      --text: #111827;
+      --text-2: #4d5b70;
+      --text-3: #7d899a;
+      --border: rgba(16,29,52,.09);
+      --border-strong: rgba(16,29,52,.17);
+      --input: rgba(16,29,52,.045);
+      --hover: rgba(16,29,52,.065);
+      --accent: #4f6ff5;
+      --accent-soft: rgba(79,111,245,.12);
+      --success: #117d58;
+      --warning: #9b6500;
+      --danger: #ce3445;
+      --page-shadow: 0 22px 62px rgba(39,53,77,.22);
+      --panel-shadow: 0 22px 60px rgba(39,53,77,.20);
+      --grid-header: #f1f4f8;
+      --grid-cell: #ffffff;
+      --grid-cell-alt: #fbfcfe;
+      --grid-line: rgba(16,29,52,.105);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body {
+      color: var(--text);
+      background: var(--bg);
+      font: 14px/1.45 var(--font);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    button, input, select { font: inherit; color: inherit; }
+    button { border: 0; }
+    [hidden] { display: none !important; }
+    a { color: inherit; }
+
+    .app {
+      width: 100%; height: 100%;
+      display: grid;
+      grid-template-rows: var(--topbar-h) minmax(0,1fr) var(--statusbar-h);
+      background: var(--bg);
+    }
+
+    .topbar {
+      position: relative; z-index: 40;
+      min-width: 0;
+      display: grid;
+      grid-template-columns: minmax(230px,1fr) auto minmax(230px,1fr);
+      align-items: center;
+      gap: 12px;
+      padding: 0 12px;
+      background: var(--glass);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand-area, .toolbar, .actions { min-width: 0; display: flex; align-items: center; gap: 7px; }
+    .actions { justify-content: flex-end; }
+    .brand { min-width: 0; display: flex; align-items: center; gap: 10px; }
+    .brand-mark {
+      flex: 0 0 auto;
+      width: 36px; height: 36px;
+      display: grid; place-items: center;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 10px;
+      background: linear-gradient(145deg,#8296ff,#536ef0);
+      box-shadow: 0 9px 24px rgba(79,111,245,.25);
+    }
+    html[data-office-kind="word"] .brand-mark { background: linear-gradient(145deg,#4691e8,#2567be); box-shadow: 0 9px 24px rgba(43,115,210,.25); }
+    html[data-office-kind="excel"] .brand-mark { background: linear-gradient(145deg,#35a86b,#137642); box-shadow: 0 9px 24px rgba(24,134,75,.25); }
+    html[data-office-kind="powerpoint"] .brand-mark { background: linear-gradient(145deg,#eb7a55,#c94424); box-shadow: 0 9px 24px rgba(211,82,48,.25); }
+    .brand-mark .office-letter { font-size: 16px; font-weight: 800; letter-spacing: -.04em; }
+
+    .file-head { min-width: 0; }
+    .file-title-row { min-width: 0; display: flex; align-items: center; gap: 7px; }
+    .file-title { max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 720; }
+    .file-subtitle { margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-3); font-size: 10.5px; }
+    .type-badge {
+      flex: 0 0 auto;
+      padding: 2px 6px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text-2);
+      background: var(--input);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: .06em;
+    }
+    html[data-office-kind="word"] .type-badge { color: #85bdff; border-color: rgba(43,115,210,.38); background: rgba(43,115,210,.14); }
+    html[data-office-kind="excel"] .type-badge { color: #6be0a2; border-color: rgba(24,134,75,.38); background: rgba(24,134,75,.14); }
+    html[data-office-kind="powerpoint"] .type-badge { color: #ff9f7d; border-color: rgba(211,82,48,.4); background: rgba(211,82,48,.14); }
+
+    .icon { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+    .icon-btn, .text-btn, .select-box, .position-control {
+      height: 34px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--input);
+    }
+    .icon-btn, .text-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer; user-select: none; }
+    .icon-btn { flex: 0 0 auto; width: 34px; padding: 0; }
+    .text-btn { padding: 0 12px; font-size: 12px; font-weight: 680; }
+    .icon-btn:hover:not(:disabled), .text-btn:hover:not(:disabled), .select-box:hover:not(:disabled) { background: var(--hover); }
+    .icon-btn:active:not(:disabled), .text-btn:active:not(:disabled) { transform: translateY(1px); }
+    .icon-btn:disabled, .text-btn:disabled, .select-box:disabled { opacity: .38; cursor: not-allowed; }
+    .icon-btn.active { color: var(--accent); border-color: color-mix(in srgb,var(--accent) 45%,transparent); background: var(--accent-soft); }
+    .text-btn.primary { color: #fff; border-color: rgba(113,140,255,.48); background: linear-gradient(180deg,#758eff,#5570ed); box-shadow: 0 8px 20px rgba(79,111,245,.19); }
+    .select-box { min-width: 76px; padding: 0 25px 0 10px; outline: none; cursor: pointer; }
+    .separator { width: 1px; height: 21px; margin: 0 2px; background: var(--border); }
+    .position-control { display: flex; align-items: center; gap: 4px; padding: 0 8px; color: var(--text-2); font-size: 11px; }
+    .position-control input { width: 40px; height: 25px; padding: 0 3px; color: var(--text); text-align: center; border: 0; outline: 0; background: transparent; font-weight: 720; }
+
+    .workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: var(--sidebar-w) 5px minmax(0,1fr);
+      overflow: hidden;
+    }
+    .workspace.sidebar-collapsed { grid-template-columns: 0 0 minmax(0,1fr); }
+    .sidebar {
+      position: relative; z-index: 25;
+      min-width: 0;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      background: var(--surface-1);
+      border-right: 1px solid var(--border);
+    }
+    .workspace.sidebar-collapsed .sidebar, .workspace.sidebar-collapsed .resizer { visibility: hidden; pointer-events: none; }
+    .sidebar-head { flex: 0 0 auto; padding: 12px; border-bottom: 1px solid var(--border); }
+    .sidebar-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+    .sidebar-title { color: var(--text-2); font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .sidebar-count { color: var(--text-3); font-size: 10.5px; }
+    .search-wrap { position: relative; display: flex; align-items: center; }
+    .search-wrap > .icon { position: absolute; left: 10px; width: 15px; height: 15px; color: var(--text-3); }
+    .search-input { width: 100%; height: 36px; padding: 0 34px 0 33px; color: var(--text); border: 1px solid var(--border); border-radius: 9px; outline: none; background: var(--input); }
+    .search-input:focus { border-color: color-mix(in srgb,var(--accent) 58%,transparent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .clear-search { position: absolute; right: 5px; width: 26px; height: 26px; color: var(--text-3); border-radius: 7px; background: transparent; cursor: pointer; }
+    .clear-search:hover { color: var(--text); background: var(--hover); }
+    .side-scroll { min-height: 0; flex: 1 1 auto; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+    .search-results { padding: 10px; border-bottom: 1px solid var(--border); }
+    .search-summary { margin: 0 3px 8px; color: var(--text-3); font-size: 10.5px; }
+    .search-result { width: 100%; margin: 0 0 6px; padding: 9px 10px; text-align: left; border: 1px solid var(--border); border-radius: 9px; background: var(--input); cursor: pointer; }
+    .search-result:hover { border-color: var(--border-strong); background: var(--hover); }
+    .search-result-loc { color: var(--accent); font-size: 10.5px; font-weight: 800; }
+    .search-result-text { display: -webkit-box; margin-top: 4px; overflow: hidden; color: var(--text-2); font-size: 11px; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+    mark { color: inherit; border-radius: 3px; background: color-mix(in srgb,var(--warning) 48%,transparent); }
+
+    .nav-list { display: flex; flex-direction: column; gap: 8px; padding: 10px 11px 18px; }
+    .nav-card { position: relative; width: 100%; padding: 7px; text-align: left; border: 1px solid transparent; border-radius: 11px; background: transparent; cursor: pointer; }
+    .nav-card:hover { border-color: var(--border); background: var(--input); }
+    .nav-card.current { border-color: color-mix(in srgb,var(--accent) 48%,transparent); background: var(--accent-soft); box-shadow: 0 0 0 2px color-mix(in srgb,var(--accent) 8%,transparent); }
+    .nav-card-row { display: flex; align-items: center; gap: 10px; }
+    .nav-index { flex: 0 0 auto; width: 28px; color: var(--text-3); text-align: center; font: 10px var(--mono); }
+    .nav-main { min-width: 0; flex: 1 1 auto; }
+    .nav-name { overflow: hidden; color: var(--text); font-size: 11.5px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .nav-meta { margin-top: 3px; overflow: hidden; color: var(--text-3); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+    .nav-icon-box { flex: 0 0 auto; width: 36px; height: 42px; display: grid; place-items: center; color: var(--text-2); border: 1px solid var(--border); border-radius: 6px; background: var(--surface-2); }
+    .nav-icon-box .icon { width: 16px; height: 16px; }
+    .sheet-icon { color: #68d49a; }
+    .page-icon { color: #78aff3; }
+
+    .thumb-card { padding: 0; }
+    .thumb-preview { position: relative; width: calc(100% - 12px); min-height: 104px; margin: 6px; overflow: hidden; border: 1px solid var(--border); border-radius: 7px; background: linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.01)),var(--surface-2); box-shadow: 0 5px 16px rgba(0,0,0,.15); }
+    .thumb-placeholder { position: absolute; inset: 0; display: grid; place-items: center; color: var(--text-3); font-size: 10.5px; }
+    .thumb-meta { display: flex; align-items: center; justify-content: space-between; padding: 1px 9px 8px; color: var(--text-3); font-size: 10px; }
+
+    .resizer { position: relative; z-index: 30; cursor: col-resize; background: var(--surface-1); border-right: 1px solid var(--border); }
+    .resizer::after { content: ""; position: absolute; top: 0; bottom: 0; left: 1px; width: 2px; background: transparent; }
+    .resizer:hover::after, .resizer.dragging::after { background: var(--accent); }
+
+    .viewer-area { position: relative; min-width: 0; min-height: 0; overflow: hidden; background: var(--canvas); }
+    .generic-scroller { position: absolute; inset: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; background-image: linear-gradient(var(--canvas-grid) 1px,transparent 1px),linear-gradient(90deg,var(--canvas-grid) 1px,transparent 1px); background-size: 24px 24px; }
+    .generic-stage { min-width: 100%; min-height: 100%; display: grid; place-items: center; padding: 34px; }
+    .center-card { width: min(690px,calc(100vw - 48px)); padding: 38px; text-align: center; border: 1px solid var(--border); border-radius: var(--radius-xl); background: color-mix(in srgb,var(--surface-1) 88%,transparent); box-shadow: var(--panel-shadow); backdrop-filter: blur(14px); }
+    .empty-logo { width: 76px; height: 76px; display: grid; place-items: center; margin: 0 auto 18px; color: var(--accent); border: 1px solid color-mix(in srgb,var(--accent) 28%,transparent); border-radius: 21px; background: var(--accent-soft); }
+    .empty-logo .icon { width: 36px; height: 36px; }
+    .center-card h1 { margin: 0; font-size: clamp(23px,3vw,32px); letter-spacing: -.03em; }
+    .center-card .lead { max-width: 560px; margin: 12px auto 22px; color: var(--text-2); line-height: 1.75; }
+    .format-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 9px; margin-top: 24px; text-align: left; }
+    .format-card { padding: 13px; border: 1px solid var(--border); border-radius: 11px; background: var(--input); }
+    .format-card-head { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 760; }
+    .format-dot { width: 9px; height: 9px; border-radius: 3px; }
+    .format-dot.word { background: var(--word); }
+    .format-dot.excel { background: var(--excel); }
+    .format-dot.powerpoint { background: var(--powerpoint); }
+    .format-card p { margin: 7px 0 0; color: var(--text-3); font-size: 10.5px; line-height: 1.55; }
+    .privacy-line { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 18px; }
+    .privacy-chip { padding: 6px 9px; color: var(--text-2); border: 1px solid var(--border); border-radius: 999px; background: var(--input); font-size: 10.5px; }
+
+    .loading-card, .error-card { width: min(540px,calc(100vw - 48px)); padding: 26px; text-align: left; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-1); box-shadow: var(--panel-shadow); }
+    .loading-card h2, .error-card h2 { margin: 0 0 8px; font-size: 17px; }
+    .loading-card p, .error-card p { margin: 0; color: var(--text-2); line-height: 1.65; }
+    .load-steps { display: grid; gap: 9px; margin-top: 18px; }
+    .load-step { display: flex; align-items: center; gap: 9px; color: var(--text-3); font-size: 11.5px; }
+    .load-step::before { content: ""; width: 8px; height: 8px; border: 1px solid var(--border-strong); border-radius: 50%; }
+    .load-step.done { color: var(--text-2); }
+    .load-step.done::before { border-color: var(--success); background: var(--success); }
+    .load-step.active { color: var(--text); font-weight: 700; }
+    .load-step.active::before { border: 3px solid var(--accent); background: var(--surface-1); }
+    .error-details { max-height: 140px; margin-top: 14px; padding: 10px; overflow: auto; color: var(--danger); border: 1px solid color-mix(in srgb,var(--danger) 30%,transparent); border-radius: 8px; background: color-mix(in srgb,var(--danger) 8%,transparent); font: 10.5px/1.55 var(--mono); white-space: pre-wrap; word-break: break-word; }
+
+    .ppt-host { position: relative; width: min(100%,1500px); height: calc(100vh - var(--topbar-h) - var(--statusbar-h) - 72px); height: min(1000px,calc(100dvh - var(--topbar-h) - var(--statusbar-h) - 72px)); min-width: 1px; min-height: 260px; display: grid; place-items: center; }
+    .ppt-host > * { box-shadow: var(--page-shadow) !important; transform-origin: center center; }
+
+    .word-shell { width: max-content; min-width: 100%; display: flex; justify-content: center; transform-origin: top center; }
+    .word-style-host { width: 0; height: 0; overflow: hidden; }
+    .word-host { width: max-content; min-width: 100%; padding: 0 0 30px; transform-origin: top center; }
+    .word-host .docx-wrapper { padding: 0 !important; background: transparent !important; }
+    .word-host section.docx { margin: 0 auto 24px !important; box-shadow: var(--page-shadow) !important; }
+    .word-host a { color: #2d7bd8; }
+    .word-host [data-office-search-mark] { border-radius: 2px; background: color-mix(in srgb,var(--warning) 58%,transparent); }
+
+    .excel-view { position: absolute; inset: 0; min-width: 0; min-height: 0; display: grid; grid-template-rows: 38px minmax(0,1fr) 38px; background: var(--canvas); }
+    .formula-bar { min-width: 0; display: grid; grid-template-columns: 82px 26px minmax(0,1fr); align-items: center; gap: 6px; padding: 5px 8px; background: var(--surface-1); border-bottom: 1px solid var(--border); }
+    .name-box, .formula-input { height: 28px; padding: 0 8px; color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; background: var(--input); }
+    .name-box { width: 82px; text-align: center; font: 11px var(--mono); }
+    .name-box:focus { border-color: color-mix(in srgb,var(--excel) 58%,transparent); box-shadow: 0 0 0 2px rgba(24,134,75,.13); }
+    .fx-label { color: var(--text-3); text-align: center; font: italic 700 12px Georgia,serif; }
+    .formula-input { min-width: 0; width: 100%; font: 11px var(--mono); }
+    .excel-scroller { min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; background: var(--grid-cell); }
+    .excel-scale-shell { width: max-content; min-width: 100%; transform-origin: top left; }
+    .excel-notice { position: sticky; z-index: 9; top: 0; left: 0; width: fit-content; max-width: min(760px,calc(100vw - 60px)); margin: 8px; padding: 7px 10px; color: var(--warning); border: 1px solid color-mix(in srgb,var(--warning) 30%,transparent); border-radius: 7px; background: color-mix(in srgb,var(--surface-1) 92%,transparent); box-shadow: 0 5px 18px rgba(0,0,0,.12); font-size: 10.5px; }
+    .excel-grid { border-collapse: separate; border-spacing: 0; table-layout: fixed; background: var(--grid-cell); font-family: Calibri,var(--font); font-size: 12px; }
+    .excel-grid th, .excel-grid td { position: relative; height: 24px; min-width: 48px; padding: 2px 6px; overflow: hidden; color: var(--text); text-align: left; vertical-align: middle; border-right: 1px solid var(--grid-line); border-bottom: 1px solid var(--grid-line); background: var(--grid-cell); white-space: pre; text-overflow: ellipsis; }
+    .excel-grid thead th { position: sticky; z-index: 7; top: 0; height: 27px; color: var(--text-2); text-align: center; background: var(--grid-header); font: 10.5px var(--font); }
+    .excel-grid .corner { z-index: 8; left: 0; min-width: 48px; width: 48px; }
+    .excel-grid tbody th { position: sticky; z-index: 6; left: 0; width: 48px; min-width: 48px; color: var(--text-3); text-align: center; background: var(--grid-header); font: 10px var(--mono); }
+    .excel-grid tbody tr:nth-child(even) td { background: var(--grid-cell-alt); }
+    .excel-grid td.selected { z-index: 5; overflow: visible; outline: 2px solid var(--excel); outline-offset: -2px; }
+    .excel-grid td.search-hit { background: color-mix(in srgb,var(--warning) 22%,var(--grid-cell)) !important; }
+    .excel-grid td.formula-cell::after { content: ""; position: absolute; right: 0; top: 0; width: 0; height: 0; border-top: 6px solid color-mix(in srgb,var(--excel) 74%,transparent); border-left: 6px solid transparent; }
+    .excel-grid td.comment-cell::before { content: ""; position: absolute; right: 0; bottom: 0; width: 0; height: 0; border-bottom: 6px solid var(--danger); border-left: 6px solid transparent; }
+    .cell-content { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .cell-content a { color: #4285d4; text-decoration: underline; }
+    .sheet-tabs { min-width: 0; display: flex; align-items: center; gap: 5px; padding: 5px 8px; overflow-x: auto; background: var(--surface-1); border-top: 1px solid var(--border); scrollbar-width: thin; }
+    .sheet-tab { flex: 0 0 auto; height: 28px; padding: 0 12px; color: var(--text-2); border: 1px solid var(--border); border-radius: 6px; background: var(--input); cursor: pointer; font-size: 11px; }
+    .sheet-tab:hover { color: var(--text); background: var(--hover); }
+    .sheet-tab.current { color: #fff; border-color: rgba(24,134,75,.5); background: linear-gradient(180deg,#26985b,#157a45); }
+
+    .empty-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .direct-link-note { margin: 15px auto 0; color: var(--text-3); font: 10.5px/1.55 var(--mono); overflow-wrap: anywhere; }
+    .download-progress { margin-top: 16px; padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--input); }
+    .download-progress-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--text-2); font-size: 11px; }
+    .download-progress-track { height: 7px; margin-top: 9px; overflow: hidden; border-radius: 999px; background: var(--surface-3); }
+    .download-progress-bar { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 62%,#fff)); }
+    .download-progress-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 9px; }
+    .download-detail { min-width: 0; overflow: hidden; color: var(--text-3); font-size: 10.5px; text-overflow: ellipsis; white-space: nowrap; }
+    .link-form { display: grid; gap: 13px; }
+    .field-label { display: grid; gap: 7px; color: var(--text-2); font-size: 11px; font-weight: 700; }
+    .url-input { width: 100%; height: 39px; padding: 0 11px; color: var(--text); border: 1px solid var(--border); border-radius: 9px; outline: none; background: var(--input); font: 11px var(--mono); }
+    .url-input:focus { border-color: color-mix(in srgb,var(--accent) 58%,transparent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .field-hint { color: var(--text-3); font-size: 10.5px; line-height: 1.55; font-weight: 400; }
+    .check-row { display: flex; align-items: flex-start; gap: 8px; color: var(--text-2); font-size: 11px; }
+    .check-row input { margin-top: 2px; accent-color: var(--accent); }
+    .link-example { padding: 10px 11px; color: var(--text-3); border: 1px solid var(--border); border-radius: 9px; background: var(--input); font: 10px/1.6 var(--mono); overflow-wrap: anywhere; }
+    details.proxy-settings { border: 1px solid var(--border); border-radius: 9px; background: var(--input); }
+    details.proxy-settings summary { padding: 9px 11px; color: var(--text-2); cursor: pointer; font-size: 11px; font-weight: 700; }
+    details.proxy-settings .proxy-body { display: grid; gap: 8px; padding: 0 11px 11px; }
+
+    .drop-overlay { position: fixed; z-index: 130; inset: 14px; display: grid; place-items: center; pointer-events: none; border: 2px dashed var(--accent); border-radius: 22px; background: color-mix(in srgb,var(--bg) 84%,transparent); backdrop-filter: blur(14px); }
+    .drop-card { padding: 28px 38px; text-align: center; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-1); box-shadow: var(--panel-shadow); }
+    .drop-card h2 { margin: 0 0 7px; font-size: 21px; }
+    .drop-card p { margin: 0; color: var(--text-2); }
+
+    .statusbar { position: relative; z-index: 40; min-width: 0; display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 12px; padding: 0 12px; color: var(--text-3); background: var(--surface-1); border-top: 1px solid var(--border); font-size: 10px; }
+    .status-left, .status-center, .status-right { min-width: 0; display: flex; align-items: center; gap: 8px; }
+    .status-right { justify-content: flex-end; }
+    .status-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-3); }
+    .status-dot.ready { background: var(--success); }
+    .status-dot.busy { background: var(--warning); }
+    .status-dot.error { background: var(--danger); }
+    .local-badge { color: var(--success); }
+
+    .toast-stack { position: fixed; z-index: 150; right: 16px; bottom: 48px; width: min(360px,calc(100vw - 32px)); display: grid; gap: 8px; pointer-events: none; }
+    .toast { padding: 12px 14px; border: 1px solid var(--border-strong); border-radius: 11px; background: var(--surface-1); box-shadow: var(--panel-shadow); pointer-events: auto; }
+    .toast-title { font-size: 12px; font-weight: 800; }
+    .toast-message { margin-top: 3px; color: var(--text-2); font-size: 10.5px; line-height: 1.5; }
+
+    dialog { width: min(610px,calc(100vw - 28px)); padding: 0; color: var(--text); border: 1px solid var(--border-strong); border-radius: 16px; background: var(--surface-1); box-shadow: var(--panel-shadow); }
+    dialog::backdrop { background: rgba(0,0,0,.58); backdrop-filter: blur(5px); }
+    .dialog-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+    .dialog-head h2 { margin: 0; font-size: 16px; }
+    .dialog-body { max-height: min(70vh,680px); padding: 18px; overflow: auto; color: var(--text-2); line-height: 1.7; }
+    .dialog-body p:first-child { margin-top: 0; }
+    .info-grid { display: grid; grid-template-columns: 118px minmax(0,1fr); gap: 9px 14px; margin: 0; }
+    .info-grid dt { color: var(--text-3); }
+    .info-grid dd { margin: 0; color: var(--text); overflow-wrap: anywhere; }
+    .compat-box { margin-top: 17px; padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--input); }
+    .compat-box strong { color: var(--text); }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 13px 18px; border-top: 1px solid var(--border); }
+
+    .mobile-only { display: none; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    @media (max-width: 1080px) {
+      .topbar { grid-template-columns: minmax(170px,1fr) auto; backdrop-filter: none; }
+      .toolbar { position: fixed; z-index: 45; left: 50%; bottom: 45px; max-width: calc(100vw - 24px); padding: 7px; transform: translateX(-50%); border: 1px solid var(--border-strong); border-radius: 12px; background: var(--glass); box-shadow: var(--panel-shadow); backdrop-filter: blur(16px); }
+      .actions .optional-action { display: none; }
+      .status-center { display: none; }
+      .statusbar { grid-template-columns: minmax(0,1fr) auto; }
+      .generic-stage { padding: 23px; }
+    }
+
+    @media (max-width: 740px) {
+      :root { --topbar-h: 54px; }
+      .workspace { position: relative; display: block; }
+      .viewer-area { width: 100%; height: 100%; }
+      .sidebar { position: fixed; z-index: 70; top: var(--topbar-h); bottom: var(--statusbar-h); left: 0; width: min(84vw,320px); transform: translateX(-103%); box-shadow: var(--panel-shadow); }
+      .workspace.mobile-sidebar-open .sidebar { visibility: visible; pointer-events: auto; transform: translateX(0); }
+      .workspace.mobile-sidebar-open::after { content: ""; position: fixed; z-index: 65; inset: var(--topbar-h) 0 var(--statusbar-h); background: rgba(0,0,0,.45); }
+      .resizer { display: none; }
+      .mobile-only { display: inline-flex; }
+      .file-subtitle { display: none; }
+      .file-title { max-width: 150px; }
+      .brand-mark { width: 32px; height: 32px; }
+      .actions { gap: 5px; }
+      .actions .text-btn { width: 34px; padding: 0; }
+      .actions .text-btn .btn-label { display: none; }
+      .optional-mobile-hide { display: none; }
+      .generic-stage { padding: 14px; }
+      .center-card { padding: 28px 19px; }
+      .format-grid { grid-template-columns: 1fr; }
+      .format-card p { display: none; }
+      .formula-bar { grid-template-columns: 68px 22px minmax(0,1fr); }
+      .name-box { width: 68px; }
+    }
+
+    @media print {
+      @page { margin: 0; }
+      html, body { overflow: visible; background: #fff; }
+      .topbar, .sidebar, .resizer, .statusbar, .toolbar, .toast-stack, .formula-bar, .sheet-tabs, .excel-notice { display: none !important; }
+      .app, .workspace, .viewer-area, .generic-scroller, .generic-stage, .excel-view, .excel-scroller { position: static; display: block; width: 100%; height: auto; overflow: visible; background: #fff; }
+      .ppt-host > *, .word-host section.docx { box-shadow: none !important; }
+      .excel-grid { font-size: 9pt; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <div class="brand-area">
+        <button class="icon-btn mobile-only" id="mobileSidebarBtn" aria-label="打开导航侧栏" title="导航侧栏">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
+        </button>
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true"><span class="office-letter" id="officeLetter">O</span></div>
+          <div class="file-head">
+            <div class="file-title-row">
+              <div class="file-title" id="fileTitle">Office Preview Pro</div>
+              <span class="type-badge" id="typeBadge">OFFICE</span>
+            </div>
+            <div class="file-subtitle" id="fileSubtitle">拖入文件或打开下载链接，自动识别 Office 格式</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="toolbar" aria-label="文档工具栏">
+        <button class="icon-btn" id="sidebarBtn" aria-label="切换导航侧栏" title="切换导航侧栏">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v16"/></svg>
+        </button>
+        <div class="separator"></div>
+        <button class="icon-btn" id="prevBtn" aria-label="上一项" title="上一项（← / PageUp）" disabled>
+          <svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div class="position-control" title="输入序号并回车">
+          <input id="positionInput" type="text" inputmode="numeric" value="0" aria-label="当前位置" disabled />
+          <span>/</span><span id="positionTotal">0</span>
+        </div>
+        <button class="icon-btn" id="nextBtn" aria-label="下一项" title="下一项（→ / PageDown）" disabled>
+          <svg class="icon" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+        <div class="separator"></div>
+        <button class="icon-btn" id="zoomOutBtn" aria-label="缩小" title="缩小（-）" disabled>
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M8 11h6"/></svg>
+        </button>
+        <select class="select-box" id="zoomSelect" aria-label="缩放比例" title="缩放比例" disabled>
+          <option value="25">25%</option><option value="33">33%</option><option value="50">50%</option><option value="67">67%</option><option value="75">75%</option><option value="90">90%</option><option value="100" selected>100%</option><option value="125">125%</option><option value="150">150%</option><option value="200">200%</option><option value="300">300%</option><option value="400">400%</option>
+        </select>
+        <button class="icon-btn" id="zoomInBtn" aria-label="放大" title="放大（+）" disabled>
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M11 8v6M8 11h6"/></svg>
+        </button>
+        <button class="icon-btn active" id="fitBtn" aria-label="适合窗口" title="适合窗口" disabled>
+          <svg class="icon" viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+        </button>
+      </nav>
+
+      <div class="actions">
+        <button class="icon-btn optional-action" id="searchBtn" aria-label="全文搜索" title="全文搜索（Ctrl/⌘ + F）" disabled>
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        </button>
+        <button class="icon-btn optional-action" id="downloadBtn" aria-label="下载原文件" title="下载原文件" disabled>
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+        </button>
+        <button class="icon-btn optional-action" id="shareBtn" aria-label="复制远程直开链接" title="复制远程直开链接" disabled>
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="m8.7 10.6 6.6-3.2M8.7 13.4l6.6 3.2"/></svg>
+        </button>
+        <button class="icon-btn optional-action" id="remoteOpenBtn" aria-label="打开下载链接" title="打开 Office 下载链接">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1"/></svg>
+        </button>
+        <button class="icon-btn optional-action" id="printBtn" aria-label="打印" title="打印" disabled>
+          <svg class="icon" viewBox="0 0 24 24"><path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/></svg>
+        </button>
+        <button class="icon-btn optional-action" id="fullscreenBtn" aria-label="全屏" title="全屏" disabled>
+          <svg class="icon" viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+        </button>
+        <button class="icon-btn" id="themeBtn" aria-label="切换主题" title="切换明暗主题">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5 8.5 8.5 0 1 0 20.5 14.5z"/></svg>
+        </button>
+        <button class="icon-btn optional-action" id="infoBtn" aria-label="文件与兼容性信息" title="文件与兼容性信息">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>
+        </button>
+        <button class="text-btn primary" id="openBtn" title="选择 Office 文件">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/><path d="M12 12v5M9.5 14.5 12 12l2.5 2.5"/></svg>
+          <span class="btn-label">打开文件</span>
+        </button>
+        <input id="fileInput" type="file" accept=".docx,.docm,.dotx,.dotm,.xlsx,.xlsm,.xlsb,.xls,.ods,.csv,.tsv,.xml,.txt,.pptx,.pptm,.ppsx,.ppsm,.potx,.potm,.doc,.ppt" hidden />
+      </div>
+    </header>
+
+    <main class="workspace sidebar-collapsed" id="workspace">
+      <aside class="sidebar" id="sidebar" aria-label="文档导航">
+        <div class="sidebar-head">
+          <div class="sidebar-title-row"><span class="sidebar-title" id="navTitle">导航</span><span class="sidebar-count" id="navCount">0 项</span></div>
+          <div class="search-wrap">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+            <input class="search-input" id="searchInput" type="search" placeholder="搜索文档内容" autocomplete="off" />
+            <button class="clear-search" id="clearSearchBtn" aria-label="清除搜索" title="清除搜索" hidden>×</button>
+          </div>
+        </div>
+        <div class="side-scroll" id="sideScroll">
+          <section class="search-results" id="searchResults" hidden></section>
+          <div class="nav-list" id="navList"></div>
+        </div>
+      </aside>
+      <div class="resizer" id="resizer" role="separator" aria-orientation="vertical" aria-label="调整侧栏宽度"></div>
+
+      <section class="viewer-area" id="viewerArea" aria-label="Office 文档预览区域">
+        <div class="generic-scroller" id="genericScroller">
+          <div class="generic-stage" id="genericStage">
+            <section class="center-card" id="emptyState">
+              <div class="empty-logo"><svg class="icon" viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h5M10 12h6M10 16h4"/></svg></div>
+              <h1>专业 Office 文件预览器</h1>
+              <p class="lead">拖入、选择文件，或粘贴公开下载链接。查看器会自动识别 Word、Excel 或 PowerPoint；文件解析始终在浏览器本地完成。</p>
+              <div class="empty-actions">
+                <button class="text-btn primary" id="emptyOpenBtn"><svg class="icon" viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/><path d="M12 12v5M9.5 14.5 12 12l2.5 2.5"/></svg>选择 Office 文件</button>
+                <button class="text-btn" id="emptyUrlBtn"><svg class="icon" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1"/></svg>打开下载链接</button>
+              </div>
+              <div class="direct-link-note">直开格式：viewer.html?file=&lt;encodeURIComponent(下载地址)&gt;&amp;name=可选文件名.xlsx</div>
+              <div class="format-grid">
+                <div class="format-card"><div class="format-card-head"><span class="format-dot word"></span>Word</div><p>DOCX / DOCM / DOTX，分页、页导航、全文搜索与打印。</p></div>
+                <div class="format-card"><div class="format-card-head"><span class="format-dot excel"></span>Excel</div><p>XLSX / XLSM / XLSB / XLS / ODS / CSV，工作表、公式栏与单元格跳转。</p></div>
+                <div class="format-card"><div class="format-card-head"><span class="format-dot powerpoint"></span>PowerPoint</div><p>PPTX / PPTM / PPSX / POTX，高保真图形、表格、图表与 SmartArt。</p></div>
+              </div>
+              <div class="privacy-line"><span class="privacy-chip">自动识别真实格式</span><span class="privacy-chip">宏永不执行</span><span class="privacy-chip">大文件安全限制</span><span class="privacy-chip">首次加载引擎需联网</span></div>
+            </section>
+
+            <section class="loading-card" id="loadingCard" hidden aria-live="polite">
+              <h2 id="loadingTitle">正在打开 Office 文件</h2>
+              <p id="loadingMessage">正在读取文件并识别真实格式。</p>
+              <div class="download-progress" id="downloadProgress" hidden>
+                <div class="download-progress-head"><span id="downloadProgressText">正在下载远程文件</span><strong id="downloadProgressPercent">0%</strong></div>
+                <div class="download-progress-track"><div class="download-progress-bar" id="downloadProgressBar"></div></div>
+                <div class="download-progress-foot"><span class="download-detail" id="downloadDetail">准备连接</span><button class="text-btn" id="cancelRemoteBtn" type="button">取消</button></div>
+              </div>
+              <div class="load-steps">
+                <div class="load-step" id="stepDownload">获取远程文件（仅链接模式）</div>
+                <div class="load-step" id="stepDetect">识别文件类型</div>
+                <div class="load-step" id="stepEngine">加载对应预览引擎</div>
+                <div class="load-step" id="stepParse">解析文档结构与资源</div>
+                <div class="load-step" id="stepRender">构建专业预览</div>
+              </div>
+            </section>
+
+            <section class="error-card" id="errorCard" hidden>
+              <h2>无法预览此文件</h2>
+              <p id="errorMessage">请确认文件格式正确，然后重试。</p>
+              <pre class="error-details" id="errorDetails"></pre>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px"><button class="text-btn primary" id="errorOpenBtn">选择其他文件</button><button class="text-btn" id="errorUrlBtn">打开其他链接</button><button class="text-btn" id="errorBackBtn">返回</button></div>
+            </section>
+
+            <div class="ppt-host" id="pptHost" hidden></div>
+            <div class="word-shell" id="wordShell" hidden><div class="word-style-host" id="wordStyleHost"></div><div class="word-host" id="wordHost"></div></div>
+          </div>
+        </div>
+
+        <section class="excel-view" id="excelView" hidden aria-label="Excel 工作簿预览">
+          <div class="formula-bar">
+            <input class="name-box" id="nameBox" value="A1" aria-label="名称框，输入单元格地址后回车" />
+            <div class="fx-label">fx</div>
+            <input class="formula-input" id="formulaInput" readonly aria-label="公式栏" />
+          </div>
+          <div class="excel-scroller" id="excelScroller"><div class="excel-scale-shell" id="excelScaleShell"><div class="excel-notice" id="excelNotice" hidden></div><table class="excel-grid" id="excelGrid" role="grid"></table></div></div>
+          <div class="sheet-tabs" id="sheetTabs" aria-label="工作表标签"></div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="statusbar">
+      <div class="status-left"><span class="status-dot" id="statusDot"></span><span class="status-text" id="statusText" aria-live="polite">等待打开文件</span></div>
+      <div class="status-center"><span>← / → 导航</span><span>·</span><span>Ctrl/⌘ + F 搜索</span><span>·</span><span>Ctrl/⌘ + 滚轮缩放</span></div>
+      <div class="status-right"><span class="local-badge">● 本地处理</span><span class="optional-mobile-hide" id="fileSizeStatus">未加载文件</span></div>
+    </footer>
+  </div>
+
+  <div class="drop-overlay" id="dropOverlay" hidden><div class="drop-card"><h2>释放以打开 Office 文件</h2><p>可拖入本地文件或网页中的 Office 下载链接</p></div></div>
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+  <dialog id="urlDialog">
+    <div class="dialog-head"><h2>打开 Office 下载链接</h2><button class="icon-btn" data-close-dialog="urlDialog" aria-label="关闭"><svg class="icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-body">
+      <form class="link-form" id="urlForm">
+        <label class="field-label">文件下载地址
+          <input class="url-input" id="urlInput" type="url" inputmode="url" autocomplete="url" spellcheck="false" placeholder="https://example.com/report.xlsx" required />
+          <span class="field-hint">必须是最终文件地址或可跟随重定向的公开下载地址。需要登录、Cookie 或验证码的页面通常无法直接读取。</span>
+        </label>
+        <label class="field-label">文件名（可选）
+          <input class="url-input" id="remoteNameInput" type="text" autocomplete="off" spellcheck="false" placeholder="季度报告.xlsx" />
+          <span class="field-hint">当服务器未暴露 Content-Disposition，或链接路径没有扩展名时使用。</span>
+        </label>
+        <label class="check-row"><input id="updateAddressCheckbox" type="checkbox" checked /> <span>成功打开后，把下载地址写入当前页面地址，便于复制分享。</span></label>
+        <details class="proxy-settings">
+          <summary>高级：自定义跨域代理</summary>
+          <div class="proxy-body">
+            <input class="url-input" id="proxyInput" type="text" autocomplete="off" spellcheck="false" placeholder="https://proxy.example/fetch?url={url}" />
+            <span class="field-hint">模板应包含 <code>{url}</code>。留空时，直接下载失败后会尝试同源 <code>/api/fetch?url=…</code>，可配合附带的 Python 服务。</span>
+          </div>
+        </details>
+        <div class="link-example">示例：office_preview_pro_url.html?file=https%3A%2F%2Fexample.com%2Freport.xlsx<br />推荐始终对 file 参数执行 encodeURIComponent。</div>
+      </form>
+    </div>
+    <div class="dialog-actions"><button class="text-btn" data-close-dialog="urlDialog">取消</button><button class="text-btn primary" id="urlOpenConfirmBtn" type="submit" form="urlForm">下载并打开</button></div>
+  </dialog>
+
+  <dialog id="infoDialog">
+    <div class="dialog-head"><h2>文件与兼容性信息</h2><button class="icon-btn" data-close-dialog="infoDialog" aria-label="关闭"><svg class="icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-body">
+      <dl class="info-grid" id="fileInfoGrid"><dt>文件</dt><dd>尚未加载</dd><dt>支持范围</dt><dd>Word、Excel、PowerPoint 现代格式与常见表格格式</dd><dt>处理方式</dt><dd>浏览器本地解析，不上传文件</dd></dl>
+      <div class="compat-box" id="compatBox">
+        <strong>兼容性说明</strong><br />
+        本工具优先保证可读性、导航、搜索和常见版式。Office 格式规范极其庞大，特殊字体、嵌入式 OLE 对象、ActiveX、复杂域、部分矢量图与少数高级效果可能和桌面 Office 有差异。宏只读取数据，绝不执行。对像素级交付有强制要求时，应同时提供由 Office 导出的 PDF 校对版。
+      </div>
+      <p style="margin-bottom:0">使用的浏览器端组件：docx-preview、SheetJS Community Edition、pptx-renderer 与 JSZip。建议在正式内网部署时将依赖文件固定版本并本地托管。</p>
+    </div>
+    <div class="dialog-actions"><button class="text-btn" data-close-dialog="infoDialog">关闭</button></div>
+  </dialog>
+
+  <script>
+  (() => {
+    "use strict";
+
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+    const nextFrame = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+    const els = {
+      app: $("#app"), workspace: $("#workspace"), sidebar: $("#sidebar"), sidebarBtn: $("#sidebarBtn"), mobileSidebarBtn: $("#mobileSidebarBtn"), resizer: $("#resizer"),
+      openBtn: $("#openBtn"), emptyOpenBtn: $("#emptyOpenBtn"), emptyUrlBtn: $("#emptyUrlBtn"), remoteOpenBtn: $("#remoteOpenBtn"), errorOpenBtn: $("#errorOpenBtn"), errorUrlBtn: $("#errorUrlBtn"), errorBackBtn: $("#errorBackBtn"), fileInput: $("#fileInput"),
+      officeLetter: $("#officeLetter"), typeBadge: $("#typeBadge"), fileTitle: $("#fileTitle"), fileSubtitle: $("#fileSubtitle"), fileSizeStatus: $("#fileSizeStatus"),
+      navTitle: $("#navTitle"), navCount: $("#navCount"), navList: $("#navList"), sideScroll: $("#sideScroll"), searchInput: $("#searchInput"), clearSearchBtn: $("#clearSearchBtn"), searchResults: $("#searchResults"),
+      viewerArea: $("#viewerArea"), genericScroller: $("#genericScroller"), genericStage: $("#genericStage"), emptyState: $("#emptyState"), loadingCard: $("#loadingCard"), loadingTitle: $("#loadingTitle"), loadingMessage: $("#loadingMessage"), errorCard: $("#errorCard"), errorMessage: $("#errorMessage"), errorDetails: $("#errorDetails"),
+      pptHost: $("#pptHost"), wordShell: $("#wordShell"), wordStyleHost: $("#wordStyleHost"), wordHost: $("#wordHost"),
+      excelView: $("#excelView"), excelScroller: $("#excelScroller"), excelScaleShell: $("#excelScaleShell"), excelNotice: $("#excelNotice"), excelGrid: $("#excelGrid"), sheetTabs: $("#sheetTabs"), nameBox: $("#nameBox"), formulaInput: $("#formulaInput"),
+      prevBtn: $("#prevBtn"), nextBtn: $("#nextBtn"), positionInput: $("#positionInput"), positionTotal: $("#positionTotal"), zoomOutBtn: $("#zoomOutBtn"), zoomInBtn: $("#zoomInBtn"), zoomSelect: $("#zoomSelect"), fitBtn: $("#fitBtn"),
+      searchBtn: $("#searchBtn"), downloadBtn: $("#downloadBtn"), shareBtn: $("#shareBtn"), printBtn: $("#printBtn"), fullscreenBtn: $("#fullscreenBtn"), themeBtn: $("#themeBtn"), infoBtn: $("#infoBtn"), infoDialog: $("#infoDialog"), urlDialog: $("#urlDialog"), urlForm: $("#urlForm"), urlInput: $("#urlInput"), remoteNameInput: $("#remoteNameInput"), updateAddressCheckbox: $("#updateAddressCheckbox"), proxyInput: $("#proxyInput"), urlOpenConfirmBtn: $("#urlOpenConfirmBtn"), fileInfoGrid: $("#fileInfoGrid"), compatBox: $("#compatBox"),
+      dropOverlay: $("#dropOverlay"), toastStack: $("#toastStack"), statusDot: $("#statusDot"), statusText: $("#statusText"),
+      downloadProgress: $("#downloadProgress"), downloadProgressText: $("#downloadProgressText"), downloadProgressPercent: $("#downloadProgressPercent"), downloadProgressBar: $("#downloadProgressBar"), downloadDetail: $("#downloadDetail"), cancelRemoteBtn: $("#cancelRemoteBtn"),
+      steps: { download: $("#stepDownload"), detect: $("#stepDetect"), engine: $("#stepEngine"), parse: $("#stepParse"), render: $("#stepRender") }
+    };
+
+    const VERSIONS = { jszip: "3.10.1", docx: "0.4.0", sheetjs: "0.20.3", pptx: "1.2.4" };
+    const URLS = {
+      jszip: [
+        `https://cdn.jsdelivr.net/npm/jszip@${VERSIONS.jszip}/dist/jszip.min.js`,
+        `https://unpkg.com/jszip@${VERSIONS.jszip}/dist/jszip.min.js`
+      ],
+      docx: [
+        `https://cdn.jsdelivr.net/npm/docx-preview@${VERSIONS.docx}/dist/docx-preview.min.js`,
+        `https://unpkg.com/docx-preview@${VERSIONS.docx}/dist/docx-preview.min.js`
+      ],
+      sheetjs: [
+        `https://cdn.sheetjs.com/xlsx-${VERSIONS.sheetjs}/package/dist/xlsx.full.min.js`,
+        "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js",
+        "https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"
+      ],
+      pptx: [
+        `https://cdn.jsdelivr.net/npm/@aiden0z/pptx-renderer@${VERSIONS.pptx}/dist/aiden0z-pptx-renderer.browser.es.js`,
+        `https://cdn.jsdelivr.net/npm/@aiden0z/pptx-renderer@${VERSIONS.pptx}/+esm`,
+        `https://esm.sh/@aiden0z/pptx-renderer@${VERSIONS.pptx}/browser?bundle&target=es2022`,
+        `https://esm.sh/@aiden0z/pptx-renderer@${VERSIONS.pptx}?bundle&target=es2022`
+      ]
+    };
+
+    const state = {
+      kind: null, file: null, buffer: null, fileUrl: null, detection: null,
+      sourceMode: "local", sourceUrl: null, remoteMeta: null, remoteController: null,
+      busy: false, loadToken: 0, current: 0, total: 0, zoom: 100, fit: true, sidebarOpen: false, dragDepth: 0,
+      enginePromises: new Map(), pptModule: null, searchTimer: null, searchQuery: "", searchMarkPage: null,
+      navNodes: new Map(),
+      ppt: { viewer: null, presentation: null, thumbObserver: null, thumbHandles: new Map(), activeHighlight: null },
+      word: { pages: [], observer: null, naturalWidth: 816 },
+      excel: { workbook: null, sheetMeta: [], selectedAddress: "A1", windowRange: null, renderedSheet: -1, lastSearchAddress: null }
+    };
+
+    const KIND_META = {
+      word: { letter: "W", badge: "WORD", title: "Word 文档", nav: "页面", unit: "页", search: "搜索 Word 文档中的文字", fit: "适合页面宽度" },
+      excel: { letter: "X", badge: "EXCEL", title: "Excel 工作簿", nav: "工作表", unit: "表", search: "搜索工作簿中的单元格", fit: "适合可见区域" },
+      powerpoint: { letter: "P", badge: "PPT", title: "PowerPoint 演示文稿", nav: "幻灯片", unit: "页", search: "搜索演示文稿中的文字", fit: "适合窗口" }
+    };
+
+    const MAX_REMOTE_BYTES = 300 * 1024 * 1024;
+    const OFFICE_MIME_EXTENSIONS = new Map([
+      ["application/vnd.openxmlformats-officedocument.wordprocessingml.document","docx"],
+      ["application/vnd.ms-word.document.macroenabled.12","docm"],
+      ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","xlsx"],
+      ["application/vnd.ms-excel.sheet.macroenabled.12","xlsm"],
+      ["application/vnd.ms-excel.sheet.binary.macroenabled.12","xlsb"],
+      ["application/vnd.ms-excel","xls"],
+      ["application/vnd.oasis.opendocument.spreadsheet","ods"],
+      ["text/csv","csv"],
+      ["text/tab-separated-values","tsv"],
+      ["application/vnd.openxmlformats-officedocument.presentationml.presentation","pptx"],
+      ["application/vnd.ms-powerpoint.presentation.macroenabled.12","pptm"],
+      ["application/vnd.openxmlformats-officedocument.presentationml.slideshow","ppsx"],
+      ["application/vnd.ms-powerpoint.slideshow.macroenabled.12","ppsm"],
+      ["application/msword","doc"],
+      ["application/vnd.ms-powerpoint","ppt"]
+    ]);
+
+    function formatBytes(bytes) {
+      if (!Number.isFinite(bytes) || bytes < 0) return "未知";
+      const units = ["B","KB","MB","GB"]; let value = bytes, unit = 0;
+      while (value >= 1024 && unit < units.length - 1) { value /= 1024; unit++; }
+      return `${value >= 100 || unit === 0 ? value.toFixed(0) : value.toFixed(1)} ${units[unit]}`;
+    }
+
+    function formatDate(timestamp) {
+      try { return new Intl.DateTimeFormat("zh-CN", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" }).format(new Date(timestamp)); }
+      catch { return "未知"; }
+    }
+
+    function extensionOf(name) { const match = String(name || "").toLowerCase().match(/\.([^.]+)$/); return match ? match[1] : ""; }
+    function isMacroFormat(ext) { return ["docm","dotm","xlsm","pptm","ppsm","potm"].includes(ext); }
+    function escapeHtml(text) { return String(text).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+    function safeUrl(url) { try { const parsed = new URL(url, location.href); return ["http:","https:","mailto:","tel:"].includes(parsed.protocol) ? parsed.href : ""; } catch { return ""; } }
+    function cssEscape(value) { return window.CSS?.escape ? window.CSS.escape(String(value)) : String(value).replace(/[^a-zA-Z0-9_-]/g, ch => `\\${ch}`); }
+    function columnName(index) { let n = index + 1, result = ""; while (n > 0) { const mod = (n - 1) % 26; result = String.fromCharCode(65 + mod) + result; n = Math.floor((n - 1) / 26); } return result; }
+
+    function setStatus(text, kind = "idle") {
+      els.statusText.textContent = text;
+      els.statusDot.className = `status-dot ${kind === "ready" ? "ready" : kind === "busy" ? "busy" : kind === "error" ? "error" : ""}`;
+    }
+
+    function toast(title, message = "") {
+      const node = document.createElement("div"); node.className = "toast";
+      node.innerHTML = `<div class="toast-title"></div><div class="toast-message"></div>`;
+      $(".toast-title", node).textContent = title; $(".toast-message", node).textContent = message;
+      els.toastStack.appendChild(node); setTimeout(() => node.remove(), 4400);
+    }
+
+    function setLoadStep(active, done = []) {
+      const completed = state.sourceMode === "remote" && active !== "download" ? [...new Set(["download", ...done])] : done;
+      Object.entries(els.steps).forEach(([name, node]) => { node.classList.toggle("active", name === active); node.classList.toggle("done", completed.includes(name)); });
+    }
+
+    function showSurface(name) {
+      els.emptyState.hidden = name !== "empty";
+      els.loadingCard.hidden = name !== "loading";
+      els.errorCard.hidden = name !== "error";
+      els.pptHost.hidden = name !== "powerpoint";
+      els.wordShell.hidden = name !== "word";
+      els.excelView.hidden = name !== "excel";
+      els.genericScroller.hidden = name === "excel";
+    }
+
+    function setBusy(busy) {
+      state.busy = Boolean(busy);
+      els.openBtn.disabled = state.busy;
+      els.remoteOpenBtn.disabled = state.busy;
+      els.emptyOpenBtn.disabled = state.busy;
+      els.emptyUrlBtn.disabled = state.busy;
+      els.urlOpenConfirmBtn.disabled = state.busy;
+      updateControls();
+    }
+
+    function applyKind(kind) {
+      state.kind = kind || null;
+      document.documentElement.dataset.officeKind = kind || "none";
+      const meta = KIND_META[kind];
+      els.officeLetter.textContent = meta?.letter || "O";
+      els.typeBadge.textContent = meta?.badge || "OFFICE";
+      els.navTitle.textContent = meta?.nav || "导航";
+      els.searchInput.placeholder = meta?.search || "搜索文档内容";
+      els.fitBtn.title = meta?.fit || "适合窗口";
+      els.fitBtn.setAttribute("aria-label", meta?.fit || "适合窗口");
+    }
+
+    function setFileHeader(file, detail = "") {
+      if (!file) {
+        els.fileTitle.textContent = "Office Preview Pro";
+        els.fileSubtitle.textContent = "拖入文件或打开下载链接，自动识别 Office 格式";
+        els.fileSizeStatus.textContent = "未加载文件";
+        return;
+      }
+      els.fileTitle.textContent = file.name || "未命名 Office 文件";
+      els.fileSubtitle.textContent = detail || `${formatBytes(file.size)} · 正在读取`;
+      els.fileSizeStatus.textContent = `${formatBytes(file.size)} · ${(state.detection?.extension || extensionOf(file.name) || "FILE").toUpperCase()}`;
+    }
+
+    function updateControls() {
+      const loaded = Boolean(state.kind && state.total > 0);
+      const disabled = !loaded || state.busy;
+      els.prevBtn.disabled = disabled || state.current <= 0;
+      els.nextBtn.disabled = disabled || state.current >= state.total - 1;
+      els.positionInput.disabled = disabled;
+      els.zoomOutBtn.disabled = disabled;
+      els.zoomInBtn.disabled = disabled;
+      els.zoomSelect.disabled = disabled;
+      els.fitBtn.disabled = disabled;
+      els.searchBtn.disabled = disabled;
+      els.downloadBtn.disabled = !state.file || state.busy;
+      els.shareBtn.disabled = !state.sourceUrl || state.busy;
+      els.printBtn.disabled = disabled;
+      els.fullscreenBtn.disabled = disabled;
+      els.positionInput.value = loaded ? String(state.current + 1) : "0";
+      els.positionTotal.textContent = loaded ? String(state.total) : "0";
+      const unit = KIND_META[state.kind]?.unit || "项";
+      els.navCount.textContent = `${state.total} ${unit}`;
+      els.fitBtn.classList.toggle("active", loaded && state.fit);
+      const exact = [...els.zoomSelect.options].some(option => Number(option.value) === state.zoom);
+      if (exact) els.zoomSelect.value = String(state.zoom);
+      else {
+        let option = els.zoomSelect.querySelector('option[data-custom="1"]');
+        if (!option) { option = document.createElement("option"); option.dataset.custom = "1"; els.zoomSelect.appendChild(option); }
+        option.value = String(state.zoom); option.textContent = `${state.zoom}%`; els.zoomSelect.value = String(state.zoom);
+      }
+    }
+
+    async function loadScriptEngine(key, urls, test) {
+      if (test()) return true;
+      if (state.enginePromises.has(key)) return state.enginePromises.get(key);
+      const promise = (async () => {
+        const errors = [];
+        for (const url of urls) {
+          try {
+            await new Promise((resolve, reject) => {
+              const script = document.createElement("script"); script.src = url; script.async = true;
+              script.onload = () => resolve(); script.onerror = () => reject(new Error(`无法加载 ${url}`)); document.head.appendChild(script);
+            });
+            if (test()) return true;
+            errors.push(`${url}: 全局对象未出现`);
+          } catch (error) { errors.push(`${url}: ${error?.message || error}`); }
+        }
+        throw new Error(`组件 ${key} 加载失败。请检查网络、内容安全策略或 CDN 访问权限。\n${errors.join("\n")}`);
+      })();
+      state.enginePromises.set(key, promise);
+      try { return await promise; } catch (error) { state.enginePromises.delete(key); throw error; }
+    }
+
+    async function loadJSZip() { await loadScriptEngine("jszip", URLS.jszip, () => Boolean(window.JSZip)); return window.JSZip; }
+    async function loadWordEngine() { await loadJSZip(); await loadScriptEngine("docx", URLS.docx, () => Boolean(window.docx?.renderAsync)); return window.docx; }
+    async function loadSheetEngine() { await loadScriptEngine("sheetjs", URLS.sheetjs, () => Boolean(window.XLSX?.read)); return window.XLSX; }
+    async function loadPptEngine() {
+      if (state.pptModule) return state.pptModule;
+      if (state.enginePromises.has("pptx")) return state.enginePromises.get("pptx");
+      const promise = (async () => {
+        const errors = [];
+        for (const url of URLS.pptx) {
+          try {
+            const mod = await import(url);
+            if (mod?.PptxViewer && mod?.buildPresentation && (mod?.parseZipLazyMedia || mod?.parseZip)) { state.pptModule = mod; return mod; }
+            errors.push(`${url}: 模块导出不完整`);
+          } catch (error) { errors.push(`${url}: ${error?.message || error}`); }
+        }
+        throw new Error(`PowerPoint 渲染引擎加载失败。请检查网络、浏览器版本或 CDN 访问权限。\n${errors.join("\n")}`);
+      })();
+      state.enginePromises.set("pptx", promise);
+      try { return await promise; } catch (error) { state.enginePromises.delete("pptx"); throw error; }
+    }
+
+
+    function assertSafeZip(zip, compressedBytes) {
+      let entries = 0, totalUncompressed = 0, largest = 0, knownCompressed = 0;
+      for (const entry of Object.values(zip.files || {})) {
+        if (entry.dir) continue; entries++;
+        const data = entry._data || {};
+        const uncompressed = Number(data.uncompressedSize) || 0, compressed = Number(data.compressedSize) || 0;
+        totalUncompressed += uncompressed; knownCompressed += compressed; largest = Math.max(largest,uncompressed);
+      }
+      if (entries > 25000) throw new Error(`Office 包含 ${entries.toLocaleString("zh-CN")} 个文件条目，超过安全上限。`);
+      if (largest > 420 * 1024 * 1024) throw new Error("Office 包中存在超过 420 MB 的单个解压资源，已阻止以避免浏览器内存耗尽。");
+      if (totalUncompressed > 1800 * 1024 * 1024) throw new Error("Office 包解压后超过 1.8 GB，已阻止以避免 ZIP 炸弹或浏览器内存耗尽。");
+      const denominator = knownCompressed || compressedBytes || 1;
+      if (totalUncompressed > 80 * 1024 * 1024 && totalUncompressed / denominator > 320) throw new Error("Office 包压缩膨胀比异常，已按安全策略阻止打开。");
+    }
+
+    async function detectOfficeType(file, buffer) {
+      const ext = extensionOf(file.name);
+      const bytes = new Uint8Array(buffer, 0, Math.min(buffer.byteLength, 16));
+      const isZip = bytes[0] === 0x50 && bytes[1] === 0x4b && [0x03,0x05,0x07].includes(bytes[2]) && [0x04,0x06,0x08].includes(bytes[3]);
+      const isOle = [0xd0,0xcf,0x11,0xe0,0xa1,0xb1,0x1a,0xe1].every((value,index) => bytes[index] === value);
+      const wordExt = ["docx","docm","dotx","dotm"].includes(ext);
+      const pptExt = ["pptx","pptm","ppsx","ppsm","potx","potm"].includes(ext);
+
+      if (isZip) {
+        const JSZip = await loadJSZip();
+        const zip = await JSZip.loadAsync(buffer, { checkCRC32: false, createFolders: false });
+        assertSafeZip(zip,file.size);
+        const names = new Set(Object.keys(zip.files).map(name => name.replace(/^\//,"")));
+        if (names.has("word/document.xml")) { const macro = isMacroFormat(ext) || names.has("word/vbaProject.bin"); return { kind:"word", extension: wordExt ? ext : (macro ? "docm" : "docx"), confidence:"package", macro }; }
+        if (names.has("xl/workbook.xml") || names.has("xl/workbook.bin")) { const binary = names.has("xl/workbook.bin"), macro = isMacroFormat(ext) || names.has("xl/vbaProject.bin"); return { kind:"excel", extension: ["xlsx","xlsm","xlsb"].includes(ext) ? ext : (binary ? "xlsb" : macro ? "xlsm" : "xlsx"), confidence:"package", macro }; }
+        if (names.has("ppt/presentation.xml")) { const macro = isMacroFormat(ext) || names.has("ppt/vbaProject.bin"); return { kind:"powerpoint", extension: pptExt ? ext : (macro ? "pptm" : "pptx"), confidence:"package", macro }; }
+        const mimeEntry = zip.file("mimetype");
+        if (mimeEntry) {
+          const mime = (await mimeEntry.async("string")).trim();
+          if (mime === "application/vnd.oasis.opendocument.spreadsheet") return { kind:"excel", extension: ext === "ods" ? ext : "ods", confidence:"package", macro:false };
+        }
+        throw new Error("文件是 ZIP 容器，但未检测到 Word、Excel 或 PowerPoint 的核心文档结构。可能是损坏文件或其他类型的压缩包。");
+      }
+
+      if (isOle) {
+        if (["docx","docm","dotx","dotm","xlsx","xlsm","xlsb","pptx","pptm","ppsx","ppsm","potx","potm"].includes(ext)) throw new Error("检测到加密或密码保护的现代 Office 文件。纯浏览器预览器无法解密，请先在桌面 Office 中取消密码保护后重试。");
+        if (ext === "xls") return { kind:"excel", extension:"xls", confidence:"signature+extension", macro:false, legacy:true };
+        if (ext === "doc") return { kind:"legacy-word", extension:"doc", confidence:"signature+extension", legacy:true };
+        if (ext === "ppt") return { kind:"legacy-powerpoint", extension:"ppt", confidence:"signature+extension", legacy:true };
+        throw new Error("检测到旧版 OLE Office 文件，但缺少可识别扩展名。请使用正确的 .xls、.doc 或 .ppt 文件名，或转换为现代 OOXML 格式。");
+      }
+
+      if (["csv","tsv"].includes(ext)) return { kind:"excel", extension:ext, confidence:"extension", macro:false, text:true };
+      const sample = new TextDecoder("utf-8", { fatal:false }).decode(new Uint8Array(buffer,0,Math.min(buffer.byteLength,65536)));
+      if (ext === "xml" || /urn:schemas-microsoft-com:office:spreadsheet|<Workbook[\s>]/i.test(sample)) return { kind:"excel", extension:"xml", confidence:"content", macro:false, text:true };
+      if (!ext || ext === "txt") {
+        const lines = sample.replace(/^\uFEFF/,"").split(/\r?\n/).filter(line=>line.trim()).slice(0,20);
+        const candidates = [["\t","tsv"],[",","csv"],[";","csv"],["|","csv"]];
+        for (const [delimiter,format] of candidates) { const counts=lines.map(line=>line.split(delimiter).length-1); if(lines.length>=2&&counts[0]>0&&counts.filter(count=>count===counts[0]).length>=Math.ceil(lines.length*.7)) return { kind:"excel", extension:format, confidence:"content-heuristic", macro:false, text:true }; }
+      }
+      if (wordExt) throw new Error("文件扩展名表示 Word 文档，但内部不是有效的 DOCX/OOXML ZIP 包，文件可能已损坏或扩展名错误。");
+      if (["xlsx","xlsm","xlsb","ods"].includes(ext)) throw new Error("文件扩展名表示 Excel 工作簿，但内部不是有效的工作簿容器，文件可能已损坏、被加密或扩展名错误。");
+      if (ext === "xls") return { kind:"excel", extension:ext, confidence:"extension", macro:false, legacy:true };
+      if (pptExt) throw new Error("文件扩展名表示 PowerPoint 文档，但内部不是有效的 PPTX/OOXML ZIP 包，文件可能已损坏或扩展名错误。");
+      if (["doc","ppt"].includes(ext)) return { kind: ext === "doc" ? "legacy-word" : "legacy-powerpoint", extension:ext, confidence:"extension", legacy:true };
+      throw new Error("无法自动识别文件类型。请选择 Word、Excel 或 PowerPoint 支持格式。");
+    }
+
+    function normalizeRemoteUrl(value) {
+      let raw = String(value || "").trim();
+      for (let i = 0; i < 2 && /^https?%3a/i.test(raw); i++) { try { raw = decodeURIComponent(raw); } catch { break; } }
+      let parsed;
+      try { parsed = new URL(raw, location.href); } catch { throw new Error("下载链接格式无效。"); }
+      if (!["http:","https:"].includes(parsed.protocol)) throw new Error("远程文件只允许使用 HTTP 或 HTTPS 地址。");
+      if (parsed.username || parsed.password) throw new Error("出于安全考虑，不支持在链接中嵌入用户名或密码。");
+      return parsed.href;
+    }
+
+    function sanitizeFilename(name) {
+      const cleaned = String(name || "").replace(/[\\/:*?"<>|\u0000-\u001f\u007f]/g,"_").replace(/\s+/g," ").trim().replace(/^\.+/,"").slice(0,180);
+      return cleaned || "office-file";
+    }
+
+    function filenameFromContentDisposition(header) {
+      const value = String(header || "");
+      const extended = value.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
+      if (extended) { try { return sanitizeFilename(decodeURIComponent(extended[1].trim().replace(/^"|"$/g,""))); } catch {} }
+      const basic = value.match(/filename\s*=\s*(?:"([^"]+)"|([^;]+))/i);
+      return basic ? sanitizeFilename((basic[1] || basic[2] || "").trim()) : "";
+    }
+
+    function filenameFromUrl(url) {
+      try {
+        const parsed = new URL(url);
+        for (const key of ["filename","file_name","name","download","file"]) {
+          const value = parsed.searchParams.get(key);
+          if (value && /\.[a-z0-9]{2,6}(?:$|[?#])/i.test(value)) return sanitizeFilename(value.split(/[\\/]/).pop());
+        }
+        const pathName = decodeURIComponent(parsed.pathname.split("/").pop() || "");
+        return sanitizeFilename(pathName || "office-file");
+      } catch { return "office-file"; }
+    }
+
+    function ensureFilenameExtension(name, contentType, url) {
+      let result = sanitizeFilename(name || filenameFromUrl(url));
+      if (extensionOf(result)) return result;
+      const mime = String(contentType || "").split(";",1)[0].trim().toLowerCase();
+      const ext = OFFICE_MIME_EXTENSIONS.get(mime);
+      return ext ? `${result}.${ext}` : result;
+    }
+
+    function setRemoteProgress(loaded = 0, total = 0, detail = "") {
+      els.downloadProgress.hidden = false;
+      const known = Number.isFinite(total) && total > 0;
+      const percent = known ? Math.max(0,Math.min(100,Math.round(loaded / total * 100))) : (loaded ? 18 : 0);
+      els.downloadProgressBar.style.width = `${percent}%`;
+      els.downloadProgressPercent.textContent = known ? `${percent}%` : formatBytes(loaded);
+      els.downloadProgressText.textContent = loaded >= total && known ? "远程文件下载完成" : "正在下载远程文件";
+      els.downloadDetail.textContent = detail || (known ? `${formatBytes(loaded)} / ${formatBytes(total)}` : `${formatBytes(loaded)} · 服务器未提供总大小`);
+    }
+
+    function hideRemoteProgress() {
+      els.downloadProgress.hidden = true;
+      els.downloadProgressBar.style.width = "0%";
+      els.downloadProgressPercent.textContent = "0%";
+      els.downloadDetail.textContent = "准备连接";
+    }
+
+    function abortRemoteDownload() {
+      if (state.remoteController) { try { state.remoteController.abort(); } catch {} }
+      state.remoteController = null;
+    }
+
+    function configuredProxyTemplate() {
+      const params = new URLSearchParams(location.search);
+      const fromQuery = params.get("proxy");
+      if (fromQuery === "none") return "";
+      if (fromQuery) return fromQuery;
+      const fromInput = els.proxyInput?.value?.trim();
+      if (fromInput) return fromInput;
+      try { return localStorage.getItem("office-preview-proxy") || ""; } catch { return ""; }
+    }
+
+    function buildProxyUrl(target, template = "") {
+      if (template) {
+        if (template.includes("{url}")) return template.replaceAll("{url}", encodeURIComponent(target));
+        const separator = template.includes("?") ? (/[?&]$/.test(template) ? "" : "&") : "?";
+        return `${template}${separator}url=${encodeURIComponent(target)}`;
+      }
+      if (!["http:","https:"].includes(location.protocol)) return "";
+      const proxy = new URL("/api/fetch", location.href);
+      proxy.searchParams.set("url", target);
+      return proxy.href;
+    }
+
+    async function readResponseBuffer(response, controller, token) {
+      const declared = Number(response.headers.get("content-length")) || 0;
+      if (declared > MAX_REMOTE_BYTES) throw new Error(`远程文件为 ${formatBytes(declared)}，超过 300 MB 安全上限。`);
+      const reader = response.body?.getReader?.();
+      if (!reader) {
+        const buffer = await response.arrayBuffer();
+        if (buffer.byteLength > MAX_REMOTE_BYTES) throw new Error("远程文件超过 300 MB 安全上限。");
+        setRemoteProgress(buffer.byteLength, buffer.byteLength, `${formatBytes(buffer.byteLength)} · 下载完成`);
+        return buffer;
+      }
+      let loaded = 0, lastPaint = 0;
+      let storage = declared ? new Uint8Array(declared) : null;
+      const chunks = declared ? null : [];
+      let inactivityTimer = null;
+      const armTimeout = () => { clearTimeout(inactivityTimer); inactivityTimer = setTimeout(() => controller.abort("download-timeout"), 45000); };
+      armTimeout();
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          if (token !== state.loadToken) throw new DOMException("已取消", "AbortError");
+          loaded += value.byteLength;
+          if (loaded > MAX_REMOTE_BYTES) { controller.abort(); throw new Error("远程文件下载超过 300 MB 安全上限，已中止。"); }
+          if (storage) {
+            if (loaded > storage.byteLength) { const grown = new Uint8Array(Math.min(MAX_REMOTE_BYTES,Math.max(loaded,storage.byteLength*2))); grown.set(storage); storage = grown; }
+            storage.set(value, loaded - value.byteLength);
+          } else chunks.push(value);
+          const now = performance.now();
+          if (now - lastPaint > 90) { setRemoteProgress(loaded,declared); lastPaint = now; }
+          armTimeout();
+        }
+      } finally { clearTimeout(inactivityTimer); }
+      setRemoteProgress(loaded,declared || loaded,`${formatBytes(loaded)} · 下载完成`);
+      if (storage) return storage.buffer.slice(0,loaded);
+      const combined = new Uint8Array(loaded); let offset = 0;
+      for (const chunk of chunks) { combined.set(chunk,offset); offset += chunk.byteLength; }
+      return combined.buffer;
+    }
+
+    async function fetchRemoteAttempt(requestUrl, targetUrl, { token, preferredName = "", viaProxy = false } = {}) {
+      const controller = new AbortController();
+      state.remoteController = controller;
+      let connectTimer = setTimeout(() => controller.abort("connect-timeout"), 30000);
+      let response;
+      try {
+        response = await fetch(requestUrl, { method:"GET", mode:"cors", credentials:"omit", cache:"no-store", redirect:"follow", referrerPolicy:"no-referrer", signal:controller.signal, headers:{ "Accept":"application/octet-stream,application/vnd.openxmlformats-officedocument.*,application/vnd.ms-*,text/csv,*/*;q=0.8" } });
+      } finally { clearTimeout(connectTimer); }
+      if (!response.ok) throw new Error(`下载服务器返回 HTTP ${response.status}${response.statusText ? ` ${response.statusText}` : ""}。`);
+      const contentType = response.headers.get("content-type") || "application/octet-stream";
+      const dispositionName = filenameFromContentDisposition(response.headers.get("content-disposition"));
+      const finalUrlHeader = response.headers.get("x-office-final-url");
+      const effectiveUrl = viaProxy ? (finalUrlHeader ? decodeURIComponent(finalUrlHeader) : targetUrl) : (response.url || targetUrl);
+      const buffer = await readResponseBuffer(response,controller,token);
+      const firstText = /^text\/html\b/i.test(contentType) ? new TextDecoder().decode(new Uint8Array(buffer,0,Math.min(buffer.byteLength,256))).toLowerCase() : "";
+      if (/^text\/html\b/i.test(contentType) && /<!doctype html|<html|<form|<title/.test(firstText)) throw new Error("下载地址返回了网页而不是 Office 文件，可能需要登录、验证码，或分享链接已过期。");
+      const name = ensureFilenameExtension(preferredName || dispositionName || filenameFromUrl(effectiveUrl),contentType,effectiveUrl);
+      const file = new File([buffer],name,{ type:contentType, lastModified:Date.now() });
+      state.remoteController = null;
+      return { file, buffer, meta:{ originalUrl:targetUrl, effectiveUrl, viaProxy, contentType, contentDisposition:response.headers.get("content-disposition") || "" } };
+    }
+
+    async function downloadRemoteFile(targetUrl, options = {}) {
+      let directError = null;
+      setRemoteProgress(0,0,"正在连接文件服务器（直接模式）");
+      try { return await fetchRemoteAttempt(targetUrl,targetUrl,{...options,viaProxy:false}); }
+      catch (error) {
+        if (error?.name === "AbortError") throw error;
+        directError = error;
+      }
+      const template = configuredProxyTemplate();
+      const proxyUrl = buildProxyUrl(targetUrl,template);
+      if (!proxyUrl || proxyUrl === targetUrl) {
+        throw new Error(`浏览器无法直接读取该链接：${directError?.message || directError}。目标服务器需要允许 CORS；也可用附带的 Python 服务启动查看器，或配置跨域代理。`);
+      }
+      setRemoteProgress(0,0,template ? "直接读取失败，正在使用自定义代理" : "直接读取失败，正在尝试同源 Python 代理");
+      try { return await fetchRemoteAttempt(proxyUrl,targetUrl,{...options,viaProxy:true}); }
+      catch (proxyError) {
+        if (proxyError?.name === "AbortError") throw proxyError;
+        throw new Error(`远程文件读取失败。直接模式：${directError?.message || directError}；代理模式：${proxyError?.message || proxyError}。若目标链接需要登录或 Cookie，请改用本地下载后拖入。`);
+      }
+    }
+
+    function startupRemoteRequest() {
+      const query = new URLSearchParams(location.search);
+      let file = query.get("file") || query.get("url") || query.get("src") || "";
+      let name = query.get("name") || "";
+      if (!file && location.hash.length > 1) {
+        const hash = new URLSearchParams(location.hash.slice(1));
+        file = hash.get("file") || hash.get("url") || hash.get("src") || "";
+        name ||= hash.get("name") || "";
+      }
+      return file ? { url:file, name } : null;
+    }
+
+    function updateAddressForRemote(targetUrl, name = "") {
+      try {
+        const page = new URL(location.href); page.hash = ""; page.searchParams.delete("url"); page.searchParams.delete("src"); page.searchParams.set("file",targetUrl);
+        if (name) page.searchParams.set("name",name); else page.searchParams.delete("name");
+        history.replaceState(null,"",page.href);
+      } catch {}
+    }
+
+    function buildShareLink() {
+      if (!state.sourceUrl) return "";
+      const page = new URL(location.href); page.hash = ""; page.searchParams.delete("url"); page.searchParams.delete("src"); page.searchParams.set("file",state.sourceUrl);
+      if (state.file?.name) page.searchParams.set("name",state.file.name);
+      return page.href;
+    }
+
+    async function copyShareLink() {
+      const link = buildShareLink(); if (!link) return;
+      try { await navigator.clipboard.writeText(link); toast("直开链接已复制","接收方打开链接后会自动下载并预览文件。"); }
+      catch {
+        const input = document.createElement("textarea"); input.value = link; input.style.position = "fixed"; input.style.opacity = "0"; document.body.appendChild(input); input.select();
+        const ok = document.execCommand("copy"); input.remove(); toast(ok ? "直开链接已复制" : "无法自动复制",ok ? "可直接发送给接收方。" : link);
+      }
+    }
+
+    function openUrlDialog(prefill = "") {
+      if (prefill) els.urlInput.value = prefill;
+      try { els.proxyInput.value = localStorage.getItem("office-preview-proxy") || ""; } catch {}
+      openDialog(els.urlDialog);
+      setTimeout(() => { els.urlInput.focus(); if (!prefill) els.urlInput.select(); },0);
+    }
+
+    async function openRemoteUrl(rawUrl, options = {}) {
+      let target;
+      try { target = normalizeRemoteUrl(rawUrl); }
+      catch (error) { toast("下载链接无效",error?.message || String(error)); openUrlDialog(String(rawUrl || "")); return false; }
+      const token = ++state.loadToken;
+      abortRemoteDownload();
+      state.sourceMode = "remote"; state.sourceUrl = target; state.remoteMeta = null;
+      setBusy(true); showSurface("loading"); hideRemoteProgress(); setLoadStep("download");
+      els.loadingTitle.textContent = "正在获取远程 Office 文件";
+      els.loadingMessage.textContent = "先尝试浏览器直接下载；若跨域受限，将自动尝试同源代理。";
+      const provisionalName = sanitizeFilename(options.name || filenameFromUrl(target));
+      setFileHeader({ name:provisionalName, size:0 },"远程链接 · 准备下载");
+      setStatus("正在连接远程文件", "busy");
+      try {
+        const remote = await downloadRemoteFile(target,{ token, preferredName:options.name || "" });
+        if (token !== state.loadToken) return false;
+        state.remoteMeta = remote.meta;
+        const opened = await openFile(remote.file,{ token, buffer:remote.buffer, sourceMode:"remote", sourceUrl:target, remoteMeta:remote.meta });
+        if (opened && options.updateAddress !== false) updateAddressForRemote(target,remote.file.name);
+        return opened;
+      } catch (error) {
+        if (token !== state.loadToken) return false;
+        state.remoteController = null; setBusy(false); hideRemoteProgress();
+        if (error?.name === "AbortError") { showSurface(state.kind || "empty"); setStatus("远程下载已取消",state.kind ? "ready" : "idle"); toast("已取消远程下载"); return false; }
+        console.error(error); showSurface("error"); els.errorMessage.textContent = error?.message?.split("\n")[0] || "远程文件下载失败。"; els.errorDetails.textContent = error?.stack || error?.message || String(error); setStatus("远程文件读取失败","error"); toast("无法打开下载链接",els.errorMessage.textContent); return false;
+      }
+    }
+
+    function validateFile(file) {
+      if (!file) throw new Error("未选择文件。");
+      if (!file.size) throw new Error("文件为空。");
+      if (file.size > 300 * 1024 * 1024) throw new Error("文件超过 300 MB。为防止浏览器内存不足，请压缩媒体、拆分文件或使用桌面 Office 打开。");
+    }
+
+    function revokeBlobUrls(root) {
+      if (!root) return;
+      $$('[src^="blob:"],[href^="blob:"]', root).forEach(node => {
+        const url = node.getAttribute("src") || node.getAttribute("href");
+        try { URL.revokeObjectURL(url); } catch {}
+      });
+    }
+
+    function clearSearchMarks() {
+      state.ppt.activeHighlight?.dispose?.(); state.ppt.activeHighlight = null;
+      state.ppt.viewer?.clearSearchHighlights?.();
+      $$('[data-office-search-mark="1"]', els.wordHost).forEach(mark => mark.replaceWith(document.createTextNode(mark.textContent || "")));
+      els.wordHost.normalize();
+      $$("td.search-hit", els.excelGrid).forEach(cell => cell.classList.remove("search-hit"));
+      state.searchMarkPage = null;
+    }
+
+    function resetSearch() {
+      state.searchQuery = ""; els.searchInput.value = ""; els.clearSearchBtn.hidden = true; els.searchResults.hidden = true; els.searchResults.replaceChildren(); clearSearchMarks();
+    }
+
+    function cleanupDocument() {
+      clearSearchMarks();
+      state.ppt.thumbObserver?.disconnect(); state.ppt.thumbObserver = null;
+      for (const handle of state.ppt.thumbHandles.values()) { try { handle?.dispose?.(); } catch {} }
+      state.ppt.thumbHandles.clear();
+      try { state.ppt.viewer?.destroy?.(); } catch {}
+      state.ppt.viewer = null; state.ppt.presentation = null; els.pptHost.replaceChildren();
+      state.word.observer?.disconnect(); state.word.observer = null; revokeBlobUrls(els.wordHost); els.wordHost.replaceChildren(); els.wordStyleHost.replaceChildren(); els.wordHost.style.zoom = ""; els.wordHost.style.transform = ""; els.wordHost.style.transformOrigin = ""; state.word.pages = [];
+      els.excelScaleShell.style.zoom = ""; els.excelScaleShell.style.transform = ""; els.excelScaleShell.style.transformOrigin = ""; state.excel.workbook = null; state.excel.sheetMeta = []; state.excel.selectedAddress = "A1"; state.excel.windowRange = null; state.excel.renderedSheet = -1; els.excelGrid.replaceChildren(); els.sheetTabs.replaceChildren(); els.excelNotice.hidden = true;
+      state.navNodes.clear(); els.navList.replaceChildren();
+      state.current = 0; state.total = 0; state.zoom = 100; state.fit = true;
+      els.genericScroller.scrollTo(0,0); els.excelScroller.scrollTo(0,0);
+      resetSearch();
+    }
+
+    function resetFileUrl() { if (state.fileUrl) { try { URL.revokeObjectURL(state.fileUrl); } catch {} } state.fileUrl = null; }
+
+    async function openFile(file, options = {}) {
+      const token = Number.isInteger(options.token) ? options.token : ++state.loadToken;
+      if (!Number.isInteger(options.token)) abortRemoteDownload();
+      try {
+        state.sourceMode = options.sourceMode || "local";
+        state.sourceUrl = options.sourceUrl || null;
+        state.remoteMeta = options.remoteMeta || null;
+        validateFile(file); setBusy(true); cleanupDocument(); resetFileUrl(); applyKind(null); showSurface("loading"); hideRemoteProgress(); setFileHeader(file); setStatus("正在读取并识别文件", "busy");
+        els.loadingTitle.textContent = "正在打开 Office 文件"; els.loadingMessage.textContent = state.sourceMode === "remote" ? "远程文件已获取，正在验证文件签名与内部结构。" : "将根据文件签名与内部结构自动选择预览引擎。"; setLoadStep("detect");
+        const buffer = options.buffer || await file.arrayBuffer(); if (token !== state.loadToken) return false;
+        const detection = await detectOfficeType(file, buffer); if (token !== state.loadToken) return false;
+        const currentExt = extensionOf(file.name);
+        if ((!currentExt || ["bin","dat","tmp"].includes(currentExt)) && detection.extension) {
+          const base = sanitizeFilename(file.name.replace(/\.[^.]+$/,"") || "office-file");
+          file = new File([buffer],`${base}.${detection.extension}`,{type:file.type || "application/octet-stream",lastModified:file.lastModified || Date.now()});
+        }
+        if (detection.kind === "legacy-word") throw new Error("旧版 .doc 二进制格式无法在纯浏览器中可靠还原。请使用 Microsoft Word、WPS 或 LibreOffice 另存为 .docx 后再预览。");
+        if (detection.kind === "legacy-powerpoint") throw new Error("旧版 .ppt 二进制格式无法在纯浏览器中可靠还原。请使用 PowerPoint、WPS 或 LibreOffice 另存为 .pptx 后再预览。");
+
+        state.file = file; state.buffer = buffer; state.detection = detection; state.fileUrl = URL.createObjectURL(file); applyKind(detection.kind);
+        setLoadStep("engine", ["detect"]); setStatus(`已识别为 ${KIND_META[detection.kind].title}，正在加载引擎`, "busy");
+
+        if (detection.kind === "word") await renderWord(token);
+        else if (detection.kind === "excel") await renderExcel(token);
+        else if (detection.kind === "powerpoint") await renderPowerPoint(token);
+        else throw new Error("暂不支持该文件类型。");
+
+        if (token !== state.loadToken) return false;
+        setLoadStep("", ["detect","engine","parse","render"]); setBusy(false); updateFileInfo(); updateControls();
+        const meta = KIND_META[state.kind];
+        const sourceLabel = state.sourceMode === "remote" ? " · 远程链接" : "";
+        setFileHeader(file, `${state.total} ${meta.unit} · ${formatBytes(file.size)}${sourceLabel}${detection.macro ? " · 宏已禁用" : ""}`);
+        setStatus(`已打开 ${meta.title} · ${state.current + 1} / ${state.total}`, "ready");
+        if (window.innerWidth > 740) setSidebar(true);
+        toast(`${meta.title}已打开`, `${state.total} ${meta.unit} · ${formatBytes(file.size)}${sourceLabel}${detection.macro ? " · 宏不会执行" : ""}`);
+        return true;
+      } catch (error) {
+        console.error(error); if (token !== state.loadToken) return false;
+        setBusy(false); hideRemoteProgress(); showSurface("error");
+        els.errorMessage.textContent = error?.message?.split("\n")[0] || "打开文件时发生未知错误。";
+        els.errorDetails.textContent = error?.stack || error?.message || String(error);
+        setStatus("打开失败", "error"); toast("无法预览文件", els.errorMessage.textContent);
+        return false;
+      } finally {
+        if (token === state.loadToken) { els.fileInput.value = ""; updateControls(); }
+      }
+    }
+
+    function sanitizeRenderedLinks(root) {
+      $$('a[href]', root).forEach(anchor => {
+        const url = safeUrl(anchor.getAttribute("href"));
+        if (!url) { anchor.removeAttribute("href"); return; }
+        anchor.href = url; anchor.target = "_blank"; anchor.rel = "noopener noreferrer nofollow";
+      });
+      $$('script,iframe,object,embed', root).forEach(node => node.remove());
+    }
+
+    async function renderWord(token) {
+      setLoadStep("engine", ["detect"]); const docx = await loadWordEngine(); if (token !== state.loadToken) return;
+      if (state.file.size > 160 * 1024 * 1024) throw new Error("Word 文件超过 160 MB，浏览器端分页渲染可能耗尽内存。请压缩图片或拆分文档。");
+      setLoadStep("parse", ["detect","engine"]); setStatus("正在解析 Word 文档结构与媒体", "busy");
+      showSurface("word"); els.wordHost.replaceChildren(); els.wordStyleHost.replaceChildren();
+      await docx.renderAsync(state.buffer, els.wordHost, els.wordStyleHost, {
+        className: "docx", inWrapper: true, hideWrapperOnPrint: true, ignoreWidth: false, ignoreHeight: false, ignoreFonts: false,
+        breakPages: true, ignoreLastRenderedPageBreak: false, experimental: true, trimXmlDeclaration: true, useBase64URL: false,
+        renderChanges: false, renderHeaders: true, renderFooters: true, renderFootnotes: true, renderEndnotes: true, renderComments: false, renderAltChunks: false, debug: false
+      });
+      if (token !== state.loadToken) return;
+      setLoadStep("render", ["detect","engine","parse"]); setStatus("正在构建 Word 分页与导航", "busy"); await nextFrame(); sanitizeRenderedLinks(els.wordHost);
+      let pages = $$(".docx-wrapper > section.docx", els.wordHost);
+      if (!pages.length) pages = $$("section.docx", els.wordHost);
+      if (!pages.length) { const wrapper = $(".docx-wrapper", els.wordHost) || els.wordHost; pages = [wrapper]; }
+      pages.forEach((page,index) => { page.dataset.officePage = String(index); page.id = `office-word-page-${index + 1}`; page.setAttribute("aria-label", `第 ${index + 1} 页`); });
+      state.word.pages = pages; state.total = pages.length; state.current = 0; state.zoom = 100; state.fit = true;
+      state.word.naturalWidth = Math.max(...pages.map(page => page.offsetWidth || 0), 816);
+      buildWordNav(); setupWordObserver(); updateControls(); await fitToWindow(); highlightCurrentNav();
+    }
+
+    function buildWordNav() {
+      els.navList.replaceChildren(); state.navNodes.clear(); const fragment = document.createDocumentFragment();
+      state.word.pages.forEach((page,index) => {
+        const raw = (page.innerText || page.textContent || "").replace(/\s+/g," ").trim();
+        const title = raw ? raw.slice(0,38) : `第 ${index + 1} 页`;
+        const snippet = raw.length > 38 ? raw.slice(38,96) : "Word 文档页面";
+        const button = document.createElement("button"); button.type = "button"; button.className = "nav-card"; button.dataset.index = String(index);
+        button.innerHTML = `<div class="nav-card-row"><div class="nav-icon-box page-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h5M10 12h6M10 16h4"/></svg></div><div class="nav-main"><div class="nav-name"></div><div class="nav-meta"></div></div><div class="nav-index">${String(index + 1).padStart(2,"0")}</div></div>`;
+        $(".nav-name",button).textContent = title; $(".nav-meta",button).textContent = snippet;
+        button.addEventListener("click", () => navigateTo(index)); state.navNodes.set(index,button); fragment.appendChild(button);
+      });
+      els.navList.appendChild(fragment);
+    }
+
+    function setupWordObserver() {
+      state.word.observer?.disconnect();
+      let ratios = new Map();
+      state.word.observer = new IntersectionObserver(entries => {
+        for (const entry of entries) ratios.set(Number(entry.target.dataset.officePage), entry.isIntersecting ? entry.intersectionRatio : 0);
+        let best = state.current, bestRatio = -1;
+        for (const [index,ratio] of ratios) if (ratio > bestRatio) { best = index; bestRatio = ratio; }
+        if (bestRatio > 0 && best !== state.current && !state.busy) { state.current = best; updateControls(); highlightCurrentNav(); setStatus(`Word · 第 ${best + 1} / ${state.total} 页`, "ready"); }
+      }, { root: els.genericScroller, threshold:[0,.05,.2,.45,.7] });
+      state.word.pages.forEach(page => state.word.observer.observe(page));
+    }
+
+    async function renderExcel(token) {
+      setLoadStep("engine", ["detect"]); const XLSX = await loadSheetEngine(); if (token !== state.loadToken) return;
+      if (state.file.size > 220 * 1024 * 1024) throw new Error("Excel 文件超过 220 MB，浏览器端解析可能耗尽内存。请拆分工作簿或移除大型嵌入对象。");
+      setLoadStep("parse", ["detect","engine"]); setStatus("正在解析工作簿、工作表与单元格", "busy");
+      const workbook = XLSX.read(state.buffer, { type:"array", cellDates:true, cellFormula:true, cellStyles:true, cellHTML:false, cellNF:true, dense:true, bookVBA:false, WTF:false });
+      if (token !== state.loadToken) return;
+      if (!workbook?.SheetNames?.length) throw new Error("工作簿中没有可显示的工作表。");
+      state.excel.workbook = workbook;
+      state.excel.sheetMeta = workbook.SheetNames.map((name,index) => {
+        const ws = workbook.Sheets[name]; const ref = ws?.["!ref"] || "A1";
+        let rows = 0, cols = 0;
+        try { const range = XLSX.utils.decode_range(ref); rows = range.e.r - range.s.r + 1; cols = range.e.c - range.s.c + 1; } catch {}
+        const visibility = Number(workbook?.Workbook?.Sheets?.[index]?.Hidden || 0); return { name,index,ref,rows,cols,visibility };
+      });
+      state.total = workbook.SheetNames.length; state.current = 0; state.zoom = 100; state.fit = false;
+      setLoadStep("render", ["detect","engine","parse"]); setStatus("正在构建工作表网格", "busy");
+      showSurface("excel"); buildExcelNav(); buildSheetTabs(); await renderExcelSheet(0, { resetScroll:true }); updateControls(); highlightCurrentNav();
+    }
+
+    function getExcelCell(ws, row, col, XLSX) {
+      if (Array.isArray(ws)) return ws[row]?.[col];
+      if (Array.isArray(ws?.["!data"])) return ws["!data"][row]?.[col];
+      return ws?.[XLSX.utils.encode_cell({r:row,c:col})];
+    }
+
+    function getColor(color) {
+      if (!color) return "";
+      let rgb = color.rgb || color.argb || "";
+      if (rgb) { rgb = String(rgb).replace(/^#/i,""); if (rgb.length === 8) rgb = rgb.slice(2); if (/^[0-9a-f]{6}$/i.test(rgb)) return `#${rgb}`; }
+      return "";
+    }
+
+    function applyExcelStyle(td, cell) {
+      const style = cell?.s; if (!style || typeof style !== "object") return;
+      const font = style.font || {}; const fill = style.fill || {}; const align = style.alignment || {}; const border = style.border || {};
+      const fontColor = getColor(font.color); if (fontColor) td.style.color = fontColor;
+      if (font.bold) td.style.fontWeight = "700"; if (font.italic) td.style.fontStyle = "italic"; if (font.underline) td.style.textDecoration = "underline";
+      if (font.sz) td.style.fontSize = `${Math.max(7,Math.min(40,Number(font.sz)))}pt`; if (font.name) td.style.fontFamily = `${font.name},Calibri,var(--font)`;
+      const fillColor = getColor(fill.fgColor || fill.patternColor); if (fillColor && fill.patternType !== "none") td.style.backgroundColor = fillColor;
+      if (align.horizontal) td.style.textAlign = ({center:"center",right:"right",left:"left",justify:"justify"})[align.horizontal] || td.style.textAlign;
+      if (align.vertical) td.style.verticalAlign = ({center:"middle",top:"top",bottom:"bottom"})[align.vertical] || td.style.verticalAlign;
+      if (align.wrapText) { td.style.whiteSpace = "pre-wrap"; td.style.textOverflow = "clip"; }
+      for (const [side,css] of [["top","borderTop"],["right","borderRight"],["bottom","borderBottom"],["left","borderLeft"]]) {
+        const part = border[side]; if (!part) continue; const color = getColor(part.color) || "currentColor"; const width = ["medium","thick","double"].includes(part.style) ? 2 : 1; td.style[css] = `${width}px solid ${color}`;
+      }
+    }
+
+    function renderCellContent(cell, XLSX) {
+      if (!cell) return { text:"", raw:"", formula:"" };
+      let text = "";
+      try { text = cell.w != null ? String(cell.w) : XLSX.utils.format_cell(cell); } catch { text = cell.v == null ? "" : String(cell.v); }
+      if (cell.t === "e" && cell.w) text = String(cell.w);
+      const raw = cell.v instanceof Date ? cell.v.toLocaleString("zh-CN") : cell.v == null ? "" : String(cell.v);
+      return { text, raw, formula: cell.f ? `=${cell.f}` : "" };
+    }
+
+    function buildMergeMap(merges, visible) {
+      const starts = new Map(), covered = new Set();
+      for (const merge of merges || []) {
+        if (merge.e.r < visible.s.r || merge.s.r > visible.e.r || merge.e.c < visible.s.c || merge.s.c > visible.e.c) continue;
+        const sr = Math.max(merge.s.r,visible.s.r), sc = Math.max(merge.s.c,visible.s.c), er = Math.min(merge.e.r,visible.e.r), ec = Math.min(merge.e.c,visible.e.c);
+        starts.set(`${sr}:${sc}`, { rowspan:er-sr+1, colspan:ec-sc+1 });
+        for (let r=sr;r<=er;r++) for (let c=sc;c<=ec;c++) if (!(r===sr && c===sc)) covered.add(`${r}:${c}`);
+      }
+      return { starts, covered };
+    }
+
+    function computeExcelWindow(range, focus) {
+      const totalRows = range.e.r - range.s.r + 1, totalCols = range.e.c - range.s.c + 1;
+      const maxCols = Math.min(totalCols, 220); const maxCells = 110000; const maxRows = Math.max(80, Math.min(totalRows, Math.floor(maxCells / Math.max(1,maxCols))));
+      let startR = range.s.r, startC = range.s.c;
+      if (focus) {
+        startR = Math.max(range.s.r, Math.min(focus.r - Math.floor(maxRows * .3), range.e.r - maxRows + 1));
+        startC = Math.max(range.s.c, Math.min(focus.c - Math.floor(maxCols * .25), range.e.c - maxCols + 1));
+      }
+      return { s:{r:startR,c:startC}, e:{r:Math.min(range.e.r,startR+maxRows-1),c:Math.min(range.e.c,startC+maxCols-1)}, truncated: maxRows < totalRows || maxCols < totalCols, totalRows, totalCols };
+    }
+
+    async function renderExcelSheet(index, options = {}) {
+      const XLSX = window.XLSX; const wb = state.excel.workbook; if (!XLSX || !wb) return;
+      const target = Math.max(0,Math.min(wb.SheetNames.length-1,Number(index)||0)); const name = wb.SheetNames[target]; const ws = wb.Sheets[name];
+      if (!ws) throw new Error(`无法读取工作表“${name}”。`);
+      state.current = target; state.excel.renderedSheet = target; clearSearchMarks();
+      let range; try { range = XLSX.utils.decode_range(ws["!ref"] || "A1"); } catch { range = {s:{r:0,c:0},e:{r:0,c:0}}; }
+      let focus = null; if (options.focusAddress) { try { focus = XLSX.utils.decode_cell(options.focusAddress.toUpperCase()); } catch {} }
+      const visible = computeExcelWindow(range, focus); state.excel.windowRange = visible;
+      const mergeMap = buildMergeMap(ws["!merges"] || [], visible); const table = els.excelGrid; table.replaceChildren();
+
+      const colgroup = document.createElement("colgroup"); const rowCol = document.createElement("col"); rowCol.style.width = "48px"; colgroup.appendChild(rowCol);
+      const cols = ws["!cols"] || [];
+      for (let c=visible.s.c;c<=visible.e.c;c++) { const col = document.createElement("col"); const info = cols[c] || {}; let width = Number(info.wpx) || (Number(info.wch) ? Number(info.wch)*7.2+14 : 96); width = Math.max(48,Math.min(420,width)); col.style.width = `${width}px`; if(info.hidden) col.style.display = "none"; colgroup.appendChild(col); }
+      table.appendChild(colgroup);
+
+      const thead = document.createElement("thead"), headRow = document.createElement("tr"), corner = document.createElement("th"); corner.className = "corner"; corner.textContent = ""; headRow.appendChild(corner);
+      for (let c=visible.s.c;c<=visible.e.c;c++) { const th = document.createElement("th"); th.scope = "col"; th.textContent = columnName(c); headRow.appendChild(th); }
+      thead.appendChild(headRow); table.appendChild(thead);
+
+      const tbody = document.createElement("tbody"); const rowsInfo = ws["!rows"] || [];
+      for (let r=visible.s.r;r<=visible.e.r;r++) {
+        const tr = document.createElement("tr"); const rowInfo = rowsInfo[r] || {}; if(rowInfo.hidden) tr.hidden = true; if (rowInfo.hpx) tr.style.height = `${Math.max(18,Math.min(200,rowInfo.hpx))}px`;
+        const rh = document.createElement("th"); rh.scope = "row"; rh.textContent = String(r+1); tr.appendChild(rh);
+        for (let c=visible.s.c;c<=visible.e.c;c++) {
+          const key = `${r}:${c}`; if (mergeMap.covered.has(key)) continue;
+          const td = document.createElement("td"), address = XLSX.utils.encode_cell({r,c}), cell = getExcelCell(ws,r,c,XLSX), content = renderCellContent(cell,XLSX);
+          td.dataset.address = address; td.dataset.row = String(r); td.dataset.col = String(c); td.setAttribute("role","gridcell"); td.tabIndex = -1;
+          const merge = mergeMap.starts.get(key); if (merge) { td.rowSpan = merge.rowspan; td.colSpan = merge.colspan; }
+          const div = document.createElement("div"); div.className = "cell-content";
+          const hyperlink = safeUrl(cell?.l?.Target || cell?.l?.target || "");
+          if (hyperlink && content.text) { const a = document.createElement("a"); a.href = hyperlink; a.target = "_blank"; a.rel = "noopener noreferrer nofollow"; a.textContent = content.text; div.appendChild(a); }
+          else div.textContent = content.text;
+          td.appendChild(div); td.title = content.formula || content.text;
+          if (cell?.f) td.classList.add("formula-cell"); if (cell?.c?.length) td.classList.add("comment-cell"); applyExcelStyle(td,cell); tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+      }
+      table.appendChild(tbody);
+      const renderedRows = visible.e.r-visible.s.r+1, renderedCols = visible.e.c-visible.s.c+1;
+      if (visible.truncated) { els.excelNotice.hidden = false; els.excelNotice.textContent = `大型工作表性能保护：当前显示 ${XLSX.utils.encode_cell(visible.s)}:${XLSX.utils.encode_cell(visible.e)}（${renderedRows} 行 × ${renderedCols} 列），名称框或搜索可跳转到其他区域。完整使用范围为 ${ws["!ref"] || "A1"}。`; }
+      else els.excelNotice.hidden = true;
+      updateSheetTabs(); highlightCurrentNav(); updateControls();
+      if (options.resetScroll) els.excelScroller.scrollTo(0,0);
+      await nextFrame();
+      const address = options.focusAddress || state.excel.selectedAddress || XLSX.utils.encode_cell(visible.s); selectExcelCell(address, { scroll:Boolean(options.focusAddress), preserveIfMissing:false });
+      if (state.fit) await fitToWindow();
+      setStatus(`Excel · ${name} · ${ws["!ref"] || "空工作表"}`, "ready");
+    }
+
+    function buildExcelNav() {
+      els.navList.replaceChildren(); state.navNodes.clear(); const fragment = document.createDocumentFragment();
+      state.excel.sheetMeta.forEach(meta => {
+        const button = document.createElement("button"); button.type = "button"; button.className = "nav-card"; button.dataset.index = String(meta.index);
+        button.innerHTML = `<div class="nav-card-row"><div class="nav-icon-box sheet-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16M14 9v11"/></svg></div><div class="nav-main"><div class="nav-name"></div><div class="nav-meta"></div></div><div class="nav-index">${String(meta.index+1).padStart(2,"0")}</div></div>`;
+        $(".nav-name",button).textContent = meta.name; $(".nav-meta",button).textContent = `${meta.ref} · ${meta.rows} 行 × ${meta.cols} 列${meta.visibility ? meta.visibility === 2 ? " · 深度隐藏" : " · 隐藏" : ""}`; if(meta.visibility) button.style.opacity = ".72";
+        button.addEventListener("click", () => navigateTo(meta.index)); state.navNodes.set(meta.index,button); fragment.appendChild(button);
+      }); els.navList.appendChild(fragment);
+    }
+
+    function buildSheetTabs() {
+      els.sheetTabs.replaceChildren(); const fragment = document.createDocumentFragment();
+      state.excel.sheetMeta.forEach(meta => { const button = document.createElement("button"); button.type = "button"; button.className = "sheet-tab"; button.dataset.index = String(meta.index); button.textContent = meta.name; button.title = `${meta.name} · ${meta.ref}${meta.visibility ? " · 隐藏工作表" : ""}`; if(meta.visibility) button.style.opacity = ".68"; button.addEventListener("click", () => navigateTo(meta.index)); fragment.appendChild(button); });
+      els.sheetTabs.appendChild(fragment); updateSheetTabs();
+    }
+
+    function updateSheetTabs() { $$(".sheet-tab",els.sheetTabs).forEach((node,index) => node.classList.toggle("current",index===state.current)); const current = $(`.sheet-tab[data-index="${state.current}"]`,els.sheetTabs); current?.scrollIntoView?.({inline:"nearest",block:"nearest"}); }
+
+    function selectExcelCell(address, options = {}) {
+      const XLSX = window.XLSX; if (!XLSX) return false; const normalized = String(address || "").trim().toUpperCase();
+      let cellPos; try { cellPos = XLSX.utils.decode_cell(normalized); } catch { toast("单元格地址无效", normalized || "请输入例如 A1、C25"); return false; }
+      const visible = state.excel.windowRange;
+      if (!visible || cellPos.r < visible.s.r || cellPos.r > visible.e.r || cellPos.c < visible.s.c || cellPos.c > visible.e.c) {
+        if (options.preserveIfMissing !== false) { renderExcelSheet(state.current,{focusAddress:normalized}).catch(error => toast("无法跳转",error?.message||String(error))); return true; }
+        return false;
+      }
+      $$("td.selected",els.excelGrid).forEach(td => td.classList.remove("selected")); const td = $(`td[data-address="${cssEscape(normalized)}"]`,els.excelGrid);
+      if (!td) return false; td.classList.add("selected"); state.excel.selectedAddress = normalized; els.nameBox.value = normalized;
+      const ws = state.excel.workbook.Sheets[state.excel.workbook.SheetNames[state.current]], cell = getExcelCell(ws,cellPos.r,cellPos.c,XLSX), content = renderCellContent(cell,XLSX);
+      els.formulaInput.value = content.formula || content.raw || content.text; els.formulaInput.title = els.formulaInput.value;
+      if (options.scroll) td.scrollIntoView({block:"center",inline:"center"}); setStatus(`Excel · ${state.excel.workbook.SheetNames[state.current]}!${normalized}${content.formula ? ` · ${content.formula}` : ""}`,"ready"); return true;
+    }
+
+    async function renderPowerPoint(token) {
+      setLoadStep("engine", ["detect"]); const mod = await loadPptEngine(); if (token !== state.loadToken) return;
+      if (state.file.size > 260 * 1024 * 1024) throw new Error("PowerPoint 文件超过 260 MB，浏览器端媒体解码可能耗尽内存。请压缩图片和视频后重试。");
+      setLoadStep("parse", ["detect","engine"]); setStatus("正在解析幻灯片、母版、主题与媒体", "busy");
+      const parse = mod.parseZipLazyMedia || mod.parseZip, limits = mod.RECOMMENDED_ZIP_LIMITS; const files = await parse(state.buffer,limits); if (token !== state.loadToken) return;
+      const presentation = mod.buildPresentation(files,{lazySlides:true}), total = presentation?.slides?.length || 0; if (!total) throw new Error("未在演示文稿中找到可显示的幻灯片。");
+      const viewer = new mod.PptxViewer(els.pptHost,{fitMode:"contain",zoomPercent:100,scrollContainer:els.genericScroller,lazySlides:true,lazyMedia:true,zipLimits:limits,onNodeError:(_id,error)=>console.warn("PPTX 节点警告",error),onSlideError:(index,error)=>console.warn(`第 ${index+1} 页警告`,error)});
+      viewer.load(presentation); state.ppt.viewer = viewer; state.ppt.presentation = presentation; state.total = total; state.current = 0; state.zoom = 100; state.fit = true;
+      setLoadStep("render", ["detect","engine","parse"]); setStatus("正在呈现第一页并生成缩略图", "busy"); showSurface("powerpoint"); await viewer.renderSlide(0); sanitizeRenderedLinks(els.pptHost); if (token !== state.loadToken) return;
+      buildPptNav(); updateControls(); highlightCurrentNav();
+    }
+
+    function buildPptNav() {
+      els.navList.replaceChildren(); state.navNodes.clear(); state.ppt.thumbObserver?.disconnect();
+      for (const handle of state.ppt.thumbHandles.values()) { try { handle?.dispose?.(); } catch {} } state.ppt.thumbHandles.clear();
+      const observer = new IntersectionObserver(async entries => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue; const preview = entry.target, index = Number(preview.dataset.index); observer.unobserve(preview);
+          if (!state.ppt.viewer || state.ppt.thumbHandles.has(index)) continue;
+          try { const handle = state.ppt.viewer.renderThumbnailToContainer(index,preview,{width:Math.max(160,preview.clientWidth||200)}); if (handle) { state.ppt.thumbHandles.set(index,handle); await handle.ready; $(".thumb-placeholder",preview)?.remove(); } }
+          catch (error) { const p=$(".thumb-placeholder",preview); if(p)p.textContent="缩略图不可用"; console.warn(error); }
+        }
+      },{root:els.sideScroll,rootMargin:"260px 0px",threshold:.01}); state.ppt.thumbObserver=observer;
+      const fragment=document.createDocumentFragment();
+      for(let i=0;i<state.total;i++) { const button=document.createElement("button"); button.type="button"; button.className="nav-card thumb-card"; button.dataset.index=String(i); button.setAttribute("aria-label",`转到第 ${i+1} 页`); button.innerHTML=`<div class="thumb-preview" data-index="${i}"><span class="thumb-placeholder">第 ${i+1} 页</span></div><div class="thumb-meta"><span>${String(i+1).padStart(2,"0")}</span><span>PPT</span></div>`; button.addEventListener("click",()=>navigateTo(i)); state.navNodes.set(i,button); fragment.appendChild(button); observer.observe($(".thumb-preview",button)); }
+      els.navList.appendChild(fragment);
+    }
+
+    function highlightCurrentNav() {
+      for (const [index,node] of state.navNodes) { const current=index===state.current; node.classList.toggle("current",current); node.setAttribute("aria-current",current?"page":"false"); }
+      state.navNodes.get(state.current)?.scrollIntoView?.({block:"nearest"}); updateSheetTabs();
+    }
+
+    async function navigateTo(index, options = {}) {
+      if (!state.kind || state.busy) return; const target=Math.max(0,Math.min(state.total-1,Number(index)||0));
+      if (state.kind === "powerpoint") {
+        if (target===state.current && !options.force) return; setBusy(true); clearSearchMarks(); setStatus(`正在呈现第 ${target+1} 页`,"busy");
+        try { await state.ppt.viewer.renderSlide(target); sanitizeRenderedLinks(els.pptHost); state.current=target; if(options.searchResult){await nextFrame();state.ppt.activeHighlight=await state.ppt.viewer.highlightSearchResult?.(options.searchResult,{borderColor:"#f0ba5b",backgroundColor:"rgba(240,186,91,.22)",borderRadius:5,borderWidth:2,padding:3,boxShadow:"0 0 0 3px rgba(240,186,91,.14)"});} setStatus(`PowerPoint · 第 ${target+1} / ${state.total} 页`,"ready"); }
+        catch(error){toast("幻灯片呈现失败",error?.message||String(error));setStatus("呈现失败","error");} finally{setBusy(false);highlightCurrentNav();updateControls();}
+      } else if (state.kind === "word") {
+        state.current=target; updateControls(); highlightCurrentNav(); state.word.pages[target]?.scrollIntoView?.({block:"start",inline:"center"});
+        if(options.query) highlightWordPage(target,options.query); else if(state.searchMarkPage!==null) clearSearchMarks(); setStatus(`Word · 第 ${target+1} / ${state.total} 页`,"ready"); if(window.innerWidth<=740)setMobileSidebar(false);
+      } else if (state.kind === "excel") {
+        if(target===state.current && !options.focusAddress && !options.force)return; setBusy(true);
+        try{await renderExcelSheet(target,{resetScroll:!options.focusAddress,focusAddress:options.focusAddress});if(options.query&&options.focusAddress){const td=$(`td[data-address="${cssEscape(options.focusAddress)}"]`,els.excelGrid);td?.classList.add("search-hit");}}catch(error){toast("工作表呈现失败",error?.message||String(error));setStatus("呈现失败","error");}finally{setBusy(false);highlightCurrentNav();updateControls();}
+      }
+      if(window.innerWidth<=740)setMobileSidebar(false);
+    }
+
+    function setVisualZoom(element, value, origin = "top center") {
+      const scale = value / 100;
+      if (CSS.supports?.("zoom","1")) { element.style.zoom = String(scale); element.style.transform = ""; element.style.transformOrigin = ""; }
+      else { element.style.zoom = ""; element.style.transform = `scale(${scale})`; element.style.transformOrigin = origin; }
+    }
+
+    async function setZoom(value, fit = false) {
+      if (!state.kind || state.busy) return; const next=Math.max(10,Math.min(400,Math.round(Number(value)||100))); state.fit=Boolean(fit);
+      try {
+        if (state.kind === "powerpoint") { if(fit){await state.ppt.viewer.setFitMode("contain");state.zoom=100;}else{await state.ppt.viewer.setFitMode("none");await state.ppt.viewer.setZoom(next);state.zoom=next;} }
+        else if (state.kind === "word") { state.zoom=fit?await calculateWordFit():next; setVisualZoom(els.wordHost,state.zoom,"top center"); }
+        else if (state.kind === "excel") { state.zoom=fit?await calculateExcelFit():next; setVisualZoom(els.excelScaleShell,state.zoom,"top left"); }
+        updateControls(); setStatus(fit?KIND_META[state.kind].fit:`缩放 ${state.zoom}%`,"ready");
+      } catch(error){toast("缩放失败",error?.message||String(error));}
+    }
+
+    async function calculateWordFit() { setVisualZoom(els.wordHost,100,"top center"); await nextFrame(); const width=Math.max(...state.word.pages.map(page=>page.offsetWidth||0),state.word.naturalWidth||816); const available=Math.max(260,els.genericScroller.clientWidth-54); return Math.max(25,Math.min(200,Math.floor(available/width*100))); }
+    async function calculateExcelFit() { setVisualZoom(els.excelScaleShell,100,"top left"); await nextFrame(); const width=Math.max(1,els.excelGrid.offsetWidth); const available=Math.max(260,els.excelScroller.clientWidth-20); return Math.max(25,Math.min(150,Math.floor(available/width*100))); }
+    async function fitToWindow() { return setZoom(100,true); }
+    function stepZoom(direction) { const presets=[25,33,50,67,75,90,100,110,125,150,175,200,250,300,400], current=state.fit?state.zoom:state.zoom; setZoom(direction>0?(presets.find(v=>v>current)??400):([...presets].reverse().find(v=>v<current)??25)); }
+
+    function highlightWordPage(index, query) {
+      clearSearchMarks(); const page=state.word.pages[index]; if(!page||!query)return;
+      const pattern=new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"ig"); const walker=document.createTreeWalker(page,NodeFilter.SHOW_TEXT,{acceptNode(node){if(!node.nodeValue?.trim())return NodeFilter.FILTER_REJECT;const parent=node.parentElement;if(!parent||["SCRIPT","STYLE","MARK"].includes(parent.tagName))return NodeFilter.FILTER_REJECT;pattern.lastIndex=0;return pattern.test(node.nodeValue)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;}});
+      const nodes=[]; while(walker.nextNode())nodes.push(walker.currentNode); let first=null;
+      for(const node of nodes){pattern.lastIndex=0;const text=node.nodeValue,fragment=document.createDocumentFragment();let last=0,match;while((match=pattern.exec(text))){fragment.appendChild(document.createTextNode(text.slice(last,match.index)));const mark=document.createElement("mark");mark.dataset.officeSearchMark="1";mark.textContent=match[0];fragment.appendChild(mark);first ||= mark;last=match.index+match[0].length;if(!match[0].length)pattern.lastIndex++;}fragment.appendChild(document.createTextNode(text.slice(last)));node.replaceWith(fragment);} first?.scrollIntoView?.({block:"center",inline:"nearest"}); state.searchMarkPage=index;
+    }
+
+    function performSearch(query) {
+      clearTimeout(state.searchTimer); state.searchTimer=setTimeout(async()=>{const term=String(query||"").trim();els.clearSearchBtn.hidden=!term;if(!term||!state.kind){els.searchResults.hidden=true;els.searchResults.replaceChildren();state.searchQuery="";clearSearchMarks();return;}state.searchQuery=term;setStatus(`正在搜索“${term}”`,"busy");try{let results=[];if(state.kind==="powerpoint")results=searchPpt(term);else if(state.kind==="word")results=searchWord(term);else if(state.kind==="excel")results=await searchExcel(term);renderSearchResults(term,results.slice(0,120),results.length);setStatus(`搜索完成 · ${results.length} 个匹配`,"ready");}catch(error){console.error(error);els.searchResults.hidden=false;els.searchResults.innerHTML=`<div class="search-summary">搜索失败：${escapeHtml(error?.message||String(error))}</div>`;setStatus("搜索失败","error");}},230);
+    }
+
+    function searchPpt(term) { return state.ppt.viewer?.searchText(term,{matchCase:false,wholeWord:false,snippetRadius:58}) || []; }
+    function searchWord(term) { const q=term.toLocaleLowerCase();const results=[];state.word.pages.forEach((page,index)=>{const text=(page.innerText||page.textContent||"").replace(/\s+/g," ").trim();let from=0,pos;while((pos=text.toLocaleLowerCase().indexOf(q,from))!==-1&&results.length<500){results.push({kind:"word",unitIndex:index,text:text.slice(Math.max(0,pos-45),Math.min(text.length,pos+q.length+65))});from=pos+Math.max(1,q.length);}});return results; }
+    async function searchExcel(term) {
+      const XLSX=window.XLSX,wb=state.excel.workbook,q=term.toLocaleLowerCase(),results=[];let inspected=0;const MAX_INSPECT=700000;
+      for(let s=0;s<wb.SheetNames.length&&results.length<500;s++){const name=wb.SheetNames[s],ws=wb.Sheets[name];let range;try{range=XLSX.utils.decode_range(ws["!ref"]||"A1");}catch{continue;}for(let r=range.s.r;r<=range.e.r&&results.length<500;r++){for(let c=range.s.c;c<=range.e.c&&results.length<500;c++){if(++inspected>MAX_INSPECT)return results;if(inspected%20000===0)await new Promise(resolve=>setTimeout(resolve,0));const cell=getExcelCell(ws,r,c,XLSX);if(!cell)continue;const content=renderCellContent(cell,XLSX),hay=`${content.text} ${content.formula} ${content.raw}`.toLocaleLowerCase();if(hay.includes(q))results.push({kind:"excel",unitIndex:s,address:XLSX.utils.encode_cell({r,c}),text:content.formula?`${content.formula} → ${content.text}`:content.text,sheetName:name});}}}return results;
+    }
+
+    function highlightedSnippet(text,term){const clean=String(text||"").replace(/\s+/g," ").trim(),safe=escapeHtml(clean),escaped=term.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");try{return safe.replace(new RegExp(escaped,"ig"),m=>`<mark>${m}</mark>`);}catch{return safe;}}
+
+    function renderSearchResults(term,results,total){els.searchResults.replaceChildren();els.searchResults.hidden=false;const summary=document.createElement("div");summary.className="search-summary";summary.textContent=total>results.length?`找到 ${total} 个匹配，显示前 ${results.length} 个`:`找到 ${total} 个匹配`;els.searchResults.appendChild(summary);if(!results.length){const empty=document.createElement("div");empty.className="search-summary";empty.textContent="没有找到相关内容。";els.searchResults.appendChild(empty);return;}
+      results.forEach(result=>{const button=document.createElement("button");button.type="button";button.className="search-result";let location="";if(state.kind==="powerpoint")location=`第 ${result.slideIndex+1} 页`;else if(state.kind==="word")location=`第 ${result.unitIndex+1} 页`;else location=`${result.sheetName}!${result.address}`;button.innerHTML=`<div class="search-result-loc"></div><div class="search-result-text">${highlightedSnippet(result.snippet||result.text,term)}</div>`;$(".search-result-loc",button).textContent=location;button.addEventListener("click",()=>{if(state.kind==="powerpoint")navigateTo(result.slideIndex,{force:true,searchResult:result});else if(state.kind==="word")navigateTo(result.unitIndex,{query:term,force:true});else navigateTo(result.unitIndex,{focusAddress:result.address,query:term,force:true});});els.searchResults.appendChild(button);});
+    }
+
+    function clearSearch(){resetSearch();els.searchInput.focus();setStatus(state.kind?`${KIND_META[state.kind].title} · ${state.current+1} / ${state.total}`:"等待打开文件",state.kind?"ready":"idle");}
+
+    function updateFileInfo(){
+      els.fileInfoGrid.replaceChildren();
+      if(!state.file){const rows=[["文件","尚未加载"],["支持范围","Word、Excel、PowerPoint 现代格式与常见表格格式"],["处理方式","浏览器本地解析，不上传文件"]];appendInfoRows(rows);return;}
+      const meta=KIND_META[state.kind],ext=(state.detection?.extension||extensionOf(state.file.name)).toUpperCase();let structure=`${state.total} ${meta.unit}`;
+      if(state.kind==="excel"&&state.excel.workbook)structure+=` · ${state.excel.sheetMeta.reduce((sum,s)=>sum+s.rows*s.cols,0).toLocaleString("zh-CN")} 个使用范围单元格`;
+      const engine=state.kind==="word"?`docx-preview ${VERSIONS.docx}`:state.kind==="excel"?`SheetJS CE ${VERSIONS.sheetjs}`:`pptx-renderer ${VERSIONS.pptx}`;
+      const source=state.sourceMode==="remote"?(state.remoteMeta?.viaProxy?"远程下载链接（经同源/自定义代理获取）":"远程下载链接（浏览器直接获取）"):"本地文件";
+      const rows=[["文件",state.file.name],["来源",source]];if(state.sourceUrl)rows.push(["源地址",state.sourceUrl]);rows.push(["检测类型",`${meta.title}（${ext}）`],["识别依据",state.detection?.confidence==="package"?"OOXML 包内部结构":state.detection?.confidence||"文件签名与扩展名"],["文件大小",formatBytes(state.file.size)],["文档结构",structure],["修改时间",formatDate(state.file.lastModified)],["预览引擎",engine],["宏与脚本",state.detection?.macro?"检测到宏格式；宏已完全禁用":"不执行任何宏、ActiveX 或脚本"],["处理方式","下载完成后在浏览器本地解析；文件内容不上传到预览服务"]);appendInfoRows(rows);
+    }
+
+    function appendInfoRows(rows){for(const [key,value] of rows){const dt=document.createElement("dt"),dd=document.createElement("dd");dt.textContent=key;dd.textContent=value;els.fileInfoGrid.append(dt,dd);}}
+
+    function setSidebar(open){state.sidebarOpen=Boolean(open);els.workspace.classList.toggle("sidebar-collapsed",!state.sidebarOpen);els.sidebarBtn.classList.toggle("active",state.sidebarOpen);try{localStorage.setItem("office-preview-sidebar",state.sidebarOpen?"1":"0");}catch{}requestAnimationFrame(()=>{if(state.kind&&state.fit)fitToWindow();});}
+    function setMobileSidebar(open){els.workspace.classList.toggle("mobile-sidebar-open",Boolean(open));}
+    function applyTheme(theme){const next=theme==="light"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("office-preview-theme",next);}catch{}}
+    function toggleTheme(){applyTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");}
+    function downloadOriginal(){if(!state.file||!state.fileUrl)return;const a=document.createElement("a");a.href=state.fileUrl;a.download=state.file.name;document.body.appendChild(a);a.click();a.remove();}
+    async function toggleFullscreen(){try{if(!document.fullscreenElement)await els.viewerArea.requestFullscreen();else await document.exitFullscreen();}catch(error){toast("无法进入全屏",error?.message||String(error));}}
+    function openDialog(dialog){if(typeof dialog.showModal==="function")dialog.showModal();else dialog.setAttribute("open","");}
+    function closeDialog(dialog){if(typeof dialog.close==="function")dialog.close();else dialog.removeAttribute("open");}
+    function handleFiles(files){const file=[...(files||[])][0];if(file)openFile(file);}
+
+    function setupDragAndDrop(){
+      const hasPayload=event=>{const types=[...(event.dataTransfer?.types||[])];return types.includes("Files")||types.includes("text/uri-list")||types.includes("text/plain");};
+      window.addEventListener("dragenter",event=>{if(!hasPayload(event))return;event.preventDefault();state.dragDepth++;els.dropOverlay.hidden=false;});
+      window.addEventListener("dragover",event=>{if(!hasPayload(event))return;event.preventDefault();if(event.dataTransfer)event.dataTransfer.dropEffect="copy";});
+      window.addEventListener("dragleave",event=>{event.preventDefault();state.dragDepth=Math.max(0,state.dragDepth-1);if(!state.dragDepth)els.dropOverlay.hidden=true;});
+      window.addEventListener("drop",event=>{event.preventDefault();state.dragDepth=0;els.dropOverlay.hidden=true;const files=event.dataTransfer?.files;if(files?.length){handleFiles(files);return;}const uri=(event.dataTransfer?.getData("text/uri-list")||event.dataTransfer?.getData("text/plain")||"").split(/\r?\n/).find(line=>line&&!line.startsWith("#"));if(uri)openRemoteUrl(uri,{updateAddress:true});});
+    }
+
+    function setupResizer(){let startX=0,startWidth=0;els.resizer.addEventListener("pointerdown",event=>{if(window.innerWidth<=740||!state.sidebarOpen)return;startX=event.clientX;startWidth=els.sidebar.getBoundingClientRect().width;els.resizer.classList.add("dragging");els.resizer.setPointerCapture(event.pointerId);});els.resizer.addEventListener("pointermove",event=>{if(!els.resizer.hasPointerCapture(event.pointerId))return;const width=Math.max(210,Math.min(440,startWidth+event.clientX-startX));document.documentElement.style.setProperty("--sidebar-w",`${width}px`);try{localStorage.setItem("office-preview-sidebar-width",String(width));}catch{}});const end=event=>{if(els.resizer.hasPointerCapture(event.pointerId))els.resizer.releasePointerCapture(event.pointerId);els.resizer.classList.remove("dragging");if(state.kind&&state.fit)fitToWindow();};els.resizer.addEventListener("pointerup",end);els.resizer.addEventListener("pointercancel",end);}
+
+    function setupKeyboard(){
+      window.addEventListener("keydown",event=>{const tag=event.target?.tagName?.toLowerCase(),editing=["input","textarea","select"].includes(tag)||event.target?.isContentEditable;
+        if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="o"){event.preventDefault();els.fileInput.click();return;}
+        if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="f"){event.preventDefault();if(!state.kind)return;if(window.innerWidth<=740)setMobileSidebar(true);else setSidebar(true);els.searchInput.focus();els.searchInput.select();return;}
+        if(editing||!state.kind)return;
+        if(["ArrowLeft","PageUp"].includes(event.key)){event.preventDefault();navigateTo(state.current-1);}else if(["ArrowRight","PageDown"].includes(event.key)){event.preventDefault();navigateTo(state.current+1);}else if(event.key==="Home"){event.preventDefault();navigateTo(0);}else if(event.key==="End"){event.preventDefault();navigateTo(state.total-1);}else if(["+","="].includes(event.key)){event.preventDefault();stepZoom(1);}else if(["-","_"].includes(event.key)){event.preventDefault();stepZoom(-1);}else if(event.key==="0"&&(event.ctrlKey||event.metaKey)){event.preventDefault();fitToWindow();}else if(event.key==="Escape"&&els.workspace.classList.contains("mobile-sidebar-open"))setMobileSidebar(false);
+      });
+      const wheelHandler=event=>{if(!state.kind||!(event.ctrlKey||event.metaKey))return;event.preventDefault();stepZoom(event.deltaY<0?1:-1);};els.genericScroller.addEventListener("wheel",wheelHandler,{passive:false});els.excelScroller.addEventListener("wheel",wheelHandler,{passive:false});
+    }
+
+    function bindEvents(){
+      const choose=()=>els.fileInput.click();
+      const showUrl=()=>openUrlDialog(state.sourceUrl||"");
+      els.openBtn.addEventListener("click",choose);els.emptyOpenBtn.addEventListener("click",choose);els.errorOpenBtn.addEventListener("click",choose);els.emptyUrlBtn.addEventListener("click",showUrl);els.remoteOpenBtn.addEventListener("click",showUrl);els.errorUrlBtn.addEventListener("click",showUrl);
+      els.fileInput.addEventListener("change",()=>handleFiles(els.fileInput.files));
+      els.urlForm.addEventListener("submit",event=>{event.preventDefault();const url=els.urlInput.value.trim(),name=els.remoteNameInput.value.trim(),updateAddress=els.updateAddressCheckbox.checked;try{const proxy=els.proxyInput.value.trim();if(proxy)localStorage.setItem("office-preview-proxy",proxy);else localStorage.removeItem("office-preview-proxy");}catch{}closeDialog(els.urlDialog);openRemoteUrl(url,{name,updateAddress});});
+      els.cancelRemoteBtn.addEventListener("click",()=>{state.loadToken++;abortRemoteDownload();setBusy(false);hideRemoteProgress();showSurface(state.kind||"empty");setStatus(state.kind?`${KIND_META[state.kind].title} · ${state.current+1} / ${state.total}`:"等待打开文件",state.kind?"ready":"idle");});
+      els.errorBackBtn.addEventListener("click",()=>{showSurface(state.kind?state.kind:"empty");setStatus(state.kind?`${KIND_META[state.kind].title} · ${state.current+1} / ${state.total}`:"等待打开文件",state.kind?"ready":"idle");});
+      els.sidebarBtn.addEventListener("click",()=>{if(window.innerWidth<=740)setMobileSidebar(!els.workspace.classList.contains("mobile-sidebar-open"));else setSidebar(!state.sidebarOpen);});els.mobileSidebarBtn.addEventListener("click",()=>setMobileSidebar(!els.workspace.classList.contains("mobile-sidebar-open")));els.workspace.addEventListener("click",event=>{if(window.innerWidth<=740&&els.workspace.classList.contains("mobile-sidebar-open")&&!els.sidebar.contains(event.target)&&!els.mobileSidebarBtn.contains(event.target))setMobileSidebar(false);});
+      els.prevBtn.addEventListener("click",()=>navigateTo(state.current-1));els.nextBtn.addEventListener("click",()=>navigateTo(state.current+1));els.positionInput.addEventListener("keydown",event=>{if(event.key!=="Enter")return;event.preventDefault();const value=Number.parseInt(els.positionInput.value,10);if(Number.isFinite(value))navigateTo(value-1,{force:true});else updateControls();els.positionInput.blur();});els.positionInput.addEventListener("blur",updateControls);
+      els.zoomOutBtn.addEventListener("click",()=>stepZoom(-1));els.zoomInBtn.addEventListener("click",()=>stepZoom(1));els.zoomSelect.addEventListener("change",()=>setZoom(Number(els.zoomSelect.value)));els.fitBtn.addEventListener("click",fitToWindow);
+      els.searchBtn.addEventListener("click",()=>{if(window.innerWidth<=740)setMobileSidebar(true);else setSidebar(true);els.searchInput.focus();els.searchInput.select();});els.searchInput.addEventListener("input",()=>performSearch(els.searchInput.value));els.clearSearchBtn.addEventListener("click",clearSearch);
+      els.downloadBtn.addEventListener("click",downloadOriginal);els.shareBtn.addEventListener("click",copyShareLink);els.printBtn.addEventListener("click",()=>window.print());els.fullscreenBtn.addEventListener("click",toggleFullscreen);els.themeBtn.addEventListener("click",toggleTheme);els.infoBtn.addEventListener("click",()=>{updateFileInfo();openDialog(els.infoDialog);});
+      $$('[data-close-dialog]').forEach(button=>button.addEventListener("click",()=>closeDialog(document.getElementById(button.dataset.closeDialog))));els.infoDialog.addEventListener("click",event=>{if(event.target===els.infoDialog)closeDialog(els.infoDialog);});els.urlDialog.addEventListener("click",event=>{if(event.target===els.urlDialog)closeDialog(els.urlDialog);});
+      els.excelGrid.addEventListener("click",event=>{const td=event.target.closest("td[data-address]");if(td)selectExcelCell(td.dataset.address,{scroll:false});});els.excelGrid.addEventListener("dblclick",event=>{const link=event.target.closest("a[href]");if(link)return;const td=event.target.closest("td[data-address]");if(td)selectExcelCell(td.dataset.address,{scroll:true});});
+      els.nameBox.addEventListener("keydown",event=>{if(event.key!=="Enter")return;event.preventDefault();selectExcelCell(els.nameBox.value,{scroll:true});els.nameBox.blur();});
+      document.addEventListener("fullscreenchange",()=>{els.fullscreenBtn.classList.toggle("active",Boolean(document.fullscreenElement));if(state.kind&&state.fit)requestAnimationFrame(fitToWindow);});
+      window.addEventListener("resize",()=>{if(window.innerWidth>740)setMobileSidebar(false);if(state.kind&&state.fit)requestAnimationFrame(fitToWindow);});
+      window.addEventListener("beforeunload",()=>{abortRemoteDownload();cleanupDocument();resetFileUrl();});
+    }
+
+    function restorePreferences(){try{applyTheme(localStorage.getItem("office-preview-theme")||"dark");const width=Number(localStorage.getItem("office-preview-sidebar-width"));if(width>=210&&width<=440)document.documentElement.style.setProperty("--sidebar-w",`${width}px`);if(window.innerWidth>740)setSidebar(localStorage.getItem("office-preview-sidebar")==="1");}catch{applyTheme("dark");}}
+
+    function init(){
+      restorePreferences();bindEvents();setupDragAndDrop();setupResizer();setupKeyboard();applyKind(null);setFileHeader(null);showSurface("empty");hideRemoteProgress();updateControls();
+      const startup=startupRemoteRequest();if(startup){els.urlInput.value=startup.url;els.remoteNameInput.value=startup.name||"";queueMicrotask(()=>openRemoteUrl(startup.url,{name:startup.name||"",updateAddress:false}));}
+    }
+    init();
+  })();
+  </script></body>
+</html>
