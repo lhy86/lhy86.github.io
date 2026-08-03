@@ -2678,6 +2678,13 @@
 				<div class="timeline-item">
                     <div class="timeline-marker"></div>
                     <div class="timeline-content">
+                        <h3 class="timeline-title">网络结构与安全更新 <span class="timeline-date-inline">2026.07</span></h3>
+                        <p class="timeline-description">全屋WI-FI7组网|VLAN划分|密码全换为各站唯一</p>
+                    </div>
+                </div>
+				<div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
                         <h3 class="timeline-title">布局及面板升级 <span class="timeline-date-inline">2026.05</span></h3>
                         <p class="timeline-description">自制监控面板|DNS迁至CF|新备站|主站改为Nl</p>
                     </div>
@@ -2880,7 +2887,7 @@
             }
             // 当一个词完全显示后，暂停一段时间再开始删除
             if (!isDeleting && charIndex === currentText.length) {
-                typeSpeed = 1500; // 词完全显示后停顿1.5秒
+                typeSpeed = 1500; // 词完全显示后停顿1.2秒
                 isDeleting = true;
             }
             // 当一个词完全删除后，切换到下一个词
@@ -2926,7 +2933,7 @@
         ];
         // 防止过快点击的节流函数
         let canClick = true;
-        const CLICK_DELAY = 500;
+        const CLICK_DELAY = 400;
         // 随机更换好句
         function changeQuote() {
             if (!canClick) return; // 如果不能点击则直接返回
@@ -3220,9 +3227,9 @@
             }
             return num;
         }
-        // 计算年龄函数
+        // 计算年龄函数（非准确日期）
         function calculateAge() {
-            const birthDate = new Date('2009-11-21');
+            const birthDate = new Date('2009-12-01');
             const today = new Date();
             let age = today.getFullYear() - birthDate.getFullYear();
             const monthDiff = today.getMonth() - birthDate.getMonth();
